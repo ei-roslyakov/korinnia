@@ -1,0 +1,4 @@
+upstream korinnia_backend {
+    server ${NGINX_BACKEND_UPSTREAM};
+    keepalive 16;
+}

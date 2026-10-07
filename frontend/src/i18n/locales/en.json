@@ -1,0 +1,27 @@
+{
+  "app": {
+    "name": "Korinnia",
+    "tagline": "A family archive and tree for future generations"
+  },
+  "nav": {
+    "home": "Home",
+    "language": "Language"
+  },
+  "status": {
+    "title": "System status",
+    "api": "Server",
+    "database": "Database",
+    "storage": "File storage",
+    "ok": "OK",
+    "error": "Error",
+    "loading": "Checking…",
+    "version": "Version {{version}}"
+  },
+  "home": {
+    "comingSoon": "The interactive family tree will appear here soon."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "back": "Back to home"
+  }
+}

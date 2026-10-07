@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend — lint, types, tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: korinnia
+          POSTGRES_PASSWORD: korinnia
+          POSTGRES_DB: korinnia_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U korinnia" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: korinnia
+      POSTGRES_PASSWORD: korinnia
+      POSTGRES_DB: korinnia_test
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --frozen --python 3.12
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy .
+      - run: uv run pytest --cov=app --cov-report=term-missing --cov-report=xml --cov-fail-under=80
+
+  frontend:
+    name: Frontend — lint, types, tests, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  images-e2e:
+    name: Docker images + end-to-end tests
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - name: Build backend image
+        uses: docker/build-push-action@v7
+        with:
+          context: backend
+          target: prod
+          tags: korinnia/backend:latest
+          load: true
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+      - name: Build nginx image (includes frontend build)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: deploy/nginx/Dockerfile
+          target: prod
+          tags: korinnia/nginx:latest
+          load: true
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,mode=max,scope=nginx
+      - name: Start production stack
+        run: |
+          cp .env.example .env
+          echo "ENVIRONMENT=production" >> .env
+          docker compose -f docker-compose.yml up -d --no-build --wait
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Playwright
+        working-directory: frontend
+        env:
+          E2E_BASE_URL: http://localhost:8080
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npx playwright test
+      - name: Stack logs
+        if: failure()
+        run: docker compose -f docker-compose.yml logs

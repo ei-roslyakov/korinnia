@@ -1,0 +1,27 @@
+{
+  "app": {
+    "name": "Korinnia",
+    "tagline": "Archiwum rodzinne i drzewo genealogiczne dla przyszłych pokoleń"
+  },
+  "nav": {
+    "home": "Strona główna",
+    "language": "Język"
+  },
+  "status": {
+    "title": "Stan systemu",
+    "api": "Serwer",
+    "database": "Baza danych",
+    "storage": "Magazyn plików",
+    "ok": "Działa",
+    "error": "Błąd",
+    "loading": "Sprawdzanie…",
+    "version": "Wersja {{version}}"
+  },
+  "home": {
+    "comingSoon": "Interaktywne drzewo rodzinne pojawi się tu wkrótce."
+  },
+  "notFound": {
+    "title": "Nie znaleziono strony",
+    "back": "Wróć na stronę główną"
+  }
+}

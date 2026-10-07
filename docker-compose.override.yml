@@ -1,0 +1,52 @@
+# Development overrides (applied automatically by `docker compose`):
+# hot reload for backend/worker/frontend, exposed ports, dev tooling in images.
+
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_PORT_HOST:-5432}:5432"
+
+  backend:
+    build:
+      target: dev
+    command: ["api-dev"]
+    environment:
+      ENVIRONMENT: development
+    volumes:
+      - ./backend:/app  # dependencies live in /opt/venv inside the image
+    ports:
+      - "8000:8000"
+
+  worker:
+    build:
+      target: dev
+    environment:
+      ENVIRONMENT: development
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    command: ["sh", "-c", "npm ci --no-audit --no-fund && npm run dev"]
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8000
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    ports:
+      - "5173:5173"
+
+  nginx:
+    build:
+      target: base
+    ports: !override
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./deploy/nginx/snippets/frontend-dev.conf:/etc/nginx/snippets/frontend.conf:ro
+    depends_on:
+      frontend:
+        condition: service_started
+
+volumes:
+  frontend-node-modules:

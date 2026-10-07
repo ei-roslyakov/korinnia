@@ -1,0 +1,46 @@
+# Shared by the HTTP and HTTPS server blocks (rendered to /etc/nginx/conf.d/app.inc).
+
+client_max_body_size ${NGINX_MAX_BODY_SIZE};
+
+include /etc/nginx/snippets/security-headers.conf;
+
+location = /nginx-health {
+    access_log off;
+    default_type text/plain;
+    return 200 "ok\n";
+}
+
+location /api/ {
+    proxy_pass http://korinnia_backend;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $forwarded_proto;
+    proxy_set_header Connection "";
+    # Stream large uploads (video/audio) straight to the backend.
+    proxy_request_buffering off;
+    proxy_read_timeout 300s;
+    proxy_send_timeout 300s;
+    add_header Cache-Control "no-store" always;
+    include /etc/nginx/snippets/security-headers.conf;
+}
+
+# Swagger UI (development only; disabled by the backend in production) loads assets from a CDN.
+location = /api/docs {
+    proxy_pass http://korinnia_backend;
+    proxy_set_header Host $host;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://fastapi.tiangolo.com; frame-ancestors 'none'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+}
+
+# Media files are served by nginx after the backend authorises the request
+# (backend replies with X-Accel-Redirect: /_media/<key>). Not reachable directly.
+location /_media/ {
+    internal;
+    alias /data/media/;
+    add_header Cache-Control "private, max-age=3600" always;
+    include /etc/nginx/snippets/security-headers.conf;
+}
+
+include /etc/nginx/snippets/frontend.conf;

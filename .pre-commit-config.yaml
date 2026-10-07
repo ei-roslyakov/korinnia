@@ -1,0 +1,41 @@
+# Install once:  cd backend && uv run pre-commit install   (hooks run from the repo root)
+# ESLint / type checks run in CI and via `make lint` (they need the full project toolchains).
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ["--unsafe"]  # syntax only: compose files use custom tags (!override)
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.10
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        files: ^backend/
+      - id: ruff-format
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (backend)
+        entry: bash -c 'cd backend && uv run --frozen mypy .'
+        language: system
+        files: ^backend/.*\.py$
+        pass_filenames: false
+      - id: prettier
+        name: prettier (frontend)
+        # Skipped when Node isn't installed on the host; `make lint` and CI always enforce it.
+        entry: bash -c 'command -v npx >/dev/null || { echo "npx not found, skipping (run make lint)"; exit 0; }; cd frontend && npx --no-install prettier --check .'
+        language: system
+        files: ^frontend/
+        pass_filenames: false
