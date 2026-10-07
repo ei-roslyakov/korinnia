@@ -26,6 +26,7 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- include "korinnia.mediaPermissionsInit" . | nindent 6 }}
       containers:
         - name: backend
           image: {{ include "korinnia.image" (list . .Values.image.backend) }}

@@ -68,6 +68,11 @@ persistence:
   size: 20Gi
   # Never delete the media volume together with the release.
   keep: true
+  # Before each pod starts, an init container (as root) makes the volume's top folder
+  # group-writable for the app (gid 1000). Some provisioners reset it on every mount, e.g.
+  # csi-driver-nfs with `mountPermissions: "0755"`, so fsGroup alone is not enough.
+  # Needs an NFS export without root_squash; disable if your storage handles it.
+  fixPermissions: true
 
 # --- Components -------------------------------------------------------------------------
 backend:

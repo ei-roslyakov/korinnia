@@ -79,3 +79,27 @@ app.kubernetes.io/component: {{ index . 1 }}
   persistentVolumeClaim:
     claimName: {{ include "korinnia.mediaClaim" . }}
 {{- end }}
+
+{{- /* Re-applies group ownership and write access on the media volume's top folder. */ -}}
+{{- define "korinnia.mediaPermissionsInit" -}}
+{{- if .Values.persistence.fixPermissions -}}
+initContainers:
+  - name: media-permissions
+    image: {{ include "korinnia.image" (list . .Values.image.backend) }}
+    imagePullPolicy: {{ .Values.image.pullPolicy }}
+    command: ["sh", "-c", "chgrp 1000 /data/media && chmod 2775 /data/media"]
+    securityContext:
+      runAsUser: 0
+      runAsNonRoot: false
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+    volumeMounts:
+      - name: media
+        mountPath: /data/media
+{{- end }}
+{{- end }}
