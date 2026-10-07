@@ -1,15 +1,21 @@
 name: Release
 
 # Cuts a version: promotes the images CI built and tested (sha-<commit>; the newest commit
-# with images, as long as nothing after it changed the app code) to X.Y.Z, publishes the Helm chart as an OCI artifact with the same version,
-# and tags the commit vX.Y.Z with a GitHub release. Argo CD (sandbox repo) deploys the chart
+# with images, as long as nothing after it changed the app code) to X.Y.Z, publishes the
+# Helm chart as an OCI artifact with the same version, and tags the commit vX.Y.Z with a
+# GitHub release. The version is either given explicitly or bumped from the latest tag. Argo CD (sandbox repo) deploys the chart
 # version pinned in its Application; Renovate opens a PR there when a new chart is published.
 
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: Exact version to release (X.Y.Z, e.g. 0.0.1). Leave empty to bump instead.
+        required: false
+        default: ""
+        type: string
       bump:
-        description: Which part of the version to increase
+        description: Which part of the latest version to increase (ignored when version is set)
         required: true
         default: patch
         type: choice
@@ -40,16 +46,24 @@ jobs:
       - name: Next version
         id: version
         env:
+          VERSION_INPUT: ${{ inputs.version }}
           BUMP: ${{ inputs.bump }}
         run: |
           last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
           last=${last:-v0.0.0}
-          IFS=. read -r major minor patch <<< "${last#v}"
-          case "$BUMP" in
-            major) major=$((major + 1)); minor=0; patch=0 ;;
-            minor) minor=$((minor + 1)); patch=0 ;;
-            patch) patch=$((patch + 1)) ;;
-          esac
+          if [ -n "$VERSION_INPUT" ]; then
+            if ! [[ "${VERSION_INPUT#v}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::version must look like X.Y.Z (got '$VERSION_INPUT')"; exit 1
+            fi
+            IFS=. read -r major minor patch <<< "${VERSION_INPUT#v}"
+          else
+            IFS=. read -r major minor patch <<< "${last#v}"
+            case "$BUMP" in
+              major) major=$((major + 1)); minor=0; patch=0 ;;
+              minor) minor=$((minor + 1)); patch=0 ;;
+              patch) patch=$((patch + 1)) ;;
+            esac
+          fi
           version="$major.$minor.$patch"
           if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
             echo "::error::Tag v$version already exists"; exit 1
