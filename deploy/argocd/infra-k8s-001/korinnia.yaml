@@ -12,14 +12,14 @@ spec:
     # Published by the Deploy / Release workflows (private GHCR; credentials: ghcr-charts repo secret)
     repoURL: ghcr.io/ei-roslyakov/charts
     chart: korinnia
-    targetRevision: "0.0.2" # set by Deploy
+    targetRevision: "0.0.3" # set by Deploy
     helm:
       valuesObject:
         image:
           backend:
-            tag: "sha-8516061" # set by Deploy
+            tag: "0.0.3" # set by Deploy
           nginx:
-            tag: "sha-8516061" # set by Deploy
+            tag: "0.0.3" # set by Deploy
 
         imagePullSecrets:
           - name: infra-k8s-001-korinnia-ghcr-pull
