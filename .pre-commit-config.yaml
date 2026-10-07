@@ -8,6 +8,7 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
         args: ["--unsafe"]  # syntax only: compose files use custom tags (!override)
+        exclude: ^deploy/helm/.*/templates/  # Go templates, not plain YAML (helm lint checks them)
       - id: check-json
       - id: check-toml
       - id: check-merge-conflict
