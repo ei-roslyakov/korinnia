@@ -85,6 +85,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Infinite canvas: drag to pan, wheel / pinch to zoom, fit to screen, zoom buttons, minimap
 - ✅ Drawn as a real tree growing upwards: the oldest generation stands on the ground with a trunk and roots, one row per generation above it, partners always side by side, curved brown branches that thin out towards the youngest generations; adoptive/step/foster links dashed; layout (ELK) runs in a Web Worker
 - ✅ Person cards: portrait, primary name, life years with uncertainty markers (~1850, <1944) and † for the deceased; coloured accent by gender; hover preview with full name, dates and birthplace
+- ✅ Three tree styles to choose from: Simple, Oak (a broad trunk and a leafy crown behind the family) and Spring (leaves at every family knot, blossoms on the youngest branches); remembered per browser
 - ✅ Hover or select a person to highlight their line (ancestors, descendants, partners); generation labels beside each row ("III покоління · 1920-ті")
 - ✅ Click a card → side panel; full person page with shareable link: all names, birth / death / burial (with map link), facts, rendered Markdown biography, life timeline, relatives with portraits, a life bar with the events of their life, notes for descendants, data notes (editors)
 - ✅ Search by any name variant (Cyrillic ↔ Latin), place (incl. historical names) or year; the result is centred and opened

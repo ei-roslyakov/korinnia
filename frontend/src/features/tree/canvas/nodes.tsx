@@ -7,7 +7,7 @@ import { formatPartialDate, lifeYears } from "@/lib/dates";
 import type { PersonSummary, RelativeRelation } from "@/lib/genealogy";
 
 import { FAMILY_SIZE, PERSON_HEIGHT, PERSON_WIDTH } from "./familyGraph";
-import { BRANCH, GROUND_HEIGHT, TRUNK_REACH } from "./treeStyle";
+import { BRANCH, GROUND_HEIGHT, seeded, TRUNK_REACH, type TreeStyle } from "./treeStyle";
 
 export interface PersonNodeData extends Record<string, unknown> {
   person: PersonSummary;
@@ -18,7 +18,6 @@ export interface PersonNodeData extends Record<string, unknown> {
   onAdd?: (personId: string, relation: RelativeRelation) => void;
 }
 export type PersonFlowNode = Node<PersonNodeData, "person">;
-export type FamilyFlowNode = Node<Record<string, never>, "family">;
 
 const hidden = "!h-1 !w-1 !min-h-0 !min-w-0 !border-0 !bg-transparent";
 
@@ -133,16 +132,179 @@ function AddButtons({
   );
 }
 
+export interface FamilyNodeData extends Record<string, unknown> {
+  decor?: TreeStyle;
+  /** Blossoms at the youngest generations (spring). */
+  blossom?: boolean;
+  /** Varies the leaves from knot to knot. */
+  seed?: number;
+  /** Oak: diameter of the joint where branches meet. */
+  knot?: number;
+}
+export type FamilyFlowNode = Node<FamilyNodeData, "family">;
+
+const LEAF = { fill: "var(--k-logo-leaf)" };
+const LEAF_LIGHT = { fill: "var(--k-logo-leaf-light)" };
+
+/** Leaves (and a blossom) around a family knot, drawn in a 64×64 box centred on it. */
+function KnotDecor({ blossom, seed }: { blossom: boolean; seed: number }) {
+  const rnd = seeded(seed + 7);
+  // A full fan of leaves around the upper side of the knot.
+  const leaves = Array.from({ length: 9 }, (_, i) => {
+    const angle = -175 + i * 21 + (rnd() - 0.5) * 14;
+    return { angle, light: rnd() > 0.5, len: 12 + rnd() * 9 };
+  });
+  return (
+    <svg
+      viewBox="-32 -32 64 64"
+      className="pointer-events-none absolute top-1/2 left-1/2 size-16 -translate-x-1/2 -translate-y-1/2 overflow-visible"
+      aria-hidden="true"
+    >
+      {leaves.map((l, i) => (
+        <g key={i} transform={`rotate(${l.angle})`}>
+          <path
+            d={`M7 0 Q${7 + l.len / 2} -6 ${7 + l.len} 0 Q${7 + l.len / 2} 6 7 0Z`}
+            style={l.light ? LEAF_LIGHT : LEAF}
+          />
+        </g>
+      ))}
+      {blossom && (
+        <g transform="translate(0 -14)">
+          {[0, 72, 144, 216, 288].map((a) => (
+            <ellipse
+              key={a}
+              cx="0"
+              cy="-4.5"
+              rx="3.4"
+              ry="4.6"
+              fill="#f4b6c8"
+              transform={`rotate(${a})`}
+            />
+          ))}
+          <circle r="2.4" fill="#f2cf5b" />
+        </g>
+      )}
+    </svg>
+  );
+}
+
 /** Where a couple's branch splits towards their children: a knot on the branch. */
-export const FamilyNode = memo(function FamilyNode() {
+export const FamilyNode = memo(function FamilyNode({ data }: NodeProps<FamilyFlowNode>) {
+  const decor = data?.decor ?? "simple";
   return (
     <div
-      style={{ width: FAMILY_SIZE, height: FAMILY_SIZE, background: BRANCH }}
-      className="rounded-full"
+      style={{
+        width: FAMILY_SIZE,
+        height: FAMILY_SIZE,
+        background: decor === "oak" ? "transparent" : BRANCH,
+      }}
+      className="relative rounded-full"
     >
+      {decor === "oak" && (
+        <span
+          aria-hidden="true"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{ width: data?.knot ?? 12, height: data?.knot ?? 12, background: BRANCH }}
+        />
+      )}
+      {decor !== "simple" && (
+        <KnotDecor blossom={decor === "spring" && Boolean(data?.blossom)} seed={data?.seed ?? 1} />
+      )}
       <Handle type="target" position={Position.Bottom} className={hidden} isConnectable={false} />
       <Handle type="source" position={Position.Top} className={hidden} isConnectable={false} />
     </div>
+  );
+});
+
+export interface CrownNodeData extends Record<string, unknown> {
+  width: number;
+  height: number;
+  /** Leafy crown (ellipse inside the node's box) behind the upper generations. */
+  crown: { cx: number; cy: number; rx: number; ry: number } | null;
+  /** Trunks from the ground up to each founding couple's knot. */
+  trunks: { x: number; width: number; bottom: number; top: number }[];
+}
+export type CrownFlowNode = Node<CrownNodeData, "crown">;
+
+/** The oak: a broad trunk and a soft leafy crown behind the family. Purely visual. */
+export const CrownNode = memo(function CrownNode({ data }: NodeProps<CrownFlowNode>) {
+  const { width, height, crown, trunks } = data;
+  const blobs: { x: number; y: number; r: number; light: boolean; o: number }[] = [];
+  if (crown) {
+    const rnd = seeded(Math.round(crown.rx * 7 + crown.ry * 13));
+    const base = Math.min(crown.rx, crown.ry);
+    // Clumps around the rim, then a fill inside: an irregular, cloud-like crown.
+    for (let i = 0; i < 26; i++) {
+      const a = (i / 26) * Math.PI * 2;
+      const f = 0.82 + rnd() * 0.16;
+      blobs.push({
+        x: crown.cx + Math.cos(a) * crown.rx * f,
+        y: crown.cy + Math.sin(a) * crown.ry * f,
+        r: base * (0.22 + rnd() * 0.14),
+        light: rnd() > 0.55,
+        o: 0.16 + rnd() * 0.1,
+      });
+    }
+    for (let i = 0; i < 40; i++) {
+      const a = rnd() * Math.PI * 2;
+      const d = Math.sqrt(rnd()) * 0.75;
+      blobs.push({
+        x: crown.cx + Math.cos(a) * crown.rx * d,
+        y: crown.cy + Math.sin(a) * crown.ry * d,
+        r: base * (0.2 + rnd() * 0.18),
+        light: rnd() > 0.5,
+        o: 0.12 + rnd() * 0.08,
+      });
+    }
+  }
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      aria-hidden="true"
+      style={{ pointerEvents: "none", overflow: "visible" }}
+    >
+      <defs>
+        <filter id="crown-soft" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur stdDeviation="6" />
+        </filter>
+        <linearGradient id="bark" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" style={{ stopColor: "var(--k-branch)" }} stopOpacity="0.75" />
+          <stop offset="0.45" style={{ stopColor: "var(--k-branch)" }} />
+          <stop offset="1" style={{ stopColor: "var(--k-branch)" }} stopOpacity="0.8" />
+        </linearGradient>
+      </defs>
+      {crown && (
+        <g filter="url(#crown-soft)">
+          {blobs.map((b, i) => (
+            <circle
+              key={i}
+              cx={b.x}
+              cy={b.y}
+              r={b.r}
+              style={b.light ? LEAF_LIGHT : LEAF}
+              opacity={b.o}
+            />
+          ))}
+        </g>
+      )}
+      {trunks.map((t, i) => {
+        const h = t.bottom - t.top;
+        const w1 = t.width / 2 + 1; // meets the founders' branches at their knot
+        const w0 = Math.max(28, t.width * 2.2);
+        return (
+          <path
+            key={i}
+            d={`M ${t.x - w0} ${t.bottom}
+                C ${t.x - w0 * 0.7} ${t.bottom - h * 0.35}, ${t.x - w1 * 1.4} ${t.top + h * 0.35}, ${t.x - w1} ${t.top}
+                L ${t.x + w1} ${t.top}
+                C ${t.x + w1 * 1.4} ${t.top + h * 0.35}, ${t.x + w0 * 0.7} ${t.bottom - h * 0.35}, ${t.x + w0} ${t.bottom} Z`}
+            fill="url(#bark)"
+          />
+        );
+      })}
+    </svg>
   );
 });
 

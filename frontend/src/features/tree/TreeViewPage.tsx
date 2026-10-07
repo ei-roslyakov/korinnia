@@ -17,6 +17,8 @@ import { defaultFocus, focusSet, indexRelations } from "./canvas/familyGraph";
 import { TreeCanvas, type CenterRequest } from "./canvas/TreeCanvas";
 import { SearchBox } from "./SearchBox";
 import { EmptyState } from "@/components/EmptyState";
+import { HeaderSelect } from "@/components/HeaderSelect";
+import { readTreeStyle, saveTreeStyle, TREE_STYLES, type TreeStyle } from "./canvas/treeStyle";
 
 /** Trees larger than this open in focus mode instead of showing everyone. */
 const FOCUS_THRESHOLD = 150;
@@ -34,6 +36,7 @@ export function TreeViewPage() {
     relation: RelativeRelation | null;
   } | null>(null);
   const saveOffsets = useSaveLayoutOffsets(treeId);
+  const [treeStyle, setTreeStyle] = useState<TreeStyle>(readTreeStyle);
   const resetLayout = useResetLayout(treeId);
   const moderation = useModerationCounts(
     treeId,
@@ -189,6 +192,26 @@ export function TreeViewPage() {
             )}
           </div>
         )}
+        {count > 0 && (
+          <label className="text-bark-700 flex items-center gap-1.5 text-sm">
+            <span>{t("canvas.treeStyle.label")}</span>
+            <HeaderSelect
+              aria-label={t("canvas.treeStyle.label")}
+              value={treeStyle}
+              onChange={(e) => {
+                const style = e.target.value as TreeStyle;
+                setTreeStyle(style);
+                saveTreeStyle(style);
+              }}
+            >
+              {TREE_STYLES.map((s) => (
+                <option key={s} value={s}>
+                  {t(`canvas.treeStyle.${s}`)}
+                </option>
+              ))}
+            </HeaderSelect>
+          </label>
+        )}
         <TreeNav treeId={treeId} role={tree.data.my_role} pending={pending} />
       </div>
 
@@ -210,6 +233,7 @@ export function TreeViewPage() {
         ) : (
           <TreeCanvas
             treeId={treeId}
+            treeStyle={treeStyle}
             graph={graph.data}
             included={included}
             focusMode={Boolean(focusId)}

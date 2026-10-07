@@ -34,8 +34,17 @@ import {
   toElkGraph,
   type Family,
 } from "./familyGraph";
+import { edgeTypes } from "./edgeTypes";
 import { computeLayout } from "./layout";
-import { BRANCH, BRANCH_COLOR, GROUND_HEIGHT, TRUNK_REACH, branchWidth } from "./treeStyle";
+import {
+  BRANCH,
+  BRANCH_COLOR,
+  GROUND_HEIGHT,
+  STYLE_WIDTH,
+  TRUNK_REACH,
+  branchWidth,
+  type TreeStyle,
+} from "./treeStyle";
 import type { PersonFlowNode } from "./nodes";
 import { nodeTypes } from "./nodeTypes";
 
@@ -59,6 +68,8 @@ export interface CenterRequest {
 
 interface Props {
   treeId: string;
+  /** How the tree is drawn (simple, oak, spring). */
+  treeStyle?: TreeStyle;
   graph: TreeGraph;
   included: Set<string>;
   focusMode: boolean;
@@ -74,8 +85,12 @@ interface Props {
 
 type XY = { x: number; y: number };
 
+/** A stable number from an id, to vary decorations deterministically. */
+const hashOf = (s: string) => Math.abs([...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7));
+
 function CanvasInner({
   treeId,
+  treeStyle = "simple",
   graph,
   included,
   focusMode,
@@ -154,13 +169,14 @@ function CanvasInner({
     const moved = (id: string) => Boolean(offsets?.[id] || dragging[id]);
     // "III покоління · 1910-ті" beside each row (rows counted from the oldest, at the bottom).
     const rowLabels = (): Node[] => {
-      const placed = personIds.filter((id) => personPos[id]);
+      // Rows of the automatic layout: hand-moved cards keep their generation.
+      const placed = personIds.filter((id) => personPos[id] && pos[id]);
       if (!placed.length) return [];
       const left = Math.min(...placed.map((id) => personPos[id]!.x)) - 230;
-      const rows = [...new Set(placed.map((id) => personPos[id]!.y))].sort((a, b) => b - a);
+      const rows = [...new Set(placed.map((id) => pos[id]!.y))].sort((a, b) => b - a);
       return rows.map((y, i) => {
         const years = placed
-          .filter((id) => personPos[id]!.y === y)
+          .filter((id) => pos[id]!.y === y)
           .map((id) => byId.get(id)?.birth?.year)
           .filter((v): v is number => typeof v === "number")
           .sort((a, b) => a - b);
@@ -211,6 +227,64 @@ function CanvasInner({
         },
       ];
     };
+    // Oak: a broad trunk under each founding couple and a leafy crown behind the family.
+    const crownNodes = (): Node[] => {
+      if (treeStyle !== "oak") return [];
+      const placed = personIds.filter((id) => personPos[id]).map((id) => personPos[id]!);
+      if (!placed.length) return [];
+      const rootRow = Math.max(...placed.map((p) => p.y));
+      const upper = placed.filter((p) => p.y < rootRow);
+      const left = Math.min(...placed.map((p) => p.x)) - 220;
+      const right = Math.max(...placed.map((p) => p.x)) + PERSON_WIDTH + 220;
+      const top = Math.min(...placed.map((p) => p.y)) - 220;
+      const ground = rootRow + PERSON_HEIGHT + TRUNK_REACH + 34;
+      const crown = upper.length
+        ? (() => {
+            const x0 = Math.min(...upper.map((p) => p.x)) - 70;
+            const x1 = Math.max(...upper.map((p) => p.x)) + PERSON_WIDTH + 70;
+            const y0 = Math.min(...upper.map((p) => p.y)) - 90;
+            const y1 = Math.max(...upper.map((p) => p.y)) + PERSON_HEIGHT + 30;
+            return {
+              cx: (x0 + x1) / 2 - left,
+              cy: (y0 + y1) / 2 - top,
+              rx: (x1 - x0) / 2,
+              ry: (y1 - y0) / 2,
+            };
+          })()
+        : null;
+      const trunks = families
+        .filter((f) => f.children.length && f.parents.every((p) => personPos[p]?.y === rootRow))
+        .map((f) => {
+          const xs = f.parents.map((p) => personPos[p]!.x + PERSON_WIDTH / 2);
+          const knot = pos[f.id];
+          return {
+            x: (Math.min(...xs) + Math.max(...xs)) / 2 - left,
+            width: branchWidth(0.5) * STYLE_WIDTH.oak,
+            bottom: ground - top,
+            top: (knot ? knot.y : rootRow - 40) + FAMILY_SIZE / 2 - top,
+          };
+        });
+      return [
+        {
+          id: "crown",
+          type: "crown",
+          position: { x: left, y: top },
+          initialWidth: right - left,
+          initialHeight: ground - top,
+          selectable: false,
+          draggable: false,
+          focusable: false,
+          zIndex: -2,
+          style: { pointerEvents: "none" },
+          data: { width: right - left, height: ground - top, crown, trunks },
+        },
+      ];
+    };
+    // Rows counted from the oldest (0); the youngest rows blossom in spring.
+    const rowsY = [...new Set(personIds.filter((id) => pos[id]).map((id) => pos[id]!.y))].sort(
+      (a, b) => b - a,
+    );
+    const rowOf = (id: string) => rowsY.indexOf(pos[id]?.y ?? NaN);
     const personNodes: PersonFlowNode[] = personIds
       .filter((id) => pos[id])
       .map((id) => {
@@ -270,10 +344,18 @@ function CanvasInner({
           initialHeight: FAMILY_SIZE,
           selectable: false,
           draggable: false,
-          data: {},
+          data: {
+            decor: treeStyle,
+            // Oak: the knot is as thick as the branches meeting there.
+            knot:
+              branchWidth(Math.min(...f.parents.map(rowOf).filter((r) => r >= 0), 0) + 0.5) *
+              STYLE_WIDTH[treeStyle],
+            blossom: Math.max(...f.parents.map(rowOf)) >= rowsY.length - 2 && rowsY.length > 2,
+            seed: hashOf(f.id),
+          },
         };
       });
-    return [...groundNodes(), ...rowLabels(), ...personNodes, ...familyNodes];
+    return [...crownNodes(), ...groundNodes(), ...rowLabels(), ...personNodes, ...familyNodes];
   }, [
     layout.data,
     graph,
@@ -292,6 +374,7 @@ function CanvasInner({
     lit,
     familyLit,
     t,
+    treeStyle,
   ]);
 
   // Dragging a card moves its whole branch (partners and descendants); with Alt held,
@@ -342,28 +425,73 @@ function CanvasInner({
   };
 
   // Generation rank of each row, counted from the bottom (0 = the oldest generation).
+  // From the automatic layout, so moving cards by hand never changes anyone's generation.
   const rankOf = useMemo(() => {
-    const rows = [...new Set(Object.values(personPos).map((p) => p.y))].sort((a, b) => b - a);
-    return (id: string) => Math.max(0, rows.indexOf(personPos[id]?.y ?? rows[0] ?? 0));
-  }, [personPos]);
+    const base = layout.data ?? {};
+    const ys = personIds.map((id) => base[id]?.y).filter((y): y is number => y !== undefined);
+    const rows = [...new Set(ys)].sort((a, b) => b - a);
+    return (id: string) => Math.max(0, rows.indexOf(base[id]?.y ?? NaN));
+  }, [layout.data, personIds]);
+
+  const maxRank = useMemo(
+    () => personIds.reduce((m, id) => Math.max(m, rankOf(id)), 0),
+    [personIds, rankOf],
+  );
 
   const edges = useMemo<Edge[]>(
     () =>
-      families.flatMap((f) => {
+      families.flatMap((f): Edge[] => {
         const rank = Math.min(...f.parents.map(rankOf));
-        const branch = { stroke: BRANCH, strokeLinecap: "round" as const };
+        const scale = STYLE_WIDTH[treeStyle];
+        const width = (r: number) => branchWidth(r) * scale;
         const on = familyLit(f);
+        const opacity = (id: string) => (on && (!lit || lit.has(id)) ? 1 : 0.18);
+        if (treeStyle !== "simple") {
+          const spring = treeStyle === "spring";
+          // Young branches blossom in spring.
+          const young = rank >= maxRank - 2;
+          // Oak and spring: tapering branches whose thickness carries on through each knot: parent → knot
+          // goes from width(rank) to width(rank + ½), knot → child on to width(rank + 1).
+          return [
+            ...f.parents.map((p) => ({
+              id: `${p}->${f.id}`,
+              source: p,
+              target: f.id,
+              type: "branch",
+              data: {
+                w0: width(rank),
+                w1: width(rank + 0.5),
+                opacity: opacity(p),
+                seed: hashOf(`${p}${f.id}`),
+                twigEvery: spring ? 80 : 70,
+                blossoms: spring && young,
+              },
+            })),
+            ...f.children.map((c) => ({
+              id: `${f.id}->${c.id}`,
+              source: f.id,
+              target: c.id,
+              type: "branch",
+              data: {
+                w0: width(rank + 0.5),
+                w1: width(rank + 1),
+                faint: c.type !== "biological",
+                opacity: opacity(c.id),
+                seed: hashOf(`${f.id}${c.id}`),
+                twigEvery: spring ? 80 : 70,
+                blossoms: spring && young,
+              },
+            })),
+          ];
+        }
+        const branch = { stroke: BRANCH, strokeLinecap: "round" as const };
         return [
           ...f.parents.map((p) => ({
             id: `${p}->${f.id}`,
             source: p,
             target: f.id,
             type: "default",
-            style: {
-              ...branch,
-              strokeWidth: branchWidth(rank),
-              strokeOpacity: on && (!lit || lit.has(p)) ? 1 : 0.18,
-            },
+            style: { ...branch, strokeWidth: width(rank), strokeOpacity: opacity(p) },
           })),
           ...f.children.map((c) => ({
             id: `${f.id}->${c.id}`,
@@ -372,14 +500,14 @@ function CanvasInner({
             type: "default",
             style: {
               ...branch,
-              strokeWidth: branchWidth(rank + 0.5),
+              strokeWidth: width(rank + 0.5),
               strokeDasharray: c.type === "biological" ? undefined : "6 5",
-              strokeOpacity: on && (!lit || lit.has(c.id)) ? 1 : 0.18,
+              strokeOpacity: opacity(c.id),
             },
           })),
         ];
       }),
-    [families, rankOf, familyLit, lit],
+    [families, rankOf, familyLit, lit, treeStyle, maxRank],
   );
 
   // Fit the whole tree once (first layout); afterwards only move the view on explicit
@@ -426,6 +554,7 @@ function CanvasInner({
       colorMode={theme === "dark" ? "dark" : "light"}
       nodes={nodes}
       edges={edges}
+      edgeTypes={edgeTypes}
       nodeTypes={nodeTypes}
       onNodeClick={(_, node) => node.type === "person" && onSelectPerson(node.id)}
       onNodeMouseEnter={(_, node) => node.type === "person" && setHovered(node.id)}
@@ -456,12 +585,13 @@ function CanvasInner({
         pannable
         zoomable
         ariaLabel={t("canvas.minimap")}
-        nodeColor={(n) =>
-          n.type === "person"
-            ? (GENDER_COLORS[(n as PersonFlowNode).data.person.gender] ?? "#e7e5e4")
-            : n.type === "ground"
-              ? "transparent"
-              : BRANCH_COLOR
+        nodeColor={
+          (n) =>
+            n.type === "person"
+              ? (GENDER_COLORS[(n as PersonFlowNode).data.person.gender] ?? "#e7e5e4")
+              : n.type === "family"
+                ? BRANCH_COLOR
+                : "transparent" // decorations (ground, crown, row labels)
         }
         className="!hidden sm:!block"
       />

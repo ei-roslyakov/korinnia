@@ -289,7 +289,13 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "generationRow": "Generation {{n}}",
-    "emptyHintEditor": "Start with yourself, your parents or the oldest known ancestor; the tree grows from there."
+    "emptyHintEditor": "Start with yourself, your parents or the oldest known ancestor; the tree grows from there.",
+    "treeStyle": {
+      "label": "Style",
+      "simple": "Simple",
+      "oak": "Oak",
+      "spring": "Spring"
+    }
   },
   "person": {
     "names": "Names",

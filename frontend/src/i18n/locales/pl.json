@@ -291,7 +291,13 @@
     "zoomIn": "Powiększ",
     "zoomOut": "Pomniejsz",
     "generationRow": "{{n}} pokolenie",
-    "emptyHintEditor": "Zacznij od siebie, rodziców albo najdawniejszego znanego przodka — drzewo wyrośnie stamtąd."
+    "emptyHintEditor": "Zacznij od siebie, rodziców albo najdawniejszego znanego przodka — drzewo wyrośnie stamtąd.",
+    "treeStyle": {
+      "label": "Wygląd",
+      "simple": "Prosty",
+      "oak": "Dąb",
+      "spring": "Wiosna"
+    }
   },
   "person": {
     "names": "Imiona i nazwiska",
