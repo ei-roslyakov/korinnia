@@ -5,10 +5,16 @@ name: Deploy
 # (deploy/argocd/infra-k8s-001/korinnia.yaml) and pushes that change. Argo CD picks it up
 # from git. Images are not run through the CI test suite here.
 #
+# Runs on every push to main (patch bump) or manually (explicit version or bump).
 # No loop: the version commit is pushed with GITHUB_TOKEN (pushes made with it never start
-# workflows) and carries [skip ci] as a second guard.
+# workflows), carries [skip ci], and only touches deploy/argocd/ (ignored below).
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "deploy/argocd/**" # Application edits are applied by Argo CD directly
+      - "**/*.md"
   workflow_dispatch:
     inputs:
       version:
@@ -50,7 +56,7 @@ jobs:
         id: version
         env:
           VERSION_INPUT: ${{ inputs.version }}
-          BUMP: ${{ inputs.bump }}
+          BUMP: ${{ inputs.bump || 'patch' }} # push events have no inputs
         run: |
           last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
           last=${last:-v0.0.0}
