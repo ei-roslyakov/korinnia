@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, NavLink, Outlet, useNavigate } from "react-router";
+import { Link, NavLink, Outlet, useMatch, useNavigate } from "react-router";
 
 import { useLogout, useMe } from "@/features/auth/api";
 
@@ -12,6 +12,8 @@ export function Layout() {
   const logout = useLogout();
   const navigate = useNavigate();
   const preferred = me.data?.preferred_language;
+  // The tree canvas uses the full viewport below the header.
+  const fullBleed = useMatch("/trees/:treeId") !== null;
 
   // Apply the user's saved language once their profile is known.
   useEffect(() => {
@@ -22,9 +24,9 @@ export function Layout() {
     `text-sm ${isActive ? "font-semibold text-leaf-700" : "text-bark-700 hover:text-bark-900"}`;
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className={fullBleed ? "flex h-dvh flex-col" : "flex min-h-full flex-col"}>
       <header className="border-bark-100 border-b bg-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3 print:hidden">
           <div className="flex items-center gap-6">
             <Link to="/" className="text-leaf-700 font-serif text-xl font-semibold">
               {t("app.name")}
@@ -65,7 +67,11 @@ export function Layout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+      <main
+        className={
+          fullBleed ? "flex min-h-0 flex-1 flex-col" : "mx-auto w-full max-w-6xl flex-1 px-4 py-8"
+        }
+      >
         <Outlet />
       </main>
     </div>

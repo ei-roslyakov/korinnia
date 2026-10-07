@@ -147,3 +147,23 @@ A partnership carries its own start/end partial dates, place and end reason, so 
 
 ### D40. End-to-end tests run on a throwaway stack
 `make test-e2e` builds the **production** images, starts them as a separate Compose project (`korinnia-e2e`, port 8091), runs Playwright against them, then removes the project including its volumes. Tests always start from a clean database (bootstrapped superadmin, Ukrainian UI) and never write into the developer's own dev data. The earlier version ran against the dev stack, so it created test trees and users there and broke as soon as the admin changed their language. CI does the same thing against freshly built images.
+
+## Phase 4: tree canvas, person page, search
+
+### D41. Layout: ELK layered with "family" junction nodes
+Every couple, or set of co-parents, becomes a small junction node: parent → family → child. ELK's layered algorithm (direction DOWN, network-simplex placement, model order preserved) then puts each generation on its own row, keeps partners next to their shared junction, and handles remarriages, half-siblings and pedigree collapse, none of which a strict tree layout can draw. Childless couples still get a junction so partners stay together. Non-biological child links are drawn dashed.
+
+### D42. ELK runs in its official Web Worker
+Laying out thousands of nodes can take hundreds of milliseconds, so it must not block the UI. elkjs's own worker script (`elk-worker.min.js`) is loaded as a same-origin asset (`?url` import), which the strict CSP allows without `unsafe-eval`. Running `elk.bundled.js` inside our own worker does **not** work: elkjs detects the worker context and installs itself as the message handler. The CommonJS default export also differs between Vite dev, the Rolldown production build and Vitest, so `resolveElkConstructor()` normalises it. Results are cached with TanStack Query, keyed by graph version and the set of shown people.
+
+### D43. Focus mode by default for large trees
+Trees with more than 150 people open on the root ancestor with the most descendants, showing 3 generations up and down; "Whole tree" shows everyone. Focus includes ancestors, descendants, their partners, and the person's siblings. Cards show ▲/▼ when relatives are hidden. Focus, selected person and depth live in the URL, so views can be shared and survive reloads.
+
+### D44. Rendering 2,000+ people
+React Flow renders only the nodes inside the viewport (`onlyRenderVisibleElements`). Nodes aren't draggable in view mode, and custom node components are memoised. With the demo data plus a synthetic 2,000-person graph, layout and render stay responsive. The formal performance test is in phase 10.
+
+### D45. Search covers names, places and years
+Each query term must match a name variant (with transliteration), or the current or historical name of a place where one of the person's events happened. A 4-digit term matches birth/death years. The search box is an accessible combobox (arrow keys, Enter, Escape). The result is centred and opened, and the focus moves to it if it was hidden.
+
+### D46. Person view is one component in two places
+The same `PersonView` renders inside the canvas side panel (full width on phones) and on the stand-alone page `/trees/:id/people/:personId`, which can be linked to and printed. Markdown is rendered with react-markdown + GFM. Raw HTML is never rendered, and links open in a new tab with `rel="noopener noreferrer nofollow"`. Data-quality warnings are shown to editors and above only.

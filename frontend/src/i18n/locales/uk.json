@@ -211,5 +211,138 @@
     "totp_not_set_up": "Спочатку розпочніть налаштування.",
     "totp_not_enabled": "Двоетапну перевірку не ввімкнено.",
     "invitation_already_accepted": "Це запрошення вже прийнято."
+  },
+  "dates": {
+    "approx": "бл. {{date}}",
+    "before": "до {{date}}",
+    "after": "після {{date}}",
+    "between": "між {{from}} і {{to}}"
+  },
+  "canvas": {
+    "search": "Знайти людину, місце або рік…",
+    "noResults": "Нічого не знайдено",
+    "searching": "Пошук…",
+    "wholeTree": "Усе дерево",
+    "focus": "Фокус",
+    "generations": "Покоління",
+    "fit": "Вмістити на екран",
+    "empty": "У цьому родоводі ще немає людей.",
+    "emptyHint": "Людей можна буде додати в режимі редагування (наступний етап) або імпортувати з файлу GEDCOM.",
+    "layouting": "Розташовую дерево…",
+    "focusHere": "Зосередитися тут",
+    "openPage": "Відкрити сторінку",
+    "close": "Закрити",
+    "moreAbove": "Є ще предки",
+    "moreBelow": "Є ще нащадки",
+    "persons": "Людей: {{count}}",
+    "history": "Історія",
+    "minimap": "Мінікарта",
+    "controls": "Масштаб",
+    "zoomIn": "Збільшити",
+    "zoomOut": "Зменшити"
+  },
+  "person": {
+    "names": "Імена",
+    "facts": "Відомості",
+    "born": "Народження",
+    "died": "Смерть",
+    "buried": "Поховання",
+    "living": "Живе",
+    "occupation": "Заняття",
+    "education": "Освіта",
+    "religion": "Віросповідання",
+    "nationality": "Національність",
+    "biography": "Біографія",
+    "timeline": "Життєвий шлях",
+    "relatives": "Родина",
+    "parents": "Батьки",
+    "partners": "Подружжя",
+    "children": "Діти",
+    "siblings": "Брати й сестри",
+    "halfSibling": "зведені",
+    "notesForDescendants": "Нащадкам",
+    "dataNotes": "Примітки до даних",
+    "cemetery": "Кладовище",
+    "plot": "Місце",
+    "onMap": "Показати на мапі",
+    "noEvents": "Подій ще не записано.",
+    "since": "з {{date}}",
+    "until": "до {{date}}",
+    "with": "з {{names}}",
+    "notFound": "Людину не знайдено.",
+    "backToTree": "До дерева",
+    "maiden": "дівоче прізвище {{name}}",
+    "researchStatus": "Дослідження"
+  },
+  "gender": {
+    "male": "Чоловік",
+    "female": "Жінка",
+    "other": "Інше",
+    "unknown": "Невідомо"
+  },
+  "research": {
+    "complete": "Завершене",
+    "partial": "Часткове",
+    "unknown": "Не розпочате"
+  },
+  "eventTypes": {
+    "birth": "Народження",
+    "baptism": "Хрещення",
+    "death": "Смерть",
+    "burial": "Поховання",
+    "marriage": "Шлюб",
+    "divorce": "Розлучення",
+    "education": "Навчання",
+    "graduation": "Закінчення навчання",
+    "military_service": "Військова служба",
+    "occupation": "Робота",
+    "residence": "Проживання",
+    "emigration": "Еміграція",
+    "immigration": "Імміграція",
+    "award": "Нагорода",
+    "illness": "Хвороба",
+    "custom": "Подія"
+  },
+  "nameTypes": {
+    "birth": "Ім’я при народженні",
+    "married": "Прізвище в шлюбі",
+    "nickname": "Прізвисько",
+    "alias": "Інше ім’я",
+    "religious": "Церковне ім’я",
+    "other": "Інше"
+  },
+  "scripts": {
+    "cyrillic": "Кирилиця",
+    "latin": "Латиниця",
+    "other": "Інше письмо"
+  },
+  "relTypes": {
+    "biological": "",
+    "adoptive": "усиновлення",
+    "step": "нерідні",
+    "foster": "опіка",
+    "unknown": "зв’язок неясний"
+  },
+  "partnershipTypes": {
+    "marriage": "Шлюб",
+    "civil_union": "Цивільний союз",
+    "partnership": "Партнерство"
+  },
+  "endReasons": {
+    "divorce": "розлучення",
+    "death": "до смерті",
+    "separation": "розійшлися",
+    "other": "завершено"
+  },
+  "warnings": {
+    "death_before_birth": "Дата смерті раніша за дату народження.",
+    "lifespan_too_long": "Тривалість життя {{years}} років виглядає неправдоподібно.",
+    "living_too_old": "Позначено як живу людину, але їй було б {{years}} років.",
+    "child_born_before_parent": "Дитина народилася раніше за одного з батьків.",
+    "parent_too_young": "Одному з батьків на момент народження дитини було б лише {{age}}.",
+    "parent_too_old": "Одному з батьків на момент народження дитини було б {{age}}.",
+    "born_after_parent_death": "Дитина народилася після смерті одного з батьків.",
+    "event_before_birth": "Подія датована раніше народження.",
+    "event_after_death": "Подія датована пізніше смерті."
   }
 }

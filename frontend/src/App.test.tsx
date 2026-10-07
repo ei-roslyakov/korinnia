@@ -81,6 +81,7 @@ describe("App", () => {
       "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true }),
       "GET /api/v1/trees/t1": () =>
         json({ id: "t1", name: "Родина", description: "Полтава", my_role: "admin" }),
+      "GET /api/v1/trees/t1/graph": () => json({ persons: [], parent_child: [], partnerships: [] }),
     });
     renderWithProviders(<App />, { route: "/trees/t1" });
     expect(await screen.findByRole("heading", { name: "Родина" })).toBeInTheDocument();
@@ -93,6 +94,7 @@ describe("App", () => {
       "GET /api/v1/auth/me": () => json(ME),
       "GET /api/v1/trees/t1": () =>
         json({ id: "t1", name: "Родина", description: null, my_role: "viewer" }),
+      "GET /api/v1/trees/t1/graph": () => json({ persons: [], parent_child: [], partnerships: [] }),
     });
     renderWithProviders(<App />, { route: "/trees/t1" });
     expect(await screen.findByRole("heading", { name: "Родина" })).toBeInTheDocument();

@@ -211,5 +211,138 @@
     "totp_not_set_up": "Start the setup first.",
     "totp_not_enabled": "Two-step verification is not on.",
     "invitation_already_accepted": "This invitation has already been accepted."
+  },
+  "dates": {
+    "approx": "about {{date}}",
+    "before": "before {{date}}",
+    "after": "after {{date}}",
+    "between": "between {{from}} and {{to}}"
+  },
+  "canvas": {
+    "search": "Find a person, place or year…",
+    "noResults": "Nothing found",
+    "searching": "Searching…",
+    "wholeTree": "Whole tree",
+    "focus": "Focus",
+    "generations": "Generations",
+    "fit": "Fit to screen",
+    "empty": "This tree has no people yet.",
+    "emptyHint": "People can be added in builder mode (coming in the next phase) or by importing a GEDCOM file later.",
+    "layouting": "Arranging the tree…",
+    "focusHere": "Focus here",
+    "openPage": "Open full page",
+    "close": "Close",
+    "moreAbove": "Has more ancestors",
+    "moreBelow": "Has more descendants",
+    "persons": "{{count}} people",
+    "history": "History",
+    "minimap": "Overview map",
+    "controls": "Zoom controls",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
+  },
+  "person": {
+    "names": "Names",
+    "facts": "Facts",
+    "born": "Born",
+    "died": "Died",
+    "buried": "Burial",
+    "living": "Living",
+    "occupation": "Occupation",
+    "education": "Education",
+    "religion": "Religion",
+    "nationality": "Nationality",
+    "biography": "Biography",
+    "timeline": "Life timeline",
+    "relatives": "Family",
+    "parents": "Parents",
+    "partners": "Partners",
+    "children": "Children",
+    "siblings": "Siblings",
+    "halfSibling": "half-sibling",
+    "notesForDescendants": "Notes for descendants",
+    "dataNotes": "Data notes",
+    "cemetery": "Cemetery",
+    "plot": "Plot",
+    "onMap": "Show on map",
+    "noEvents": "No events recorded yet.",
+    "since": "since {{date}}",
+    "until": "until {{date}}",
+    "with": "with {{names}}",
+    "notFound": "Person not found.",
+    "backToTree": "Back to tree",
+    "maiden": "née {{name}}",
+    "researchStatus": "Research"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "unknown": "Unknown"
+  },
+  "research": {
+    "complete": "Complete",
+    "partial": "Partial",
+    "unknown": "Not started"
+  },
+  "eventTypes": {
+    "birth": "Birth",
+    "baptism": "Baptism",
+    "death": "Death",
+    "burial": "Burial",
+    "marriage": "Marriage",
+    "divorce": "Divorce",
+    "education": "Education",
+    "graduation": "Graduation",
+    "military_service": "Military service",
+    "occupation": "Occupation",
+    "residence": "Residence",
+    "emigration": "Emigration",
+    "immigration": "Immigration",
+    "award": "Award",
+    "illness": "Illness",
+    "custom": "Event"
+  },
+  "nameTypes": {
+    "birth": "Birth name",
+    "married": "Married name",
+    "nickname": "Nickname",
+    "alias": "Alias",
+    "religious": "Religious name",
+    "other": "Other name"
+  },
+  "scripts": {
+    "cyrillic": "Cyrillic",
+    "latin": "Latin",
+    "other": "Other script"
+  },
+  "relTypes": {
+    "biological": "",
+    "adoptive": "adoptive",
+    "step": "step",
+    "foster": "foster",
+    "unknown": "relationship unclear"
+  },
+  "partnershipTypes": {
+    "marriage": "Marriage",
+    "civil_union": "Civil union",
+    "partnership": "Partnership"
+  },
+  "endReasons": {
+    "divorce": "divorced",
+    "death": "ended by death",
+    "separation": "separated",
+    "other": "ended"
+  },
+  "warnings": {
+    "death_before_birth": "Death date is before birth date.",
+    "lifespan_too_long": "Lifespan of {{years}} years seems implausible.",
+    "living_too_old": "Marked as living but would be {{years}} years old.",
+    "child_born_before_parent": "A child is born before their parent.",
+    "parent_too_young": "A parent would have been only {{age}} at the child's birth.",
+    "parent_too_old": "A parent would have been {{age}} at the child's birth.",
+    "born_after_parent_death": "A child is born after the parent's death.",
+    "event_before_birth": "An event is dated before birth.",
+    "event_after_death": "An event is dated after death."
   }
 }

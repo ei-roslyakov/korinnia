@@ -11,8 +11,9 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { ProfilePage } from "@/features/auth/ProfilePage";
 import { RequireAuth } from "@/features/auth/RequireAuth";
 import { ResetPasswordPage } from "@/features/auth/ResetPasswordPage";
+import { PersonPage } from "@/features/person/PersonPage";
 import { MembersPage } from "@/features/tree/MembersPage";
-import { TreeHomePage } from "@/features/tree/TreeHomePage";
+import { TreeViewPage } from "@/features/tree/TreeViewPage";
 import { TreesPage } from "@/features/tree/TreesPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 
@@ -46,7 +47,15 @@ export function App() {
           path="trees/:treeId"
           element={
             <RequireAuth>
-              <TreeHomePage />
+              <TreeViewPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/people/:personId"
+          element={
+            <RequireAuth>
+              <PersonPage />
             </RequireAuth>
           }
         />

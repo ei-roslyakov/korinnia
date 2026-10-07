@@ -232,8 +232,12 @@ async def test_search_persons(ctx: Ctx) -> None:
     assert await names("1931") == ["Halyna Kowalenko"]
     assert await names("Марія 1999") == ["Марія Коваленко"]
     assert await names("nobody") == []
+    place = await ctx.place("Івано-Франківськ", historical_names=[{"name": "Станиславів"}])
+    await ctx.person("Йосип", "Шевчук", birth={"date": y(1885), "place_id": place["id"]})
+    assert await names("stanyslaviv") == ["Йосип Шевчук"]  # by (historical) place name
+    assert await names("Шевчук Франків") == ["Йосип Шевчук"]
     page = (await ctx.editor.get(f"{ctx.base}/persons", params={"limit": 2})).json()
-    assert page["total"] == 4
+    assert page["total"] == 5
     assert len(page["items"]) == 2
 
 

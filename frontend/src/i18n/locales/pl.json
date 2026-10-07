@@ -211,5 +211,138 @@
     "totp_not_set_up": "Najpierw rozpocznij konfigurację.",
     "totp_not_enabled": "Weryfikacja dwuetapowa nie jest włączona.",
     "invitation_already_accepted": "To zaproszenie zostało już przyjęte."
+  },
+  "dates": {
+    "approx": "ok. {{date}}",
+    "before": "przed {{date}}",
+    "after": "po {{date}}",
+    "between": "między {{from}} a {{to}}"
+  },
+  "canvas": {
+    "search": "Znajdź osobę, miejsce lub rok…",
+    "noResults": "Nic nie znaleziono",
+    "searching": "Szukanie…",
+    "wholeTree": "Całe drzewo",
+    "focus": "Fokus",
+    "generations": "Pokolenia",
+    "fit": "Dopasuj do ekranu",
+    "empty": "To drzewo nie ma jeszcze żadnych osób.",
+    "emptyHint": "Osoby będzie można dodać w trybie edycji (następny etap) lub zaimportować z pliku GEDCOM.",
+    "layouting": "Układanie drzewa…",
+    "focusHere": "Skup się tutaj",
+    "openPage": "Otwórz stronę",
+    "close": "Zamknij",
+    "moreAbove": "Ma więcej przodków",
+    "moreBelow": "Ma więcej potomków",
+    "persons": "Osób: {{count}}",
+    "history": "Historia",
+    "minimap": "Mapa poglądowa",
+    "controls": "Powiększenie",
+    "zoomIn": "Powiększ",
+    "zoomOut": "Pomniejsz"
+  },
+  "person": {
+    "names": "Imiona i nazwiska",
+    "facts": "Informacje",
+    "born": "Urodzenie",
+    "died": "Śmierć",
+    "buried": "Pochówek",
+    "living": "Żyje",
+    "occupation": "Zajęcie",
+    "education": "Wykształcenie",
+    "religion": "Wyznanie",
+    "nationality": "Narodowość",
+    "biography": "Biografia",
+    "timeline": "Przebieg życia",
+    "relatives": "Rodzina",
+    "parents": "Rodzice",
+    "partners": "Małżonkowie",
+    "children": "Dzieci",
+    "siblings": "Rodzeństwo",
+    "halfSibling": "przyrodnie",
+    "notesForDescendants": "Dla potomnych",
+    "dataNotes": "Uwagi do danych",
+    "cemetery": "Cmentarz",
+    "plot": "Kwatera",
+    "onMap": "Pokaż na mapie",
+    "noEvents": "Nie zapisano jeszcze wydarzeń.",
+    "since": "od {{date}}",
+    "until": "do {{date}}",
+    "with": "z {{names}}",
+    "notFound": "Nie znaleziono osoby.",
+    "backToTree": "Wróć do drzewa",
+    "maiden": "z domu {{name}}",
+    "researchStatus": "Badania"
+  },
+  "gender": {
+    "male": "Mężczyzna",
+    "female": "Kobieta",
+    "other": "Inna",
+    "unknown": "Nieznana"
+  },
+  "research": {
+    "complete": "Zakończone",
+    "partial": "Częściowe",
+    "unknown": "Nierozpoczęte"
+  },
+  "eventTypes": {
+    "birth": "Urodzenie",
+    "baptism": "Chrzest",
+    "death": "Śmierć",
+    "burial": "Pochówek",
+    "marriage": "Ślub",
+    "divorce": "Rozwód",
+    "education": "Nauka",
+    "graduation": "Ukończenie nauki",
+    "military_service": "Służba wojskowa",
+    "occupation": "Praca",
+    "residence": "Zamieszkanie",
+    "emigration": "Emigracja",
+    "immigration": "Imigracja",
+    "award": "Odznaczenie",
+    "illness": "Choroba",
+    "custom": "Wydarzenie"
+  },
+  "nameTypes": {
+    "birth": "Nazwisko rodowe",
+    "married": "Nazwisko po ślubie",
+    "nickname": "Przezwisko",
+    "alias": "Inne imię",
+    "religious": "Imię zakonne",
+    "other": "Inne"
+  },
+  "scripts": {
+    "cyrillic": "Cyrylica",
+    "latin": "Alfabet łaciński",
+    "other": "Inne pismo"
+  },
+  "relTypes": {
+    "biological": "",
+    "adoptive": "adopcja",
+    "step": "przybrane",
+    "foster": "rodzina zastępcza",
+    "unknown": "związek niejasny"
+  },
+  "partnershipTypes": {
+    "marriage": "Małżeństwo",
+    "civil_union": "Związek cywilny",
+    "partnership": "Partnerstwo"
+  },
+  "endReasons": {
+    "divorce": "rozwód",
+    "death": "do śmierci",
+    "separation": "separacja",
+    "other": "zakończony"
+  },
+  "warnings": {
+    "death_before_birth": "Data śmierci jest wcześniejsza niż data urodzenia.",
+    "lifespan_too_long": "Długość życia {{years}} lat wydaje się nieprawdopodobna.",
+    "living_too_old": "Oznaczono jako żyjącą, ale miałaby {{years}} lat.",
+    "child_born_before_parent": "Dziecko urodziło się przed jednym z rodziców.",
+    "parent_too_young": "Jeden z rodziców miałby przy narodzinach dziecka tylko {{age}} lat.",
+    "parent_too_old": "Jeden z rodziców miałby przy narodzinach dziecka {{age}} lat.",
+    "born_after_parent_death": "Dziecko urodziło się po śmierci jednego z rodziców.",
+    "event_before_birth": "Wydarzenie jest datowane przed urodzeniem.",
+    "event_after_death": "Wydarzenie jest datowane po śmierci."
   }
 }

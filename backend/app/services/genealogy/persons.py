@@ -21,6 +21,7 @@ from app.models import (
     Partnership,
     Person,
     PersonName,
+    Place,
     ResearchStatus,
 )
 from app.schemas.dates import PartialDateOut
@@ -414,16 +415,28 @@ async def search_persons(
     limit: int,
     offset: int,
 ) -> tuple[list[PersonSummary], int]:
-    """Search by any name variant (Cyrillic or Latin, any name type) or a 4-digit year."""
+    """Each query term must match a name variant (Cyrillic or Latin, any name type) or the
+    place of one of the person's events; 4-digit terms match birth/death years."""
     stmt = select(Person).where(Person.tree_id == tree_id, Person.deleted_at.is_(None))
     alternatives = query_alternatives(q or "")
     years = [int(a[0]) for a in alternatives if len(a) == 1 and a[0].isdigit() and len(a[0]) == 4]
     name_terms = [a for a in alternatives if not (len(a) == 1 and a[0].isdigit())]
     for alts in name_terms:
-        matching = select(PersonName.person_id).where(
+        by_name = select(PersonName.person_id).where(
             or_(*(PersonName.search_text.ilike(f"%{a}%") for a in alts))
         )
-        stmt = stmt.where(Person.id.in_(matching))
+        # ...or the place (incl. historical names) of any of the person's life events.
+        by_place = (
+            select(EventParticipant.person_id)
+            .join(Event, Event.id == EventParticipant.event_id)
+            .join(Place, Place.id == Event.place_id)
+            .where(
+                Event.tree_id == tree_id,
+                Event.deleted_at.is_(None),
+                or_(*(Place.search_text.ilike(f"%{a}%") for a in alts)),
+            )
+        )
+        stmt = stmt.where(or_(Person.id.in_(by_name), Person.id.in_(by_place)))
     for year in years:
         in_year = (
             select(EventParticipant.person_id)

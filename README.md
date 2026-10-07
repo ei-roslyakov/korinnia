@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phases 1–3 of 11 are complete (scaffolding; users and roles; core family data API). The tree canvas UI is next. See [Features](#features) for what works today.
+> **Status:** Phases 1–4 of 11 are complete (scaffolding; users and roles; core family data; tree canvas and person pages). The builder (editing UI) is next. See [Features](#features) for what works today.
 
 ---
 
@@ -18,7 +18,9 @@ Korinnia's mission is long-term preservation: to collect *everything* about ever
 | File storage | Local filesystem behind a `Storage` abstraction, on a Docker volume / Kubernetes PVC at `/data/media` |
 | Background jobs | procrastinate 3.10 — PostgreSQL-backed job queue (no Redis) |
 | Frontend | React 19, TypeScript 6, Vite 8, Tailwind CSS 4, TanStack Query 5, React Router 8, react-i18next 17 (uk / en / pl) |
-| Frontend (planned) | React Flow (canvas), elkjs (genealogical layout), Leaflet + OpenStreetMap (maps) |
+| Tree canvas | React Flow 12 (`@xyflow/react`: pan / zoom / minimap, viewport culling), elkjs 0.12 (layered genealogical layout in a Web Worker) |
+| Content | react-markdown 10 + remark-gfm (biographies, notes; raw HTML never rendered) |
+| Frontend (planned) | Leaflet + OpenStreetMap (maps) |
 | Web server | nginx 1.29 — static frontend, `/api` reverse proxy, gzip (incl. pre-compressed assets), caching & security headers. Plain HTTP: TLS is terminated by your ingress / load balancer |
 | Media processing (planned) | Pillow (thumbnails, EXIF orientation), ffmpeg (audio/video previews), PDF thumbnails |
 | Book / PDF (planned) | WeasyPrint |
@@ -75,10 +77,16 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Demo seed family: 25 people, 5 generations (`make seed`)
 
 ### Tree view
-- 📋 Infinite canvas (pan, zoom, fit, minimap) with person cards
-- 📋 Person page: names, timeline, biography (Markdown), gallery, documents, stories, sources, relatives
-- 📋 Search by any name variant, place or year; focus mode (N generations)
-- 📋 Relationship calculator, map view, family timeline, "On this day", statistics
+- ✅ Infinite canvas: drag to pan, wheel / pinch to zoom, fit to screen, zoom buttons, minimap
+- ✅ Generational layout (ELK, layered) with family junctions; adoptive/step/foster links dashed; layout runs in a Web Worker
+- ✅ Person cards: portrait placeholder (photos in phase 6), primary name, life years with uncertainty markers (~1850, <1944)
+- ✅ Click a card → side panel; full person page with shareable link: all names, birth / death / burial (with map link), facts, rendered Markdown biography, life timeline, relatives as links, notes for descendants, data notes (editors)
+- ✅ Search by any name variant (Cyrillic ↔ Latin), place (incl. historical names) or year; the result is centred and opened
+- ✅ Focus mode: 1–6 generations around a person, markers for hidden ancestors/descendants; large trees (>150 people) open in focus mode
+- ✅ Works on tablet and mobile (touch pan/zoom, full-width panel)
+- ✅ Smooth with 2,000+ people (viewport culling; layout in worker)
+- 📋 Gallery, documents, audio/video on the person page (phase 6); stories & sources (phase 7)
+- 📋 Relationship calculator, map view, family timeline, "On this day", statistics (phase 8)
 
 ### Builder mode
 - 📋 Add parents / children / partners / siblings from a person card

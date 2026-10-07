@@ -91,6 +91,7 @@ test-e2e: .env ## End-to-end tests (Playwright) on a throwaway production-build 
 	@set -e; \
 	E2E="docker compose -p $(PROJECT)-e2e -f docker-compose.yml"; \
 	HTTP_PORT=$(E2E_PORT) ENVIRONMENT=production $$E2E up -d --build --wait; \
+	$$E2E exec -T backend python -m app.seed; \
 	status=0; \
 	docker run --rm --network $(PROJECT)-e2e_default -e E2E_BASE_URL=http://nginx -e CI=$(CI) \
 	  -v "$(CURDIR)/frontend:/app" -v $(PROJECT)-e2e-node-modules:/app/node_modules -w /app \
