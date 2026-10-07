@@ -170,7 +170,7 @@ Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** 
 make help            # list all commands
 make logs s=backend  # follow logs of one service
 make test            # backend (pytest, separate korinnia_test DB) + frontend (Vitest)
-make test-e2e        # Playwright against the running stack
+make test-e2e        # Playwright on a throwaway production-build stack (your data is untouched)
 make lint            # ruff, mypy, eslint, prettier, tsc
 make fmt             # auto-format everything
 make migrate         # apply migrations manually
@@ -204,7 +204,6 @@ docker compose exec backend python -m app.cli create-superadmin you@example.com 
 - **Start from scratch (deletes all data):** `docker compose down -v`.
 - **"Too many failed attempts":** sign-in is throttled for 15 minutes after 5 failed attempts per email (20 per IP).
 - **Login works but you're logged out immediately:** with plain HTTP, `COOKIE_SECURE` must be `false`.
-- **`make test-e2e` data:** E2E tests create trees and users in the running (dev) database.
 - **Apple Silicon / Linux permission issues on the media volume:** containers run as uid 1000. Named volumes inherit the right ownership automatically, but a bind mount must be writable by uid 1000.
 
 ## Project structure

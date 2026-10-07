@@ -144,3 +144,6 @@ A partnership carries its own start/end partial dates, place and end reason, so 
 
 ### D39. Seed data goes through the services
 `python -m app.seed` builds the demo family through the same services as the API, so it is validated, appears in the history, and its own test asserts that the family produces **no** plausibility warnings. It is idempotent: nothing happens while the demo tree exists.
+
+### D40. End-to-end tests run on a throwaway stack
+`make test-e2e` builds the **production** images, starts them as a separate Compose project (`korinnia-e2e`, port 8091), runs Playwright against them, then removes the project including its volumes. Tests always start from a clean database (bootstrapped superadmin, Ukrainian UI) and never write into the developer's own dev data. The earlier version ran against the dev stack, so it created test trees and users there and broke as soon as the admin changed their language. CI does the same thing against freshly built images.

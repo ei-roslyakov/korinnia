@@ -9,6 +9,7 @@ COMPOSE_PROD ?= docker compose -f docker-compose.yml
 PROJECT      ?= korinnia
 TEST_DB      ?= korinnia_test
 PLAYWRIGHT_IMAGE ?= mcr.microsoft.com/playwright:v1.63.0-noble
+E2E_PORT     ?= 8091
 
 .PHONY: help
 help: ## Show this help
@@ -86,10 +87,17 @@ test-frontend: .env ## Frontend unit tests (Vitest)
 	$(COMPOSE) run --rm --no-deps frontend sh -c "npm ci --no-audit --no-fund --loglevel=error && npm test"
 
 .PHONY: test-e2e
-test-e2e: ## End-to-end tests (Playwright) against the running stack
-	docker run --rm --network $(PROJECT)_default -e E2E_BASE_URL=http://nginx \
-	  -v "$(CURDIR)/frontend:/app" -v $(PROJECT)_frontend-node-modules:/app/node_modules \
-	  -w /app $(PLAYWRIGHT_IMAGE) npx playwright test
+test-e2e: .env ## End-to-end tests (Playwright) on a throwaway production-build stack
+	@set -e; \
+	E2E="docker compose -p $(PROJECT)-e2e -f docker-compose.yml"; \
+	HTTP_PORT=$(E2E_PORT) ENVIRONMENT=production $$E2E up -d --build --wait; \
+	status=0; \
+	docker run --rm --network $(PROJECT)-e2e_default -e E2E_BASE_URL=http://nginx -e CI=$(CI) \
+	  -v "$(CURDIR)/frontend:/app" -v $(PROJECT)-e2e-node-modules:/app/node_modules -w /app \
+	  $(PLAYWRIGHT_IMAGE) sh -c "npm ci --no-audit --no-fund --loglevel=error && npx playwright test $(args)" \
+	  || status=$$?; \
+	$$E2E down -v --remove-orphans >/dev/null 2>&1; \
+	exit $$status
 
 .PHONY: lint
 lint: .env ## Lint + format check + type check (backend & frontend)
