@@ -100,7 +100,14 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "v$VERSION" --target "$GITHUB_SHA" --title "v$VERSION" --generate-notes
+          # REST API instead of the gh CLI, which the self-hosted runner image does not ship.
+          # Creates the tag on the commit as well.
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases" \
+            -d "{\"tag_name\":\"v$VERSION\",\"target_commitish\":\"$GITHUB_SHA\",\"name\":\"v$VERSION\",\"generate_release_notes\":true}" \
+            > /dev/null
           {
             echo "## Korinnia v$VERSION"
             echo ""
