@@ -3,7 +3,7 @@
  * a layered layout graph for ELK, and computing "focus" subsets.
  *
  * A family tree is a graph, not a tree. We insert a small *family* node per couple (or per
- * set of co-parents): parent → family → child, drawn as smooth curves.
+ * set of co-parents): parent → family → child, drawn as branches growing upwards.
  */
 import type { ElkExtendedEdge, ElkNode } from "elkjs/lib/elk-api";
 
@@ -374,31 +374,47 @@ export function toElkGraph(personIds: string[], families: Family[]): LayoutGraph
 
 export type Positions = Record<string, { x: number; y: number }>;
 
-/** Person and family-junction positions (top-left corners) from the laid-out units. */
+/**
+ * Person and family-junction positions (top-left corners) from the laid-out units.
+ *
+ * The tree grows upwards like a real one: ELK lays it out top-down, then rows are mirrored so
+ * the oldest generation stands at the bottom and descendants branch out above it.
+ */
 export function expandLayout(result: ElkNode, graph: LayoutGraph): Positions {
   const placed = new Map((result.children ?? []).map((c) => [c.id, c]));
+  const bottom = Math.max(0, ...[...placed.values()].map((c) => c.y ?? 0));
+  const flip = (y: number) => bottom - y;
   const out: Positions = {};
   for (const unit of graph.units) {
     const box = placed.get(unit.id);
     if (!box) continue;
     unit.members.forEach((m, i) => {
-      out[m] = { x: (box.x ?? 0) + memberX(i), y: box.y ?? 0 };
+      out[m] = { x: (box.x ?? 0) + memberX(i), y: flip(box.y ?? 0) };
     });
   }
   for (const f of graph.families) {
     const anchor = graph.anchors.get(f.id);
     const box = anchor && placed.get(anchor.unitId);
     if (!anchor || !box) continue;
-    const rowBottom = (box.y ?? 0) + PERSON_HEIGHT;
-    const childTop = Math.min(...f.children.map((c) => out[c.id]?.y ?? Infinity));
-    // Halfway to the next row; just below a childless couple.
-    const mid = Number.isFinite(childTop) ? (rowBottom + childTop) / 2 : rowBottom + 24;
     out[f.id] = {
       x: (box.x ?? 0) + anchor.x - FAMILY_SIZE / 2,
-      y: Math.min(mid, rowBottom + ROW_GAP / 2) - FAMILY_SIZE / 2,
+      y: junctionY(
+        flip(box.y ?? 0),
+        f.children.map((c) => out[c.id]?.y).filter((y): y is number => y !== undefined),
+      ),
     };
   }
   return out;
+}
+
+/**
+ * Where a family junction sits: above its parents' row (the tree grows upwards), halfway to
+ * the nearest row of children; just above a childless couple.
+ */
+export function junctionY(parentTop: number, childTops: number[]): number {
+  const nearest = childTops.length ? Math.max(...childTops) + PERSON_HEIGHT : null;
+  const mid = nearest !== null ? (parentTop + nearest) / 2 : parentTop - 24;
+  return Math.max(mid, parentTop - ROW_GAP / 2) - FAMILY_SIZE / 2;
 }
 
 /** For focus mode: does this person have relatives that are not currently shown? */

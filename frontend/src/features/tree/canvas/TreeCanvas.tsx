@@ -23,11 +23,14 @@ import {
   PERSON_HEIGHT,
   PERSON_WIDTH,
   buildFamilies,
+  ROW_GAP,
   hiddenRelatives,
   indexRelations,
+  junctionY,
   toElkGraph,
 } from "./familyGraph";
 import { computeLayout } from "./layout";
+import { BRANCH_COLOR, GROUND_HEIGHT, TRUNK_REACH, branchWidth } from "./treeStyle";
 import type { PersonFlowNode } from "./nodes";
 import { nodeTypes } from "./nodeTypes";
 
@@ -131,6 +134,35 @@ function CanvasInner({
     if (!pos) return [];
     const byId = new Map(graph.persons.map((p) => [p.id, p]));
     const moved = (id: string) => Boolean(offsets?.[id] || dragging[id]);
+    // Soil under the oldest generation, with a trunk under each founding couple.
+    const groundNodes = (): Node[] => {
+      const placed = personIds.map((id) => personPos[id]).filter(Boolean) as XY[];
+      if (!placed.length) return [];
+      const rootRow = Math.max(...placed.map((p) => p.y));
+      const left = Math.min(...placed.map((p) => p.x)) - 160;
+      const right = Math.max(...placed.map((p) => p.x)) + PERSON_WIDTH + 160;
+      const trunks = families
+        .filter((f) => f.children.length && f.parents.every((p) => personPos[p]?.y === rootRow))
+        .map((f) => {
+          const xs = f.parents.map((p) => personPos[p]!.x + PERSON_WIDTH / 2);
+          return (Math.min(...xs) + Math.max(...xs)) / 2 - left;
+        });
+      return [
+        {
+          id: "ground",
+          type: "ground",
+          position: { x: left, y: rootRow + PERSON_HEIGHT + TRUNK_REACH },
+          initialWidth: right - left,
+          initialHeight: GROUND_HEIGHT,
+          selectable: false,
+          draggable: false,
+          focusable: false,
+          zIndex: -1,
+          style: { pointerEvents: "none" },
+          data: { width: right - left, trunks },
+        },
+      ];
+    };
     const personNodes: PersonFlowNode[] = personIds
       .filter((id) => pos[id])
       .map((id) => {
@@ -169,15 +201,16 @@ function CanvasInner({
             anchor.reduce((sum, p) => sum + p.x, 0) / anchor.length +
             PERSON_WIDTH / 2 -
             FAMILY_SIZE / 2;
-          const parentBottom = parents.length
-            ? Math.max(...parents.map((p) => p.y)) + PERSON_HEIGHT
-            : null;
-          const kidTop = kids.length ? Math.min(...kids.map((p) => p.y)) : null;
-          const y =
-            parentBottom !== null && kidTop !== null
-              ? (parentBottom + kidTop) / 2
-              : (parentBottom ?? (kidTop ?? 0) - 30) + (parentBottom !== null ? 20 : 0);
-          position = { x, y };
+          const parentTop = parents.length
+            ? Math.min(...parents.map((p) => p.y))
+            : Math.max(...kids.map((p) => p.y)) + PERSON_HEIGHT + ROW_GAP;
+          position = {
+            x,
+            y: junctionY(
+              parentTop,
+              kids.map((k) => k.y),
+            ),
+          };
         }
         return {
           id: f.id,
@@ -190,7 +223,7 @@ function CanvasInner({
           data: {},
         };
       });
-    return [...personNodes, ...familyNodes];
+    return [...groundNodes(), ...personNodes, ...familyNodes];
   }, [
     layout.data,
     graph,
@@ -228,28 +261,39 @@ function CanvasInner({
     });
   };
 
+  // Generation rank of each row, counted from the bottom (0 = the oldest generation).
+  const rankOf = useMemo(() => {
+    const rows = [...new Set(Object.values(personPos).map((p) => p.y))].sort((a, b) => b - a);
+    return (id: string) => Math.max(0, rows.indexOf(personPos[id]?.y ?? rows[0] ?? 0));
+  }, [personPos]);
+
   const edges = useMemo<Edge[]>(
     () =>
-      families.flatMap((f) => [
-        ...f.parents.map((p) => ({
-          id: `${p}->${f.id}`,
-          source: p,
-          target: f.id,
-          type: "default",
-          style: { stroke: "#a8a29e" },
-        })),
-        ...f.children.map((c) => ({
-          id: `${f.id}->${c.id}`,
-          source: f.id,
-          target: c.id,
-          type: "default",
-          style: {
-            stroke: "#78716c",
-            strokeDasharray: c.type === "biological" ? undefined : "6 4",
-          },
-        })),
-      ]),
-    [families],
+      families.flatMap((f) => {
+        const rank = Math.min(...f.parents.map(rankOf));
+        const branch = { stroke: BRANCH_COLOR, strokeLinecap: "round" as const };
+        return [
+          ...f.parents.map((p) => ({
+            id: `${p}->${f.id}`,
+            source: p,
+            target: f.id,
+            type: "default",
+            style: { ...branch, strokeWidth: branchWidth(rank) },
+          })),
+          ...f.children.map((c) => ({
+            id: `${f.id}->${c.id}`,
+            source: f.id,
+            target: c.id,
+            type: "default",
+            style: {
+              ...branch,
+              strokeWidth: branchWidth(rank + 0.5),
+              strokeDasharray: c.type === "biological" ? undefined : "6 5",
+            },
+          })),
+        ];
+      }),
+    [families, rankOf],
   );
 
   // Fit the whole tree once (first layout); afterwards only move the view on explicit
@@ -291,6 +335,8 @@ function CanvasInner({
 
   return (
     <ReactFlow
+      // Sky above, meadow towards the ground.
+      style={{ background: "linear-gradient(to bottom, #f1f6fa 0%, #f6f8f0 70%, #eef3e2 100%)" }}
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
@@ -313,7 +359,7 @@ function CanvasInner({
       fitView
       fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
     >
-      <Background gap={24} color="#e7e5e4" />
+      <Background gap={24} color="#e2e6dc" bgColor="transparent" />
       <Controls showInteractive={false} fitViewOptions={{ padding: 0.15, duration: 300 }} />
       <MiniMap
         pannable
@@ -322,7 +368,9 @@ function CanvasInner({
         nodeColor={(n) =>
           n.type === "person"
             ? (GENDER_COLORS[(n as PersonFlowNode).data.person.gender] ?? "#e7e5e4")
-            : "#78716c"
+            : n.type === "ground"
+              ? "transparent"
+              : BRANCH_COLOR
         }
         className="!hidden sm:!block"
       />

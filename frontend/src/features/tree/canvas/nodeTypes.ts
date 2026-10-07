@@ -1,3 +1,3 @@
-import { FamilyNode, PersonNode } from "./nodes";
+import { FamilyNode, GroundNode, PersonNode } from "./nodes";
 
-export const nodeTypes = { person: PersonNode, family: FamilyNode };
+export const nodeTypes = { person: PersonNode, family: FamilyNode, ground: GroundNode };

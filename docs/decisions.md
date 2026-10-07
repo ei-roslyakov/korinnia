@@ -295,3 +295,6 @@ Connectors are drawn as Bézier curves (parent → junction → child) instead o
 
 ### D75. Cards move sideways only
 Manual nudges change only the horizontal position, so dragging can never break the generation rows. The vertical part of offsets saved before this change is ignored rather than deleted; "Reset layout" removes offsets completely.
+
+### D76. The tree grows upwards
+Like a real tree, the oldest generation is at the bottom and descendants branch out above. ELK still lays out top-down; the rows are mirrored afterwards, and links leave a card from the top (to the person's own family) and arrive at the bottom (from the parents). Connectors are brown branches whose thickness decreases with the generation, so they are thickest at the root. A decorative ground strip sits under the oldest generation, with a trunk and roots under each founding couple that has children. It is purely visual: not focusable, ignores the pointer, and transparent in the minimap. Builder "+" buttons follow the direction: "add parent" is below a card, "add child" above it.

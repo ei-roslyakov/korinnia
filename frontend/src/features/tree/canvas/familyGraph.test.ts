@@ -7,6 +7,7 @@ import {
   PARTNER_GAP,
   PERSON_HEIGHT,
   PERSON_WIDTH,
+  ROW_GAP,
   buildFamilies,
   buildUnits,
   defaultFocus,
@@ -14,6 +15,7 @@ import {
   generations,
   hiddenRelatives,
   indexRelations,
+  junctionY,
   toElkGraph,
 } from "./familyGraph";
 import { computeLayout } from "./layout";
@@ -139,6 +141,14 @@ describe("family graph", () => {
     expect(gen.get("grandkid")).toBe(3);
   });
 
+  it("places junctions above the parents, just above a childless couple", () => {
+    const childRow = 500 - ROW_GAP - PERSON_HEIGHT;
+    expect(junctionY(500, [childRow])).toBe(500 - ROW_GAP / 2 - FAMILY_SIZE / 2);
+    // Never further than half a row from the parents, even if the children are far above.
+    expect(junctionY(500, [childRow - 400])).toBe(500 - ROW_GAP / 2 - FAMILY_SIZE / 2);
+    expect(junctionY(500, [])).toBe(500 - 24 - FAMILY_SIZE / 2);
+  });
+
   it("puts partners in one unit, a person with two partners between them", () => {
     const families = buildFamilies(graph, all);
     const units = buildUnits([...all], families, generations([...all], families));
@@ -151,7 +161,7 @@ describe("family graph", () => {
     expect(units.flatMap((u) => u.members).sort()).toEqual([...all].sort());
   });
 
-  it("lays out one row per generation with partners side by side", async () => {
+  it("grows upwards: one row per generation, partners side by side", async () => {
     const families = buildFamilies(graph, all);
     const pos = await computeLayout(toElkGraph([...all], families));
     const y = (id: string) => pos[id]!.y;
@@ -159,17 +169,18 @@ describe("family graph", () => {
     expect(new Set(["gp1", "gp2", "gp3"].map(y)).size).toBe(1);
     expect(new Set(["dad", "mom", "other"].map(y)).size).toBe(1);
     expect(y("kid1")).toBe(y("half"));
-    expect(y("gp1")).toBeLessThan(y("dad"));
-    expect(y("dad")).toBeLessThan(y("kid1"));
-    expect(y("kid1")).toBeLessThan(y("grandkid"));
+    // The oldest generation is at the bottom.
+    expect(y("gp1")).toBeGreaterThan(y("dad"));
+    expect(y("dad")).toBeGreaterThan(y("kid1"));
+    expect(y("kid1")).toBeGreaterThan(y("grandkid"));
     // Partners are adjacent: exactly one card width plus the partner gap apart.
     expect(Math.abs(x("gp1") - x("gp2"))).toBe(PERSON_WIDTH + PARTNER_GAP);
     expect(Math.abs(x("dad") - x("mom"))).toBe(PERSON_WIDTH + PARTNER_GAP);
-    // The dad+mom junction hangs between them, halfway down to their children.
+    // The dad+mom junction sits above them, halfway up to their children.
     const fam = families.find((f) => f.parents.includes("dad") && f.parents.includes("mom"))!;
     const j = pos[fam.id]!;
     expect(j.x + FAMILY_SIZE / 2).toBe((x("dad") + x("mom")) / 2 + PERSON_WIDTH / 2);
-    expect(j.y).toBeGreaterThan(y("dad") + PERSON_HEIGHT);
-    expect(j.y + FAMILY_SIZE).toBeLessThan(y("kid1"));
+    expect(j.y + FAMILY_SIZE).toBeLessThan(y("dad"));
+    expect(j.y).toBeGreaterThan(y("kid1") + PERSON_HEIGHT);
   });
 });

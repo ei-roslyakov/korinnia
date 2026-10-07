@@ -78,7 +78,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 
 ### Tree view
 - ✅ Infinite canvas: drag to pan, wheel / pinch to zoom, fit to screen, zoom buttons, minimap
-- ✅ Structured layout: one row per generation, partners always side by side, smooth curved connectors through family junctions; adoptive/step/foster links dashed; layout (ELK) runs in a Web Worker
+- ✅ Drawn as a real tree growing upwards: the oldest generation stands on the ground with a trunk and roots, one row per generation above it, partners always side by side, curved brown branches that thin out towards the youngest generations; adoptive/step/foster links dashed; layout (ELK) runs in a Web Worker
 - ✅ Person cards: portrait placeholder (photos in phase 6), primary name, life years with uncertainty markers (~1850, <1944)
 - ✅ Click a card → side panel; full person page with shareable link: all names, birth / death / burial (with map link), facts, rendered Markdown biography, life timeline, relatives as links, notes for descendants, data notes (editors)
 - ✅ Search by any name variant (Cyrillic ↔ Latin), place (incl. historical names) or year; the result is centred and opened
