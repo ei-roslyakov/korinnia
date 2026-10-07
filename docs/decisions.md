@@ -220,3 +220,33 @@ Failures are stored on the item (`failed` plus the reason) instead of being retr
 
 ### D59. Uploads use XMLHttpRequest
 `fetch` can't report upload progress, so uploads go through XHR, with the same CSRF header and cookies as every other request. Each file is uploaded and processed independently, so one failure (too large, unsupported, duplicate) doesn't block the rest.
+
+## Phase 7: sources, stories and collaboration
+
+### D60. Citations point at facts through (entity_type, entity_id)
+A citation can support a person (or one of their fields, e.g. `occupation`), a name, an event, a parent–child link, a partnership or a media item. Instead of six nullable foreign keys, `citations` stores `entity_type` + `entity_id` (+ optional `field`), and the service checks that the target exists in the same tree. When a fact is deleted its citations stay in the database but drop off the person page; restoring the fact brings them back. Comments and edit suggestions use the same pattern.
+
+### D61. No unique constraint on citations
+A database constraint on (source, target, field, page) broke "delete, then cite again" because the soft-deleted row still counted, and PostgreSQL treats NULLs as distinct, so it missed real duplicates. The service rejects a live duplicate with `409 citation_exists` (`IS NOT DISTINCT FROM` comparison) instead. Deleting a source moves it to the trash together with its citations in one batch.
+
+### D62. Source search uses a transliterated `search_text`
+Source titles are often in Cyrillic, Polish or Latin. As for people (D32), each source has a `search_text` column (title, author, archive and reference, plus KMU 2010 transliteration) with a trigram index, so "metryka" finds "Метрика".
+
+### D63. Permission model for collaboration
+- **Viewer:** reads published stories, citations, comments and research questions. Viewers are often relatives who only browse, so they do not write.
+- **Contributor:** writes comments and research questions, writes stories (always saved as draft and submitted for review), and suggests edits to people and events. Contributors see only their own suggestions and their own unpublished stories, cannot change genealogical data directly, and can open the data-quality panel to find research to-dos.
+- **Editor / admin:** edit everything directly, publish or return stories (with a comment), approve or reject suggestions, delete any comment or question, and see the moderation queue.
+
+Authors can edit their own comments; a comment on a draft story is visible only to people who can see that story.
+
+### D64. Approving a suggestion goes through the normal update path
+A suggestion stores only the proposed values (`patch`) for an allow-listed set of fields; the moderation page shows them next to the current values. Approval calls the same `update_person` / `update_event` service as the editor UI, acting as the reviewer, so validation, warnings, search indexing and the audit log all apply unchanged. A suggestion can be reviewed once (`409 suggestion_already_reviewed`).
+
+### D65. Data quality is computed on request
+The data-quality panel (people without a birth record, photo or source; date problems; open questions) is computed by a few aggregate queries when the page is opened instead of being stored. At the target scale (≤ 2,000 people) this takes milliseconds and can never be stale.
+
+### D66. Canvas nodes declare their size (bug fix)
+E2E runs showed an intermittently blank tree after adding a person: React Flow hides a node (`visibility: hidden`) until it has measured it, and a rebuilt node array could lose the measurements without triggering a new measurement. Person and family nodes now pass `initialWidth` / `initialHeight` (their sizes are fixed anyway), so they are always visible.
+
+### D67. Dialogs are never nested in the DOM
+"Create a new source" opened from the citation dialog is rendered next to it, not inside it. Nested native modal dialogs make the outer one inert while the inner one is open; the E2E test caught input landing in the wrong dialog.

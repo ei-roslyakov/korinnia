@@ -144,3 +144,65 @@ class ProcessingStatus(StrEnum):
     pending = "pending"
     ready = "ready"
     failed = "failed"
+
+
+# --- Sources, stories, collaboration ------------------------------------------------------
+
+
+class SourceType(StrEnum):
+    civil_record = "civil_record"
+    church_record = "church_record"
+    archive_document = "archive_document"
+    census = "census"
+    newspaper = "newspaper"
+    letter = "letter"
+    oral_history = "oral_history"
+    book = "book"
+    website = "website"
+    other = "other"
+
+
+class CitationQuality(StrEnum):
+    primary = "primary"
+    secondary = "secondary"
+    family_tradition = "family_tradition"
+    unverified = "unverified"
+
+
+class CitedEntity(StrEnum):
+    """What a citation supports."""
+
+    person = "person"
+    person_name = "person_name"
+    event = "event"
+    parent_child = "parent_child"
+    partnership = "partnership"
+    media = "media"
+
+
+class StoryStatus(StrEnum):
+    draft = "draft"
+    pending_review = "pending_review"
+    published = "published"
+
+
+class SuggestionStatus(StrEnum):
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+
+
+class SuggestionTarget(StrEnum):
+    person = "person"
+    event = "event"
+
+
+class CommentTarget(StrEnum):
+    person = "person"
+    story = "story"
+    media = "media"
+
+
+class QuestionStatus(StrEnum):
+    open = "open"
+    resolved = "resolved"

@@ -30,6 +30,8 @@ export function PersonPage() {
           person={person.data}
           personLink={(id) => `/trees/${treeId}/people/${id}`}
           showWarnings={tree.data ? atLeast(tree.data.my_role, "editor") : false}
+          treeId={treeId}
+          role={tree.data?.my_role}
         />
       )}
     </div>

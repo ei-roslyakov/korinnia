@@ -1,11 +1,16 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import { Markdown } from "@/components/Markdown";
-import { Badge } from "@/components/ui";
+import { Badge, Button } from "@/components/ui";
+import { CitationList } from "@/features/collab/CitationList";
+import { CommentsThread } from "@/features/collab/CommentsThread";
+import { QuestionsList } from "@/features/collab/QuestionsList";
+import { SuggestEditDialog } from "@/features/collab/SuggestEditDialog";
 import { formatPartialDate, lifeYears } from "@/lib/dates";
 import type { LifeEvent, PersonDetail, PersonSummary, PlaceSummary } from "@/lib/genealogy";
+import { atLeast, type Role } from "@/lib/types";
 
 import { MediaSections } from "@/features/media/MediaSections";
 
@@ -64,12 +69,19 @@ export function PersonView({
   person,
   personLink,
   showWarnings = false,
+  treeId,
+  role,
 }: {
   person: PersonDetail;
   personLink: PersonLink;
   showWarnings?: boolean;
+  /** With tree + role: research questions, comments and suggestions are interactive. */
+  treeId?: string;
+  role?: Role;
 }) {
   const { t, i18n } = useTranslation();
+  const [suggesting, setSuggesting] = useState(false);
+  const canContribute = role ? atLeast(role, "contributor") : false;
   const fmt = (d: Parameters<typeof formatPartialDate>[0]) =>
     formatPartialDate(d, t, i18n.language);
   const burial = person.events.find((e) => e.type === "burial");
@@ -133,11 +145,20 @@ export function PersonView({
             {lifeYears(person.birth?.date ?? null, person.death?.date ?? null, person.is_living)}
           </p>
           {person.short_summary && <p className="text-sm">{person.short_summary}</p>}
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             {person.is_living && <Badge tone="green">{t("person.living")}</Badge>}
             <Badge>
               {t("person.researchStatus")}: {t(`research.${person.research_status}`)}
             </Badge>
+            {treeId && role === "contributor" && (
+              <Button
+                variant="secondary"
+                className="ml-1 print:hidden"
+                onClick={() => setSuggesting(true)}
+              >
+                {t("collab.suggest.button")}
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -270,6 +291,44 @@ export function PersonView({
         </Section>
       )}
 
+      {person.citations.length > 0 && (
+        <Section title={t("collab.sources")}>
+          <CitationList citations={person.citations} />
+        </Section>
+      )}
+
+      {person.stories.length > 0 && treeId && (
+        <Section title={t("collab.stories")}>
+          <ul className="space-y-2 text-sm">
+            {person.stories.map((s) => (
+              <li key={s.id}>
+                <Link
+                  to={`/trees/${treeId}/stories/${s.id}`}
+                  className="text-leaf-700 font-medium hover:underline"
+                >
+                  {s.title}
+                </Link>
+                {s.status !== "published" && (
+                  <Badge tone="amber">{t(`collab.storyStatus.${s.status}`)}</Badge>
+                )}
+                <p className="text-bark-700">{s.excerpt}</p>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {treeId && (person.open_questions.length > 0 || canContribute) && (
+        <Section title={t("collab.questions.title")}>
+          <QuestionsList
+            treeId={treeId}
+            personId={person.id}
+            questions={person.open_questions}
+            canWrite={canContribute}
+          />
+        </Section>
+      )}
+
       {showWarnings && person.warnings.length > 0 && (
         <Section title={t("person.dataNotes")}>
           <ul className="list-disc space-y-1 pl-5 text-sm text-amber-800">
@@ -280,6 +339,21 @@ export function PersonView({
             ))}
           </ul>
         </Section>
+      )}
+
+      {treeId && role && (
+        <Section title={t("collab.comments.title")}>
+          <CommentsThread
+            treeId={treeId}
+            entityType="person"
+            entityId={person.id}
+            canWrite={canContribute}
+            canModerate={atLeast(role, "editor")}
+          />
+        </Section>
+      )}
+      {suggesting && treeId && (
+        <SuggestEditDialog treeId={treeId} person={person} onClose={() => setSuggesting(false)} />
       )}
     </article>
   );

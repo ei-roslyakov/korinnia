@@ -7,9 +7,8 @@ from typing import TYPE_CHECKING, Any
 import pyotp
 
 if TYPE_CHECKING:
-    from httpx import AsyncClient as ApiClient
-
     from app.models import Tree
+    from tests.conftest import ApiClient
 
 
 def totp_code(secret: str, steps_ahead: int = 0) -> str:

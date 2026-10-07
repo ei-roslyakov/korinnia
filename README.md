@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phases 1–6 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media). Sources, stories and collaboration are next. See [Features](#features) for what works today.
+> **Status:** Phases 1–7 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media; sources, stories and collaboration). Map, timeline, relationship calculator and statistics are next. See [Features](#features) for what works today.
 
 ---
 
@@ -59,7 +59,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Audit log of every change (who, when, before/after) with filters — global and per tree
 - ✅ Profile: display name, interface language (synced across devices), password change
 - 📋 Read-only share links (revocable, expiring) — phase 10
-- 📋 Moderation queue for contributors' suggestions — phase 7
+- ✅ Moderation queue for contributors' suggestions and stories (see below)
 
 ### People & relationships (REST API; UI in phases 4–5)
 - ✅ People with any number of names (birth, married, nickname, alias, religious…), each in Cyrillic, Latin or other script, with patronymic and maiden name
@@ -85,7 +85,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Focus mode: 1–6 generations around a person, markers for hidden ancestors/descendants; large trees (>150 people) open in focus mode
 - ✅ Works on tablet and mobile (touch pan/zoom, full-width panel)
 - ✅ Smooth with 2,000+ people (viewport culling; layout in worker)
-- 📋 Gallery, documents, audio/video on the person page (phase 6); stories & sources (phase 7)
+- ✅ Gallery, documents, audio/video on the person page; sources, stories, research questions and comments
 - 📋 Relationship calculator, map view, family timeline, "On this day", statistics (phase 8)
 
 ### Builder mode (editors and admins)
@@ -101,7 +101,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Delete with impact preview; trash bin page with restore
 - ✅ Drag cards to adjust the layout (saved per tree as offsets from the automatic layout); reset layout
 - ✅ Unsaved-changes warning; server validation errors and date warnings shown in place
-- 📋 Data-quality panel (phase 7)
+- ✅ Sources tab: cite a source for any fact (a name, birth, an event, a parent link, a partnership…)
 
 ### Media
 - ✅ Drag & drop upload with progress (photos incl. HEIC, document scans, PDFs, audio, video, text documents); large files streamed
@@ -114,9 +114,15 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Files served only to tree members (API checks access, nginx streams via `X-Accel-Redirect`, range requests for video)
 
 ### Sources, stories & collaboration
-- 📋 Sources and citations on any fact
-- 📋 Stories linked to several people (draft → review → published)
-- 📋 Edit suggestions from contributors with a moderation queue; comments; open research questions
+- ✅ Source library per tree (civil and church records, archive documents, census, newspapers, letters, oral history, books…) with archive, reference number and URL; search in any script
+- ✅ Citations on any fact: a person or one of their fields, a name, an event, a parent link, a partnership or a media item; page / sheet and quality (primary, secondary, family tradition, unverified); "sources" section on the person page grouped by source
+- ✅ Stories and memories in Markdown with narrator, partial date and several people; lifecycle draft → on review → published (contributors submit, editors publish or return with a comment)
+- ✅ Edit suggestions from contributors (person fields and events) with a before / after diff; editors approve (applied and audited as the reviewer) or reject with a comment
+- ✅ Moderation page with a pending badge on the tree toolbar
+- ✅ Comments on people and stories; open research questions per person (open → resolved with an answer)
+- ✅ Data-quality panel: people without a birth record, without a photo, without any source, with date problems, and open research questions
+- ✅ Sources, citations and stories have full history and go through the trash bin
+- 🚧 Attaching scans to sources, media to stories, and comments on media: available in the API, UI in phase 8
 
 ### Data safety
 - 📋 GEDCOM 5.5.1 import with preview and duplicate detection

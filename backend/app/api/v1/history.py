@@ -19,7 +19,17 @@ from app.services.genealogy import trash as trash_service
 
 router = APIRouter(prefix="/trees/{tree_id}", tags=["history"])
 
-EntityType = Literal["person", "place", "event", "parent_child", "partnership", "media"]
+EntityType = Literal[
+    "person",
+    "place",
+    "event",
+    "parent_child",
+    "partnership",
+    "media",
+    "source",
+    "citation",
+    "story",
+]
 
 
 class RestoredEntity(BaseModel):

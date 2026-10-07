@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { Alert, Button, ErrorAlert, PageHeader, Spinner } from "@/components/ui";
 import { usePerson } from "@/features/person/api";
 import { MediaTab } from "@/features/media/MediaTab";
+import { SourcesTab } from "@/features/sources/SourcesTab";
 import { useTree } from "@/features/tree/api";
 import type { PersonDetail } from "@/lib/genealogy";
 import { atLeast } from "@/lib/types";
@@ -15,7 +16,7 @@ import { FamilyTab } from "./FamilyTab";
 import { HistoryTab } from "./HistoryTab";
 import { PersonForm } from "./PersonForm";
 
-const TABS = ["details", "media", "events", "family", "history"] as const;
+const TABS = ["details", "media", "events", "family", "sources", "history"] as const;
 type Tab = (typeof TABS)[number];
 
 export function PersonEditorPage() {
@@ -60,14 +61,14 @@ export function PersonEditorPage() {
           </>
         }
       />
-      <nav className="border-bark-100 mb-6 flex gap-1 border-b" role="tablist">
+      <nav className="border-bark-100 mb-6 flex gap-1 overflow-x-auto border-b" role="tablist">
         {TABS.map((x) => (
           <button
             key={x}
             type="button"
             role="tab"
             aria-selected={tab === x}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm ${tab === x ? "border-leaf-700 text-leaf-700 font-semibold" : "text-bark-700 border-transparent"}`}
+            className={`-mb-px shrink-0 border-b-2 px-3 py-2 text-sm whitespace-nowrap ${tab === x ? "border-leaf-700 text-leaf-700 font-semibold" : "text-bark-700 border-transparent"}`}
             onClick={() => setParams({ tab: x }, { replace: true })}
           >
             {t(`builder.tabs.${x}`)}
@@ -95,6 +96,7 @@ export function PersonEditorPage() {
       )}
       {tab === "events" && <EventsTab treeId={treeId} person={p} />}
       {tab === "family" && <FamilyTab treeId={treeId} person={p} />}
+      {tab === "sources" && <SourcesTab treeId={treeId} person={p} />}
       {tab === "history" && <HistoryTab treeId={treeId} personId={personId} />}
       {deleting && (
         <DeletePersonDialog

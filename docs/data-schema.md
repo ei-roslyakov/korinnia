@@ -90,5 +90,19 @@ New `persons` columns: `primary_photo_id` (FK `media_files`), `primary_photo_cro
 
 **Reading media without the app:** every original is a plain file at `<media root>/<original_key>`. Its original name, people and description are in `media_files` / `media_persons`, and its integrity can be checked against `sha256`.
 
+### Phase 7: sources, stories and collaboration
+| Table | Purpose | Key columns |
+|---|---|---|
+| `sources` | A document or testimony in the tree's library | `title`, `type` (`civil_record`/`church_record`/`archive_document`/`census`/`newspaper`/`letter`/`oral_history`/`book`/…), `author`, `archive_name`, `reference_number`, `url`, `notes`, `search_text` (transliterated, trigram index), soft delete |
+| `source_media` | Scans attached to a source | `source_id`, `media_id` |
+| `citations` | "This fact is supported by that source" | `source_id`, `entity_type` (`person`/`person_name`/`event`/`parent_child`/`partnership`/`media`), `entity_id`, `field` (e.g. `occupation`, only for `person`), `page`, `quality` (`primary`/`secondary`/`family_tradition`/`unverified`), `notes`, soft delete |
+| `stories` | A story or memory (Markdown) | `title`, `body`, `narrator`, `date_*` (partial date), `status` (`draft`/`pending_review`/`published`), `author_user_id`, `review_comment`, soft delete |
+| `story_persons` / `story_media` | People a story is about; media it shows | `story_id` + `person_id` / `media_id` |
+| `edit_suggestions` | A contributor's proposed change | `entity_type` (`person`/`event`), `entity_id`, `patch` (JSON: field → proposed value), `comment` (where the information comes from), `status` (`pending`/`approved`/`rejected`), `created_by_id`, `reviewed_by_id`, `reviewed_at`, `review_comment` |
+| `comments` | Discussion | `entity_type` (`person`/`story`/`media`), `entity_id`, `body`, `author_id`, `deleted_at` |
+| `open_questions` | Research to-dos per person | `person_id`, `question`, `notes`, `status` (`open`/`resolved`), `resolution`, `resolved_at`, `created_by_id` |
+
+`citations`, `comments` and `edit_suggestions` point at their target with a plain (`entity_type`, `entity_id`) pair rather than a foreign key, so one table covers every kind of fact. The service checks that the target exists in the same tree.
+
 ### Planned
-Sources (phase 6); sources, citations, stories, suggestions, comments and open questions (phase 7). Each section is documented here when it is implemented.
+GEDCOM import bookkeeping and integrity-check results (phase 9); share links (phase 10); export jobs (phase 11). Each section is documented here when it is implemented.

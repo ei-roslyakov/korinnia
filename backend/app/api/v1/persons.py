@@ -8,10 +8,10 @@ from fastapi import APIRouter, Query, status
 from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer
 from app.jobs.queue import enqueue_avatar
 from app.schemas.common import Page
+from app.schemas.person_page import PersonPage
 from app.schemas.persons import (
     DeletePreview,
     PersonCreate,
-    PersonDetail,
     PersonSummary,
     PersonUpdate,
 )
@@ -20,6 +20,7 @@ from app.services.genealogy import builder as builder_service
 from app.services.genealogy import persons as person_service
 from app.services.genealogy import trash as trash_service
 from app.services.genealogy.graph import tree_graph
+from app.services.genealogy.person_page import person_page
 
 router = APIRouter(prefix="/trees/{tree_id}", tags=["persons"])
 
@@ -44,29 +45,29 @@ async def list_persons(
     return Page(items=items, total=total, limit=page.limit, offset=page.offset)
 
 
-@router.post("/persons", response_model=PersonDetail, status_code=status.HTTP_201_CREATED)
+@router.post("/persons", response_model=PersonPage, status_code=status.HTTP_201_CREATED)
 async def create_person(
     body: PersonCreate, access: TreeEditor, session: SessionDep, actor: ActorDep
-) -> PersonDetail:
+) -> PersonPage:
     """Create a person; with `relative` also link them to an existing person atomically."""
     person = await builder_service.create_person_with_relative(session, access.tree.id, body, actor)
-    return await person_service.person_detail(session, person)
+    return await person_page(session, person, access.user, access.role)
 
 
-@router.get("/persons/{person_id}", response_model=PersonDetail)
-async def get_person(person_id: uuid.UUID, access: TreeViewer, session: SessionDep) -> PersonDetail:
+@router.get("/persons/{person_id}", response_model=PersonPage)
+async def get_person(person_id: uuid.UUID, access: TreeViewer, session: SessionDep) -> PersonPage:
     person = await person_service.get_person(session, access.tree.id, person_id)
-    return await person_service.person_detail(session, person)
+    return await person_page(session, person, access.user, access.role)
 
 
-@router.patch("/persons/{person_id}", response_model=PersonDetail)
+@router.patch("/persons/{person_id}", response_model=PersonPage)
 async def update_person(
     person_id: uuid.UUID,
     body: PersonUpdate,
     access: TreeEditor,
     session: SessionDep,
     actor: ActorDep,
-) -> PersonDetail:
+) -> PersonPage:
     person = await person_service.get_person(session, access.tree.id, person_id)
     person = await person_service.update_person(session, person, body, actor)
     if {
@@ -74,7 +75,7 @@ async def update_person(
         "primary_photo_crop",
     } & body.model_fields_set and person.primary_photo_id:
         await enqueue_avatar(person.id)
-    return await person_service.person_detail(session, person)
+    return await person_page(session, person, access.user, access.role)
 
 
 @router.get("/persons/{person_id}/delete-preview", response_model=DeletePreview)

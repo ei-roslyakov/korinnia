@@ -13,7 +13,13 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { ProfilePage } from "@/features/auth/ProfilePage";
 import { RequireAuth } from "@/features/auth/RequireAuth";
 import { ResetPasswordPage } from "@/features/auth/ResetPasswordPage";
+import { ModerationPage } from "@/features/collab/ModerationPage";
+import { QualityPage } from "@/features/collab/QualityPage";
 import { PersonPage } from "@/features/person/PersonPage";
+import { SourcesPage } from "@/features/sources/SourcesPage";
+import { StoriesPage } from "@/features/stories/StoriesPage";
+import { StoryEditorPage } from "@/features/stories/StoryEditorPage";
+import { StoryPage } from "@/features/stories/StoryPage";
 import { MembersPage } from "@/features/tree/MembersPage";
 import { TreeViewPage } from "@/features/tree/TreeViewPage";
 import { TreesPage } from "@/features/tree/TreesPage";
@@ -66,6 +72,62 @@ export function App() {
           element={
             <RequireAuth>
               <PersonEditorPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/sources"
+          element={
+            <RequireAuth>
+              <SourcesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/stories"
+          element={
+            <RequireAuth>
+              <StoriesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/stories/new"
+          element={
+            <RequireAuth>
+              <StoryEditorPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/stories/:storyId"
+          element={
+            <RequireAuth>
+              <StoryPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/stories/:storyId/edit"
+          element={
+            <RequireAuth>
+              <StoryEditorPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/moderation"
+          element={
+            <RequireAuth>
+              <ModerationPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/quality"
+          element={
+            <RequireAuth>
+              <QualityPage />
             </RequireAuth>
           }
         />

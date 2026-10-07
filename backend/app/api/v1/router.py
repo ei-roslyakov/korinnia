@@ -10,12 +10,15 @@ from pydantic import BaseModel
 from app.api.v1 import (
     admin,
     auth,
+    collaboration,
     events,
     history,
     media,
     persons,
     places,
     relationships,
+    sources,
+    stories,
     trees,
 )
 from app.core.config import Settings, get_settings
@@ -24,7 +27,17 @@ api_router = APIRouter()
 api_router.include_router(auth.router)
 api_router.include_router(trees.router)
 api_router.include_router(admin.router)
-for genealogy in (persons, places, events, relationships, history, media):
+for genealogy in (
+    persons,
+    places,
+    events,
+    relationships,
+    history,
+    media,
+    sources,
+    stories,
+    collaboration,
+):
     api_router.include_router(genealogy.router)
 
 

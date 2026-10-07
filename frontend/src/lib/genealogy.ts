@@ -151,6 +151,9 @@ export interface PersonDetail {
   warnings: DataWarning[];
   created_at: string;
   updated_at: string;
+  citations: Citation[];
+  stories: StorySummary[];
+  open_questions: OpenQuestion[];
 }
 
 export interface HistoricalName {
@@ -268,3 +271,138 @@ export interface MediaItem {
 }
 
 export const isVisual = (m: MediaItem) => m.kind === "photo" || m.kind === "document_scan";
+
+// --- Sources, stories, collaboration --------------------------------------------------------
+
+export const SOURCE_TYPES = [
+  "civil_record",
+  "church_record",
+  "archive_document",
+  "census",
+  "newspaper",
+  "letter",
+  "oral_history",
+  "book",
+  "website",
+  "other",
+] as const;
+export type SourceType = (typeof SOURCE_TYPES)[number];
+export const CITATION_QUALITIES = [
+  "primary",
+  "secondary",
+  "family_tradition",
+  "unverified",
+] as const;
+export type CitationQuality = (typeof CITATION_QUALITIES)[number];
+export type CitedEntity =
+  "person" | "person_name" | "event" | "parent_child" | "partnership" | "media";
+
+export interface SourceSummary {
+  id: string;
+  title: string;
+  type: SourceType;
+}
+
+export interface Source extends SourceSummary {
+  author: string | null;
+  archive_name: string | null;
+  reference_number: string | null;
+  url: string | null;
+  notes: string | null;
+  media: MediaItem[];
+  citation_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Citation {
+  id: string;
+  source: SourceSummary;
+  target: {
+    entity_type: CitedEntity;
+    entity_id: string;
+    event_type: string | null;
+    date: string | null;
+    label: string | null;
+  };
+  field: string | null;
+  page: string | null;
+  quality: CitationQuality;
+  notes: string | null;
+  created_at: string;
+}
+
+export type StoryStatus = "draft" | "pending_review" | "published";
+export interface UserRef {
+  id: string;
+  display_name: string;
+}
+
+export interface StorySummary {
+  id: string;
+  title: string;
+  excerpt: string;
+  narrator: string | null;
+  date: PartialDate | null;
+  status: StoryStatus;
+  author: UserRef | null;
+  person_ids: string[];
+  updated_at: string;
+}
+
+export interface Story extends StorySummary {
+  body: string;
+  persons: PersonSummary[];
+  media: MediaItem[];
+  review_comment: string | null;
+  can_edit: boolean;
+  created_at: string;
+}
+
+export interface Suggestion {
+  id: string;
+  entity_type: "person" | "event";
+  entity_id: string;
+  entity_label: string;
+  patch: Record<string, unknown>;
+  current: Record<string, unknown>;
+  comment: string | null;
+  status: "pending" | "approved" | "rejected";
+  author: UserRef | null;
+  reviewer: UserRef | null;
+  review_comment: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
+
+export interface CommentItem {
+  id: string;
+  entity_type: "person" | "story" | "media";
+  entity_id: string;
+  body: string;
+  author: UserRef | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OpenQuestion {
+  id: string;
+  person_id: string;
+  person_name: string;
+  question: string;
+  notes: string | null;
+  status: "open" | "resolved";
+  resolution: string | null;
+  resolved_at: string | null;
+  created_by: UserRef | null;
+  created_at: string;
+}
+
+export interface DataQuality {
+  counts: Record<string, number>;
+  missing_birth: PersonSummary[];
+  missing_photo: PersonSummary[];
+  without_sources: PersonSummary[];
+  date_problems: { person: PersonSummary; warnings: DataWarning[] }[];
+  open_questions: OpenQuestion[];
+}

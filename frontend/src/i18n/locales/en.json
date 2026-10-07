@@ -239,7 +239,21 @@
     "tag_not_found": "This person is not linked to the file.",
     "media_not_linked": "Some files are not linked to this person.",
     "not_a_photo": "Only a photo or scan can be a portrait.",
-    "file_not_found": "File not found."
+    "file_not_found": "File not found.",
+    "source_not_found": "Source not found.",
+    "citation_not_found": "Citation not found.",
+    "citation_target_not_found": "The fact to cite was not found.",
+    "citation_exists": "This source is already cited for this fact.",
+    "story_not_found": "Story not found.",
+    "invalid_story_status": "This action is not possible in the story's current state.",
+    "suggestion_not_found": "Suggestion not found.",
+    "suggestion_already_reviewed": "This suggestion has already been reviewed.",
+    "empty_suggestion": "Change at least one field.",
+    "field_not_suggestible": "Some fields cannot be suggested.",
+    "invalid_suggestion": "The suggestion contains invalid values.",
+    "comment_not_found": "Comment not found.",
+    "comment_target_not_found": "Not found.",
+    "question_not_found": "Question not found."
   },
   "dates": {
     "approx": "about {{date}}",
@@ -558,7 +572,10 @@
         "event": "Event",
         "parent_child": "Parent–child",
         "partnership": "Partnership",
-        "media": "File"
+        "media": "File",
+        "source": "Source",
+        "citation": "Citation",
+        "story": "Story"
       }
     },
     "tabs": {
@@ -566,7 +583,8 @@
       "events": "Events",
       "family": "Family",
       "history": "History",
-      "media": "Media"
+      "media": "Media",
+      "sources": "Sources"
     }
   },
   "media": {
@@ -612,5 +630,151 @@
     "done": "Done",
     "cropHint": "Drag a square around the face for the portrait shown on the tree.",
     "cropNote": "The portrait is a separate cropped copy; the original photo is never changed."
+  },
+  "collab": {
+    "sources": "Sources",
+    "stories": "Stories",
+    "target": {
+      "person": "The person (general)",
+      "name": "Name: {{name}}",
+      "parent_child": "Parent–child link",
+      "partnership": "Partnership",
+      "media": "Media"
+    },
+    "storyStatus": {
+      "draft": "Draft",
+      "pending_review": "Awaiting review",
+      "published": "Published",
+      "all": "All"
+    },
+    "comments": {
+      "title": "Comments",
+      "none": "No comments yet.",
+      "add": "Add comment",
+      "placeholder": "Share a memory or a note…",
+      "confirmDelete": "Delete this comment?"
+    },
+    "questions": {
+      "title": "Research questions",
+      "none": "No open questions.",
+      "open": "Open",
+      "resolved": "Resolved",
+      "resolve": "Mark resolved",
+      "reopen": "Reopen",
+      "add": "Add question",
+      "placeholder": "e.g. Where was he during 1941–1945?",
+      "resolutionPrompt": "What did you find out? (optional)"
+    },
+    "suggest": {
+      "button": "Suggest an edit",
+      "title": "Suggest an edit: {{name}}",
+      "hint": "Change what you know better; an editor will review your suggestion before it is applied.",
+      "comment": "Where does this come from? (comment for the editor)",
+      "send": "Send suggestion",
+      "sent": "Thank you! Your suggestion was sent to the editors."
+    },
+    "sourcesPage": {
+      "new": "New source",
+      "title": "Title",
+      "type": "Type",
+      "archive": "Archive",
+      "reference": "Reference",
+      "referenceHint": "e.g. fond 631, opys 1, sprava 12, folio 34",
+      "author": "Author",
+      "notes": "Notes",
+      "hint": "Documents, registers, letters and recollections that the facts in this tree are based on.",
+      "search": "Search sources…",
+      "none": "No sources yet.",
+      "citations": "Cited {{count}}×",
+      "confirmDelete": "Move this source and all its citations to the trash?"
+    },
+    "cite": {
+      "hint": "Attach the sources that confirm this person's facts.",
+      "add": "Cite a source",
+      "edit": "Edit citation",
+      "none": "No sources cited yet.",
+      "supports": "What it confirms",
+      "source": "Source",
+      "page": "Page / folio",
+      "pageHint": "e.g. folio 34, entry 12",
+      "quality": "Reliability"
+    },
+    "story": {
+      "new": "New story",
+      "none": "No stories here yet.",
+      "toldBy": "told by {{name}}",
+      "writtenBy": "written by {{name}}",
+      "about": "About",
+      "returned": "Returned by the editor",
+      "submit": "Submit for review",
+      "publish": "Publish",
+      "return": "Return to author",
+      "returnComment": "What should be improved?",
+      "confirmDelete": "Move this story to the trash?",
+      "narrator": "Narrator",
+      "narratorHint": "Who told it, e.g. “grandmother Halyna, 2019”",
+      "when": "When did it happen?",
+      "addPerson": "Add a person this story is about…",
+      "body": "Story",
+      "saveDraft": "Save draft",
+      "moderationNote": "Your story is published after an editor reviews it."
+    },
+    "moderation": {
+      "title": "Moderation",
+      "pending": "{{count}} awaiting review",
+      "suggestions": "Suggested edits",
+      "stories": "Stories awaiting review",
+      "noneSuggestions": "No suggestions to review.",
+      "noneStories": "No stories to review.",
+      "field": "Field",
+      "comment": "Comment for the author (optional)",
+      "approve": "Approve and apply",
+      "reject": "Reject"
+    },
+    "quality": {
+      "title": "Data quality",
+      "hint": "A research to-do list for the {{count}} people in this tree.",
+      "date_problems": "Date conflicts",
+      "missing_birth": "No birth date",
+      "without_sources": "No sources",
+      "missing_photo": "No photo",
+      "open_questions": "Open questions",
+      "allGood": "Nothing to do here 🎉",
+      "primary": "Primary source",
+      "secondary": "Secondary source",
+      "family_tradition": "Family tradition",
+      "unverified": "Unverified"
+    },
+    "sourceTypes": {
+      "civil_record": "Civil record",
+      "church_record": "Church record",
+      "archive_document": "Archive document",
+      "census": "Census",
+      "newspaper": "Newspaper",
+      "letter": "Letter",
+      "oral_history": "Oral history",
+      "book": "Book",
+      "website": "Website",
+      "other": "Other"
+    },
+    "fields": {
+      "short_summary": "Short summary",
+      "occupation": "Occupation",
+      "education": "Education",
+      "religion": "Religion",
+      "nationality": "Nationality",
+      "biography": "Biography",
+      "notes_for_descendants": "Notes for descendants",
+      "gender": "Gender",
+      "is_living": "Living",
+      "research_status": "Research",
+      "names": "Names",
+      "birth": "Birth",
+      "death": "Death",
+      "title": "Title",
+      "date": "Date",
+      "place_id": "Place",
+      "description": "Description"
+    }
   }
 }

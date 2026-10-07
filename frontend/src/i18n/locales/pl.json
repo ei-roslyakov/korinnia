@@ -239,7 +239,21 @@
     "tag_not_found": "Ta osoba nie jest powiązana z plikiem.",
     "media_not_linked": "Niektóre pliki nie są powiązane z tą osobą.",
     "not_a_photo": "Portretem może być tylko zdjęcie lub skan.",
-    "file_not_found": "Nie znaleziono pliku."
+    "file_not_found": "Nie znaleziono pliku.",
+    "source_not_found": "Nie znaleziono źródła.",
+    "citation_not_found": "Nie znaleziono cytowania.",
+    "citation_target_not_found": "Nie znaleziono cytowanej informacji.",
+    "citation_exists": "To źródło jest już podane dla tej informacji.",
+    "story_not_found": "Nie znaleziono historii.",
+    "invalid_story_status": "Ta czynność nie jest możliwa w obecnym stanie historii.",
+    "suggestion_not_found": "Nie znaleziono propozycji.",
+    "suggestion_already_reviewed": "Ta propozycja została już rozpatrzona.",
+    "empty_suggestion": "Zmień co najmniej jedno pole.",
+    "field_not_suggestible": "Niektórych pól nie można proponować.",
+    "invalid_suggestion": "Propozycja zawiera nieprawidłowe wartości.",
+    "comment_not_found": "Nie znaleziono komentarza.",
+    "comment_target_not_found": "Nie znaleziono.",
+    "question_not_found": "Nie znaleziono pytania."
   },
   "dates": {
     "approx": "ok. {{date}}",
@@ -558,7 +572,10 @@
         "event": "Wydarzenie",
         "parent_child": "Rodzic – dziecko",
         "partnership": "Związek",
-        "media": "Plik"
+        "media": "Plik",
+        "source": "Źródło",
+        "citation": "Cytowanie",
+        "story": "Historia"
       }
     },
     "tabs": {
@@ -566,7 +583,8 @@
       "events": "Wydarzenia",
       "family": "Rodzina",
       "history": "Historia",
-      "media": "Multimedia"
+      "media": "Multimedia",
+      "sources": "Źródła"
     }
   },
   "media": {
@@ -612,5 +630,151 @@
     "done": "Gotowe",
     "cropHint": "Zaznacz kwadratem twarz do portretu na drzewie.",
     "cropNote": "Portret to osobna przycięta kopia; oryginalne zdjęcie nigdy nie jest zmieniane."
+  },
+  "collab": {
+    "sources": "Źródła",
+    "stories": "Historie",
+    "target": {
+      "person": "Osoba (ogólnie)",
+      "name": "Imię: {{name}}",
+      "parent_child": "Powiązanie rodzic – dziecko",
+      "partnership": "Związek",
+      "media": "Multimedia"
+    },
+    "storyStatus": {
+      "draft": "Szkic",
+      "pending_review": "Do przeglądu",
+      "published": "Opublikowane",
+      "all": "Wszystkie"
+    },
+    "comments": {
+      "title": "Komentarze",
+      "none": "Brak komentarzy.",
+      "add": "Dodaj komentarz",
+      "placeholder": "Podziel się wspomnieniem lub uwagą…",
+      "confirmDelete": "Usunąć ten komentarz?"
+    },
+    "questions": {
+      "title": "Pytania badawcze",
+      "none": "Brak otwartych pytań.",
+      "open": "Otwarte",
+      "resolved": "Rozwiązane",
+      "resolve": "Oznacz jako rozwiązane",
+      "reopen": "Otwórz ponownie",
+      "add": "Dodaj pytanie",
+      "placeholder": "np. Gdzie był w latach 1941–1945?",
+      "resolutionPrompt": "Czego udało się dowiedzieć? (opcjonalnie)"
+    },
+    "suggest": {
+      "button": "Zaproponuj zmianę",
+      "title": "Zaproponuj zmianę: {{name}}",
+      "hint": "Zmień to, co wiesz lepiej; redaktor sprawdzi propozycję przed zastosowaniem.",
+      "comment": "Skąd ta informacja? (komentarz dla redaktora)",
+      "send": "Wyślij propozycję",
+      "sent": "Dziękujemy! Propozycja została wysłana do redaktorów."
+    },
+    "sourcesPage": {
+      "new": "Nowe źródło",
+      "title": "Tytuł",
+      "type": "Rodzaj",
+      "archive": "Archiwum",
+      "reference": "Sygnatura",
+      "referenceHint": "np. zesp. 631, inw. 1, sygn. 12, k. 34",
+      "author": "Autor",
+      "notes": "Uwagi",
+      "hint": "Dokumenty, metryki, listy i wspomnienia, na których opierają się informacje w tym drzewie.",
+      "search": "Szukaj źródeł…",
+      "none": "Brak źródeł.",
+      "citations": "Cytowań: {{count}}",
+      "confirmDelete": "Przenieść źródło i wszystkie jego cytowania do kosza?"
+    },
+    "cite": {
+      "hint": "Dodaj źródła potwierdzające informacje o tej osobie.",
+      "add": "Zacytuj źródło",
+      "edit": "Edytuj cytowanie",
+      "none": "Brak cytowanych źródeł.",
+      "supports": "Co potwierdza",
+      "source": "Źródło",
+      "page": "Strona / karta",
+      "pageHint": "np. k. 34, wpis 12",
+      "quality": "Wiarygodność"
+    },
+    "story": {
+      "new": "Nowa historia",
+      "none": "Brak historii.",
+      "toldBy": "opowiada: {{name}}",
+      "writtenBy": "zapisał(a) {{name}}",
+      "about": "O kim",
+      "returned": "Zwrócone przez redaktora",
+      "submit": "Wyślij do przeglądu",
+      "publish": "Opublikuj",
+      "return": "Zwróć autorowi",
+      "returnComment": "Co warto poprawić?",
+      "confirmDelete": "Przenieść historię do kosza?",
+      "narrator": "Narrator",
+      "narratorHint": "Kto opowiedział, np. „babcia Halina, 2019”",
+      "when": "Kiedy to się wydarzyło?",
+      "addPerson": "Dodaj osobę, której dotyczy historia…",
+      "body": "Historia",
+      "saveDraft": "Zapisz szkic",
+      "moderationNote": "Historia zostanie opublikowana po przeglądzie redaktora."
+    },
+    "moderation": {
+      "title": "Moderacja",
+      "pending": "Do przeglądu: {{count}}",
+      "suggestions": "Proponowane zmiany",
+      "stories": "Historie do przeglądu",
+      "noneSuggestions": "Brak propozycji do przeglądu.",
+      "noneStories": "Brak historii do przeglądu.",
+      "field": "Pole",
+      "comment": "Komentarz dla autora (opcjonalnie)",
+      "approve": "Zatwierdź i zastosuj",
+      "reject": "Odrzuć"
+    },
+    "quality": {
+      "title": "Jakość danych",
+      "hint": "Lista zadań badawczych dla {{count}} osób w tym drzewie.",
+      "date_problems": "Sprzeczne daty",
+      "missing_birth": "Brak daty urodzenia",
+      "without_sources": "Bez źródeł",
+      "missing_photo": "Bez zdjęcia",
+      "open_questions": "Otwarte pytania",
+      "allGood": "Tu wszystko w porządku 🎉",
+      "primary": "Źródło pierwotne",
+      "secondary": "Źródło wtórne",
+      "family_tradition": "Tradycja rodzinna",
+      "unverified": "Niezweryfikowane"
+    },
+    "sourceTypes": {
+      "civil_record": "Akt stanu cywilnego",
+      "church_record": "Księga metrykalna",
+      "archive_document": "Dokument archiwalny",
+      "census": "Spis ludności",
+      "newspaper": "Gazeta",
+      "letter": "List",
+      "oral_history": "Historia mówiona",
+      "book": "Książka",
+      "website": "Strona internetowa",
+      "other": "Inne"
+    },
+    "fields": {
+      "short_summary": "Krótki opis",
+      "occupation": "Zajęcie",
+      "education": "Wykształcenie",
+      "religion": "Wyznanie",
+      "nationality": "Narodowość",
+      "biography": "Biografia",
+      "notes_for_descendants": "Dla potomnych",
+      "gender": "Płeć",
+      "is_living": "Żyje",
+      "research_status": "Badania",
+      "names": "Imiona",
+      "birth": "Urodzenie",
+      "death": "Śmierć",
+      "title": "Tytuł",
+      "date": "Data",
+      "place_id": "Miejsce",
+      "description": "Opis"
+    }
   }
 }

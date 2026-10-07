@@ -140,6 +140,10 @@ function CanvasInner({
           id,
           type: "person",
           position: personPos[id] ?? { x: 0, y: 0 },
+          // Known sizes: React Flow hides nodes it has not measured yet, and a rebuilt
+          // node array can drop measurements, leaving the canvas blank until a resize.
+          initialWidth: PERSON_WIDTH,
+          initialHeight: PERSON_HEIGHT,
           selected: id === selectedId,
           draggable: builder,
           data: {
@@ -178,6 +182,8 @@ function CanvasInner({
           id: f.id,
           type: "family",
           position,
+          initialWidth: FAMILY_SIZE,
+          initialHeight: FAMILY_SIZE,
           selectable: false,
           draggable: false,
           data: {},

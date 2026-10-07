@@ -5,10 +5,11 @@ import { Link, useParams, useSearchParams } from "react-router";
 import { Button, ErrorAlert, Select, Spinner } from "@/components/ui";
 import { AddRelativeDialog } from "@/features/builder/AddRelativeDialog";
 import { useResetLayout, useSaveLayoutOffset } from "@/features/builder/api";
+import { useModerationCounts } from "@/features/collab/api";
 import { useGraph, usePerson } from "@/features/person/api";
 import type { RelativeRelation } from "@/lib/genealogy";
 import { PersonView } from "@/features/person/PersonView";
-import { atLeast } from "@/lib/types";
+import { atLeast, type Role } from "@/lib/types";
 
 import { useTree } from "./api";
 import { defaultFocus, focusSet, indexRelations } from "./canvas/familyGraph";
@@ -32,6 +33,11 @@ export function TreeViewPage() {
   } | null>(null);
   const saveOffset = useSaveLayoutOffset(treeId);
   const resetLayout = useResetLayout(treeId);
+  const moderation = useModerationCounts(
+    treeId,
+    tree.data ? atLeast(tree.data.my_role, "editor") : false,
+  );
+  const pending = (moderation.data?.suggestions ?? 0) + (moderation.data?.stories ?? 0);
 
   const personId = params.get("person");
   const generations = Number(params.get("gen") ?? 3) || 3;
@@ -182,16 +188,42 @@ export function TreeViewPage() {
             )}
           </div>
         )}
-        {isAdmin && (
-          <div className="ml-auto flex gap-3 text-sm">
-            <Link to={`/trees/${treeId}/members`} className="text-leaf-700 hover:underline">
-              {t("members.title")}
+        <div className="ml-auto flex flex-wrap gap-3 text-sm">
+          <Link to={`/trees/${treeId}/stories`} className="text-leaf-700 hover:underline">
+            {t("collab.stories")}
+          </Link>
+          <Link to={`/trees/${treeId}/sources`} className="text-leaf-700 hover:underline">
+            {t("collab.sources")}
+          </Link>
+          {atLeast(tree.data.my_role, "contributor") && (
+            <Link to={`/trees/${treeId}/quality`} className="text-leaf-700 hover:underline">
+              {t("collab.quality.title")}
             </Link>
-            <Link to={`/trees/${treeId}/audit`} className="text-leaf-700 hover:underline">
-              {t("canvas.history")}
+          )}
+          {canEdit && (
+            <Link to={`/trees/${treeId}/moderation`} className="text-leaf-700 hover:underline">
+              {t("collab.moderation.title")}
+              {pending > 0 && (
+                <span
+                  className="ml-1 rounded-full bg-amber-500 px-1.5 text-xs text-white"
+                  aria-label={t("collab.moderation.pending", { count: pending })}
+                >
+                  {pending}
+                </span>
+              )}
             </Link>
-          </div>
-        )}
+          )}
+          {isAdmin && (
+            <>
+              <Link to={`/trees/${treeId}/members`} className="text-leaf-700 hover:underline">
+                {t("members.title")}
+              </Link>
+              <Link to={`/trees/${treeId}/audit`} className="text-leaf-700 hover:underline">
+                {t("canvas.history")}
+              </Link>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="relative min-h-0 flex-1">
@@ -220,6 +252,7 @@ export function TreeViewPage() {
             personId={personId}
             showWarnings={canEdit}
             editLink={canEdit ? `/trees/${treeId}/people/${personId}/edit` : null}
+            role={tree.data.my_role}
             personLink={personLink}
             onClose={() => update({ person: null })}
             onFocus={() => {
@@ -256,10 +289,12 @@ function PersonPanel({
   personLink,
   onClose,
   onFocus,
+  role,
 }: {
   treeId: string;
   personId: string;
   showWarnings: boolean;
+  role: Role;
   editLink: string | null;
   personLink: (id: string) => string;
   onClose: () => void;
@@ -300,7 +335,13 @@ function PersonPanel({
         {person.isPending && <Spinner />}
         <ErrorAlert error={person.error} />
         {person.data && (
-          <PersonView person={person.data} personLink={personLink} showWarnings={showWarnings} />
+          <PersonView
+            person={person.data}
+            personLink={personLink}
+            showWarnings={showWarnings}
+            treeId={treeId}
+            role={role}
+          />
         )}
       </div>
     </aside>

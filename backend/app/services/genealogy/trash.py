@@ -19,6 +19,7 @@ from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.security import utcnow
 from app.models import (
     AuditLog,
+    Citation,
     Event,
     EventParticipant,
     MediaFile,
@@ -28,11 +29,15 @@ from app.models import (
     Partnership,
     Person,
     Place,
+    Source,
+    Story,
 )
 from app.schemas.history import TrashEntityType, TrashItem
 from app.schemas.persons import DeletePreview
 from app.services import audit
 from app.services.context import Actor
+from app.services.genealogy import sources as sources_service
+from app.services.genealogy import stories as stories_service
 from app.services.genealogy.common import date_from_dict, name_display, pick_primary, set_date
 from app.services.genealogy.media import snapshot as media_snapshot
 from app.services.genealogy.persons import snapshot_of
@@ -56,6 +61,9 @@ MODELS: dict[str, type[Any]] = {
     "parent_child": ParentChild,
     "partnership": Partnership,
     "media": MediaFile,
+    "source": Source,
+    "citation": Citation,
+    "story": Story,
 }
 GENEALOGY_ENTITY_TYPES = tuple(MODELS)
 
@@ -148,6 +156,11 @@ async def _label(session: AsyncSession, entity_type: str, obj: Any) -> str:
         return str(obj.name)
     if isinstance(obj, MediaFile):
         return str(obj.title or obj.original_filename)
+    if isinstance(obj, Source | Story):
+        return str(obj.title)
+    if isinstance(obj, Citation):
+        source = await session.get(Source, obj.source_id)
+        return f"{source.title if source else '?'}{f', {obj.page}' if obj.page else ''}"
     if isinstance(obj, Event):
         return f"{obj.type.value} {obj.date.to_text()}".strip()
     if isinstance(obj, ParentChild):
@@ -274,6 +287,14 @@ async def _snapshot(session: AsyncSession, entity_type: str, obj: Any) -> dict[s
             return partnership_snapshot(obj)
         case "media":
             return media_snapshot(obj, await _media_tags(session, obj.id))
+        case "source":
+            return sources_service.source_snapshot(
+                obj, await sources_service.source_media_ids(session, obj.id)
+            )
+        case "citation":
+            return sources_service.citation_snapshot(obj)
+        case "story":
+            return await stories_service.snapshot_of(session, obj)
         case _:
             return place_snapshot(obj)
 
@@ -315,6 +336,12 @@ async def restore_revision(
             apply_place_snapshot(obj, snap)
         case "media":
             await _apply_media_snapshot(session, obj, snap)
+        case "source":
+            await sources_service.apply_source_snapshot(session, obj, snap)
+        case "citation":
+            sources_service.apply_citation_snapshot(obj, snap)
+        case "story":
+            await stories_service.apply_snapshot(session, obj, snap)
     obj.updated_at = utcnow()
     await session.flush()
     after = await _snapshot(session, entry.entity_type, obj)
