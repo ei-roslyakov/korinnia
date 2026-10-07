@@ -111,6 +111,20 @@
     "people_one": "{{count}} person",
     "people_other": "{{count}} people"
   },
+  "adminTrees": {
+    "title": "Trees",
+    "search": "Search by tree or owner…",
+    "live": "Active",
+    "deleted": "Deleted",
+    "owner": "Owner",
+    "size": "Size",
+    "created": "Created",
+    "deletedAt": "Deleted",
+    "restore": "Restore",
+    "empty": "No trees found.",
+    "members_one": "{{count}} member",
+    "members_other": "{{count}} members"
+  },
   "members": {
     "title": "Members",
     "add": "Add a member",
@@ -258,7 +272,8 @@
     "invalid_suggestion": "The suggestion contains invalid values.",
     "comment_not_found": "Comment not found.",
     "comment_target_not_found": "Not found.",
-    "question_not_found": "Question not found."
+    "question_not_found": "Question not found.",
+    "demo_tree_exists": "This user already has a newer demo family; delete it first to restore this one."
   },
   "dates": {
     "approx": "about {{date}}",

@@ -9,7 +9,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased, selectinload
 
-from app.core.errors import AppError, NotFoundError
+from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.security import utcnow
 from app.models import Invitation, Tree, TreeMembership, TreeRole, User
 from app.services import audit
@@ -110,6 +110,70 @@ async def delete_tree(session: AsyncSession, tree: Tree, actor: Actor) -> None:
     tree.deleted_at = utcnow()
     audit.record(session, actor, "tree.delete", "tree", tree.id, tree_id=tree.id)
     await session.commit()
+
+
+async def restore_tree(session: AsyncSession, tree: Tree, actor: Actor) -> None:
+    if tree.deleted_at is None:
+        return
+    if tree.is_demo and tree.owner_id is not None:
+        # The owner may have been given a fresh demo copy since; only one may be live.
+        live = await session.scalar(
+            select(Tree.id).where(
+                Tree.owner_id == tree.owner_id, Tree.is_demo.is_(True), Tree.deleted_at.is_(None)
+            )
+        )
+        if live is not None:
+            raise ConflictError("demo_tree_exists")
+    tree.deleted_at = None
+    audit.record(session, actor, "tree.restore", "tree", tree.id, tree_id=tree.id)
+    await session.commit()
+    await session.refresh(tree)
+
+
+@dataclass
+class AdminTreeRow:
+    tree: Tree
+    owner: User | None
+    member_count: int
+
+
+async def list_all_trees(
+    session: AsyncSession, *, q: str | None, deleted: bool, limit: int, offset: int
+) -> tuple[list[AdminTreeRow], int]:
+    """Every tree on the instance (live or deleted), newest first, for the admin panel."""
+    owner = aliased(User)
+    members = (
+        select(func.count())
+        .select_from(TreeMembership)
+        .where(TreeMembership.tree_id == Tree.id)
+        .scalar_subquery()
+    )
+    stmt = (
+        select(Tree, owner, members)
+        .outerjoin(owner, owner.id == Tree.owner_id)
+        .where(Tree.deleted_at.is_not(None) if deleted else Tree.deleted_at.is_(None))
+    )
+    if q:
+        like = f"%{q.strip().lower()}%"
+        stmt = stmt.where(
+            or_(
+                func.lower(Tree.name).like(like),
+                func.lower(owner.email).like(like),
+                func.lower(owner.display_name).like(like),
+            )
+        )
+    total = await session.scalar(select(func.count()).select_from(stmt.subquery()))
+    rows = await session.execute(
+        stmt.order_by(Tree.created_at.desc(), Tree.id).limit(limit).offset(offset)
+    )
+    return [AdminTreeRow(t, o, n) for t, o, n in rows], total or 0
+
+
+async def get_any_tree(session: AsyncSession, tree_id: uuid.UUID) -> Tree:
+    tree = await session.get(Tree, tree_id)
+    if tree is None:
+        raise NotFoundError("tree_not_found")
+    return tree
 
 
 # --- Members ----------------------------------------------------------------------------

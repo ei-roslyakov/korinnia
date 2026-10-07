@@ -87,7 +87,7 @@ Invitations (7 days) and password resets (24 h) are one-time links. The database
 ### D23. Role model and authorization
 - Roles are cumulative: viewer < contributor < editor < admin. A superadmin acts as admin in every tree.
 - All tree endpoints use one dependency, `tree_access(min_role)`. Non-members get **404** so a tree's existence isn't revealed; members with too low a role get **403**.
-- Only a superadmin creates or deletes trees. A tree admin manages members and can rename the tree.
+- Only a superadmin creates trees. A tree admin manages members, can rename the tree and can delete it (see D86).
 - Safety rails: a tree keeps at least one active admin, the installation keeps at least one active superadmin, and you cannot deactivate, demote or delete yourself.
 - "Add member" takes an email. An existing user is added directly; a new email creates an invitation. This gives tree admins one simple form, at the cost of revealing to a tree admin whether an email has an account. That is acceptable within a family.
 
@@ -344,3 +344,11 @@ Generation labels, branch thickness and blossoms come from the automatic layout'
 Korinnia is proprietary, all rights reserved (`LICENSE`). The footer shows the copyright, the release version and a link to the open-source licences the app bundles (`frontend/public/third-party-notices.txt`, regenerated with `make notices`).
 
 The version comes from the Deploy workflow: it passes `APP_VERSION` as a build argument to both images. The backend reports it in `/api/v1/meta`; the frontend bakes it in at build time (`VITE_APP_VERSION`) and shows it as e.g. "v0.0.4". The argument sits late in each Dockerfile, so it never invalidates the dependency layers. Local and CI builds show "dev".
+
+### D86. Tree admins delete trees; superadmins see and restore every tree
+
+A tree admin can now delete their tree from its settings; before, only a superadmin could. Deleting stays a soft delete (`deleted_at`): the tree disappears for every member but nothing is destroyed, which is what makes it safe to hand to tree admins. The admin panel has a Trees tab (`GET /admin/trees`) listing every tree on the instance, including other users' demo copies that the superadmin's own tree list hides, with owner, people and member counts, and a switch to deleted trees. A superadmin can delete any tree there and restore a deleted one (`POST /admin/trees/{id}/restore`, audited as `tree.restore`). A deleted demo copy cannot be restored while its owner already has a newer live one (`409 demo_tree_exists`), because only one live demo per owner is allowed.
+
+### D87. The chart repairs the media volume's top folder before each pod starts
+
+On the cluster the media volume is an NFS PVC from csi-driver-nfs with `mountPermissions: "0755"`, which the driver re-applies to the volume's top folder on every mount. The nginx pod has no `fsGroup`, so after it mounted, `/data/media` was left `root:1000 0755` and the app (uid 1000) could no longer write there: `/api/readyz` failed with "storage root not writable", although uploads into the existing `originals/`, `derived/` and `avatars/` folders still worked. Each pod that mounts the volume (backend, worker, nginx) now runs a tiny root init container that sets the top folder to group 1000 and mode `2775`. That touches one directory instead of a recursive `fsGroup` change across all media, and works whichever pod mounts last. It requires an NFS export without `root_squash`, which this one is (the folder's group was already changed by root). `persistence.fixPermissions: false` turns it off.

@@ -8,6 +8,7 @@ import { TrashPage } from "@/features/builder/TrashPage";
 import { AuditLogPage } from "@/features/admin/AuditLogPage";
 import { InvitationsPage } from "@/features/admin/InvitationsPage";
 import { SystemPage } from "@/features/admin/SystemPage";
+import { AdminTreesPage } from "@/features/admin/AdminTreesPage";
 import { UsersPage } from "@/features/admin/UsersPage";
 import { AcceptInvitePage } from "@/features/auth/AcceptInvitePage";
 import { LoginPage } from "@/features/auth/LoginPage";
@@ -220,6 +221,7 @@ export function App() {
           >
             <Route index element={<Navigate to="users" replace />} />
             <Route path="users" element={<UsersPage />} />
+            <Route path="trees" element={<AdminTreesPage />} />
             <Route path="invitations" element={<InvitationsPage />} />
             <Route path="audit" element={<AuditLogPage />} />
             <Route path="system" element={<SystemPage />} />

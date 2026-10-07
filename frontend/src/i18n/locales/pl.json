@@ -113,6 +113,22 @@
     "people_many": "{{count}} osób",
     "people_other": "{{count}} osoby"
   },
+  "adminTrees": {
+    "title": "Drzewa",
+    "search": "Szukaj po drzewie lub właścicielu…",
+    "live": "Aktywne",
+    "deleted": "Usunięte",
+    "owner": "Właściciel",
+    "size": "Rozmiar",
+    "created": "Utworzono",
+    "deletedAt": "Usunięto",
+    "restore": "Przywróć",
+    "empty": "Nie znaleziono drzew.",
+    "members_one": "{{count}} członek",
+    "members_few": "{{count}} członków",
+    "members_many": "{{count}} członków",
+    "members_other": "{{count}} członka"
+  },
   "members": {
     "title": "Członkowie",
     "add": "Dodaj członka",
@@ -260,7 +276,8 @@
     "invalid_suggestion": "Propozycja zawiera nieprawidłowe wartości.",
     "comment_not_found": "Nie znaleziono komentarza.",
     "comment_target_not_found": "Nie znaleziono.",
-    "question_not_found": "Nie znaleziono pytania."
+    "question_not_found": "Nie znaleziono pytania.",
+    "demo_tree_exists": "Ten użytkownik ma już nowszą rodzinę demo; usuń ją najpierw, aby przywrócić tę."
   },
   "dates": {
     "approx": "ok. {{date}}",

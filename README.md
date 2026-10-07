@@ -57,6 +57,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ First superadmin bootstrapped from environment variables; operator CLI for lock-out recovery
 - ✅ Multiple trees; per-tree roles: viewer, contributor, editor, admin (enforced on every endpoint, covered by tests)
 - ✅ Admin panel: create / deactivate / delete users, superadmin rights, password-reset links, reset 2FA
+- ✅ Tree deletion by the tree's admins (soft delete); the admin panel lists every tree, deletes any of them and restores deleted ones
 - ✅ Invitations via one-time, expiring links (to a tree with a role, or as superadmin)
 - ✅ Tree member management by tree admins (add existing users, invite new ones, change roles, remove)
 - ✅ Audit log of every change (who, when, before/after) with filters — global and per tree

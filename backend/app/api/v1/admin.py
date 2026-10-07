@@ -1,4 +1,4 @@
-"""Superadmin endpoints: users, invitations, global audit log."""
+"""Superadmin endpoints: users, trees, invitations, global audit log."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ from app.core.errors import NotFoundError
 from app.models import Invitation, Tree
 from app.schemas.audit import AuditEntryOut, AuditQuery
 from app.schemas.common import Page
+from app.schemas.trees import AdminTreeOut
 from app.schemas.users import (
     CreatedInvitation,
     CreateInvitationRequest,
@@ -22,6 +23,7 @@ from app.schemas.users import (
     UserOut,
 )
 from app.services import audit
+from app.services import trees as tree_service
 from app.services import users as user_service
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_superadmin)])
@@ -111,6 +113,48 @@ async def disable_2fa(user_id: uuid.UUID, session: SessionDep, actor: ActorDep) 
     target = await user_service.get_user(session, user_id)
     await user_service.admin_disable_2fa(session, target, actor)
     return UserOut.model_validate(target)
+
+
+# --- Trees ------------------------------------------------------------------------------
+
+
+@router.get("/trees", response_model=Page[AdminTreeOut])
+async def list_trees(
+    session: SessionDep,
+    page: PageParams,
+    q: Annotated[str | None, Query(max_length=200)] = None,
+    deleted: bool = False,
+) -> Page[AdminTreeOut]:
+    rows, total = await tree_service.list_all_trees(
+        session, q=q, deleted=deleted, limit=page.limit, offset=page.offset
+    )
+    info = await tree_service.overviews(session, [r.tree.id for r in rows])
+    return Page(
+        items=[
+            AdminTreeOut(
+                id=r.tree.id,
+                name=r.tree.name,
+                is_demo=r.tree.is_demo,
+                owner_id=r.tree.owner_id,
+                owner_name=r.owner.display_name if r.owner else None,
+                owner_email=r.owner.email if r.owner else None,
+                member_count=r.member_count,
+                person_count=info[r.tree.id].person_count,
+                created_at=r.tree.created_at,
+                deleted_at=r.tree.deleted_at,
+            )
+            for r in rows
+        ],
+        total=total,
+        limit=page.limit,
+        offset=page.offset,
+    )
+
+
+@router.post("/trees/{tree_id}/restore", status_code=status.HTTP_204_NO_CONTENT)
+async def restore_tree(tree_id: uuid.UUID, session: SessionDep, actor: ActorDep) -> None:
+    tree = await tree_service.get_any_tree(session, tree_id)
+    await tree_service.restore_tree(session, tree, actor)
 
 
 # --- Invitations ------------------------------------------------------------------------

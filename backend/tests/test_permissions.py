@@ -3,9 +3,9 @@
 - viewer: read only
 - contributor: read (suggestions come in phase 7)
 - editor: full content edit (phase 3+) but cannot manage members or users
-- admin: editor + manage the tree's members
+- admin: editor + manage the tree's members, delete the tree
 - outsider: cannot even see that the tree exists (404)
-- superadmin: everything, including users and tree creation/deletion
+- superadmin: everything, including users, tree creation and restoring deleted trees
 """
 
 from __future__ import annotations
@@ -141,7 +141,7 @@ CASES: dict[str, tuple[Call, dict[str, int]]] = {
             "viewer": 403,
             "contributor": 403,
             "editor": 403,
-            "admin": 403,
+            "admin": 204,
             "superadmin": 204,
         },
     ),

@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import AuditLog, Tree, TreeRole, User
+from app.services import trees as tree_service
 from tests.conftest import ApiClient
 from tests.helpers import Ctx
 
@@ -202,3 +203,82 @@ async def test_tree_list_overview(ctx: Ctx, session: AsyncSession) -> None:
     assert (t["person_count"], t["first_year"], t["last_year"]) == (2, 1890, 1990)
     assert len(t["cover"]) == 1
     assert t["cover"][0].startswith(f"/api/v1/trees/{ctx.tree.id}/persons/{a['id']}/avatar")
+
+
+async def test_tree_admin_can_delete_their_tree(
+    make_user: MakeUser,
+    make_client: MakeClient,
+    make_tree: Callable[..., Awaitable[Tree]],
+    add_member: Callable[..., Awaitable[Any]],
+) -> None:
+    owner = await make_user("owner@example.com")
+    tree = await make_tree(owner)
+    await add_member(tree, await make_user("ed@example.com"), TreeRole.editor)
+    ed = await make_client()
+    await ed.login("ed@example.com")
+    assert (await ed.delete(f"/api/v1/trees/{tree.id}")).status_code == 403
+
+    oc = await make_client()
+    await oc.login("owner@example.com")
+    assert (await oc.delete(f"/api/v1/trees/{tree.id}")).status_code == 204
+    assert (await oc.get("/api/v1/trees")).json() == []
+    assert (await ed.get(f"/api/v1/trees/{tree.id}")).status_code == 404
+
+
+async def test_admin_lists_deletes_and_restores_trees(
+    make_user: MakeUser,
+    make_client: MakeClient,
+    session: AsyncSession,
+    make_tree: Callable[..., Awaitable[Tree]],
+) -> None:
+    sa = await _superadmin(make_user, make_client)
+    owner = await make_user("owner@example.com", name="Owner")
+    tree = await make_tree(owner, "Коваленки")
+    await make_tree(owner, "Ткачуки")
+
+    page = (await sa.get("/api/v1/admin/trees", params={"q": "КОВАЛ"})).json()
+    assert page["total"] == 1
+    row = page["items"][0]
+    assert (row["name"], row["owner_email"], row["member_count"]) == (
+        "Коваленки",
+        "owner@example.com",
+        1,
+    )
+    assert row["deleted_at"] is None
+    assert (await sa.get("/api/v1/admin/trees", params={"q": "OWNER@"})).json()["total"] == 2
+
+    assert (await sa.delete(f"/api/v1/trees/{tree.id}")).status_code == 204
+    assert (await sa.get("/api/v1/admin/trees")).json()["total"] == 1
+    deleted = (await sa.get("/api/v1/admin/trees", params={"deleted": True})).json()["items"]
+    assert [d["id"] for d in deleted] == [str(tree.id)]
+    assert deleted[0]["deleted_at"] is not None
+
+    assert (await sa.post(f"/api/v1/admin/trees/{tree.id}/restore")).status_code == 204
+    assert (await sa.get(f"/api/v1/trees/{tree.id}")).status_code == 200
+    actions = (await session.scalars(select(AuditLog.action))).all()
+    assert {"tree.delete", "tree.restore"} <= set(actions)
+
+    # Only for superadmins.
+    oc = await make_client()
+    await oc.login("owner@example.com")
+    assert (await oc.get("/api/v1/admin/trees")).status_code == 403
+    assert (await oc.post(f"/api/v1/admin/trees/{tree.id}/restore")).status_code == 403
+
+
+async def test_restore_demo_tree_when_owner_has_a_new_one(
+    make_user: MakeUser, make_client: MakeClient, session: AsyncSession
+) -> None:
+    from app.services.context import Actor
+
+    sa = await _superadmin(make_user, make_client)
+    owner = await make_user("owner@example.com")
+    old = await tree_service.create_tree(
+        session, name="Demo", description=None, owner=owner, actor=Actor(None), is_demo=True
+    )
+    await tree_service.delete_tree(session, old, Actor(None))
+    await tree_service.create_tree(
+        session, name="Demo", description=None, owner=owner, actor=Actor(None), is_demo=True
+    )
+    resp = await sa.post(f"/api/v1/admin/trees/{old.id}/restore")
+    assert resp.status_code == 409
+    assert resp.json()["code"] == "demo_tree_exists"

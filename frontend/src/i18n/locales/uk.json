@@ -113,6 +113,22 @@
     "people_many": "{{count}} людей",
     "people_other": "{{count}} людини"
   },
+  "adminTrees": {
+    "title": "Родоводи",
+    "search": "Пошук за родоводом або власником…",
+    "live": "Активні",
+    "deleted": "Видалені",
+    "owner": "Власник",
+    "size": "Розмір",
+    "created": "Створено",
+    "deletedAt": "Видалено",
+    "restore": "Відновити",
+    "empty": "Родоводів не знайдено.",
+    "members_one": "{{count}} учасник",
+    "members_few": "{{count}} учасники",
+    "members_many": "{{count}} учасників",
+    "members_other": "{{count}} учасника"
+  },
   "members": {
     "title": "Учасники",
     "add": "Додати учасника",
@@ -260,7 +276,8 @@
     "invalid_suggestion": "Пропозиція містить неправильні значення.",
     "comment_not_found": "Коментар не знайдено.",
     "comment_target_not_found": "Не знайдено.",
-    "question_not_found": "Питання не знайдено."
+    "question_not_found": "Питання не знайдено.",
+    "demo_tree_exists": "У цього користувача вже є новіша демо-родина; спершу видаліть її, щоб відновити цю."
   },
   "dates": {
     "approx": "бл. {{date}}",

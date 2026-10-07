@@ -67,3 +67,18 @@ class AddMemberResponse(BaseModel):
 
 class UpdateMemberRequest(BaseModel):
     role: TreeRole
+
+
+class AdminTreeOut(BaseModel):
+    """A tree as the instance admin sees it (any tree, including deleted ones)."""
+
+    id: uuid.UUID
+    name: str
+    is_demo: bool
+    owner_id: uuid.UUID | None
+    owner_name: str | None
+    owner_email: str | None
+    member_count: int
+    person_count: int
+    created_at: datetime
+    deleted_at: datetime | None

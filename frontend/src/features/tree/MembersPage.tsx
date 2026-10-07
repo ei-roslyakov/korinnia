@@ -212,7 +212,6 @@ function MemberList({ treeId }: { treeId: string }) {
 function TreeSettings({ tree }: { tree: Tree }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const me = useMe();
   const update = useUpdateTree(tree.id);
   const del = useDeleteTree(tree.id);
   const [name, setName] = useState(tree.name);
@@ -255,19 +254,17 @@ function TreeSettings({ tree }: { tree: Tree }) {
           <Button type="submit" busy={update.isPending}>
             {t("common.save")}
           </Button>
-          {me.data?.is_superadmin && (
-            <Button
-              variant="danger"
-              busy={del.isPending}
-              onClick={() => {
-                if (window.confirm(t("trees.confirmDelete", { name: tree.name }))) {
-                  del.mutate(undefined, { onSuccess: () => void navigate("/", { replace: true }) });
-                }
-              }}
-            >
-              {t("trees.delete")}
-            </Button>
-          )}
+          <Button
+            variant="danger"
+            busy={del.isPending}
+            onClick={() => {
+              if (window.confirm(t("trees.confirmDelete", { name: tree.name }))) {
+                del.mutate(undefined, { onSuccess: () => void navigate("/", { replace: true }) });
+              }
+            }}
+          >
+            {t("trees.delete")}
+          </Button>
         </div>
       </form>
     </Card>

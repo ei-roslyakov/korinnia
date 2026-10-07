@@ -1,10 +1,13 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { ME_KEY } from "@/features/auth/api";
+import { treesKey } from "@/features/tree/api";
 import { api, qs } from "@/lib/api";
 import type { AuditEntry, Invitation, Language, LinkResponse, Page, Role, User } from "@/lib/types";
 
 const usersKey = ["admin", "users"] as const;
 const invitationsKey = ["admin", "invitations"] as const;
+const adminTreesKey = ["admin", "trees"] as const;
 
 export function useUsers(params: { q?: string; is_active?: boolean; offset?: number }) {
   return useQuery({
@@ -111,5 +114,52 @@ export function useAuditActions(enabled: boolean) {
     queryKey: ["audit", "actions"],
     queryFn: () => api.get<string[]>("/api/v1/admin/audit-log/actions"),
     enabled,
+  });
+}
+
+export interface AdminTree {
+  id: string;
+  name: string;
+  is_demo: boolean;
+  owner_id: string | null;
+  owner_name: string | null;
+  owner_email: string | null;
+  member_count: number;
+  person_count: number;
+  created_at: string;
+  deleted_at: string | null;
+}
+
+export function useAdminTrees(params: { q?: string; deleted?: boolean; offset?: number }) {
+  return useQuery({
+    queryKey: [...adminTreesKey, params],
+    queryFn: () => api.get<Page<AdminTree>>(`/api/v1/admin/trees${qs({ ...params, limit: 50 })}`),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** Deleting or restoring changes everyone's tree list, the admin list and the user's menu. */
+function useTreeListChange() {
+  const qc = useQueryClient();
+  return () => {
+    void qc.invalidateQueries({ queryKey: adminTreesKey });
+    void qc.invalidateQueries({ queryKey: treesKey });
+    void qc.invalidateQueries({ queryKey: ME_KEY });
+  };
+}
+
+export function useAdminDeleteTree() {
+  const onSuccess = useTreeListChange();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/v1/trees/${id}`),
+    onSuccess,
+  });
+}
+
+export function useRestoreTree() {
+  const onSuccess = useTreeListChange();
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/api/v1/admin/trees/${id}/restore`),
+    onSuccess,
   });
 }

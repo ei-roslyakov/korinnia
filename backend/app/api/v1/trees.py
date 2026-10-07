@@ -107,9 +107,8 @@ async def update_tree(
 
 
 @router.delete("/{tree_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_tree(
-    access: TreeAdmin, session: SessionDep, actor: ActorDep, _: Superadmin
-) -> None:
+async def delete_tree(access: TreeAdmin, session: SessionDep, actor: ActorDep) -> None:
+    """Tree admins (and superadmins) can delete; it is a soft delete a superadmin can undo."""
     await tree_service.delete_tree(session, access.tree, actor)
 
 
