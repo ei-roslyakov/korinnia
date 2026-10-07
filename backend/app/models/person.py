@@ -1,0 +1,74 @@
+"""People and their (many) names."""
+
+from __future__ import annotations
+
+import uuid
+
+from sqlalchemy import Boolean, ForeignKey, Index, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.core.enums import Gender, NameType, ResearchStatus, Script
+from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin, text_enum
+from app.models.genealogy_base import AuthoredMixin, SoftDeleteMixin, TreeScopedMixin
+
+
+class Person(
+    UUIDPrimaryKeyMixin, TreeScopedMixin, AuthoredMixin, SoftDeleteMixin, TimestampMixin, Base
+):
+    __tablename__ = "persons"
+
+    gender: Mapped[Gender] = mapped_column(
+        text_enum(Gender, "gender"), default=Gender.unknown, server_default=Gender.unknown
+    )
+    is_living: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    # FK to media_files is added together with media (phase 6).
+    primary_photo_id: Mapped[uuid.UUID | None] = mapped_column()
+    short_summary: Mapped[str | None] = mapped_column(String(500))
+    biography: Mapped[str | None] = mapped_column(Text)  # Markdown, no length limit
+    occupation: Mapped[str | None] = mapped_column(Text)
+    education: Mapped[str | None] = mapped_column(Text)
+    religion: Mapped[str | None] = mapped_column(String(200))
+    nationality: Mapped[str | None] = mapped_column(String(200))
+    notes_for_descendants: Mapped[str | None] = mapped_column(Text)  # Markdown
+    research_status: Mapped[ResearchStatus] = mapped_column(
+        text_enum(ResearchStatus, "research_status"),
+        default=ResearchStatus.unknown,
+        server_default=ResearchStatus.unknown,
+    )
+
+    names: Mapped[list[PersonName]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="(PersonName.is_primary.desc(), PersonName.sort_order)",
+    )
+
+
+class PersonName(UUIDPrimaryKeyMixin, Base):
+    __tablename__ = "person_names"
+    __table_args__ = (
+        Index(
+            "ix_person_names_search_text_trgm",
+            "search_text",
+            postgresql_using="gin",
+            postgresql_ops={"search_text": "gin_trgm_ops"},
+        ),
+    )
+
+    person_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("persons.id", ondelete="CASCADE"), index=True
+    )
+    type: Mapped[NameType] = mapped_column(text_enum(NameType, "name_type"), default=NameType.birth)
+    first_name: Mapped[str | None] = mapped_column(String(200))
+    middle_name: Mapped[str | None] = mapped_column(String(200))
+    patronymic: Mapped[str | None] = mapped_column(String(200))
+    last_name: Mapped[str | None] = mapped_column(String(200))
+    maiden_name: Mapped[str | None] = mapped_column(String(200))
+    script: Mapped[Script] = mapped_column(text_enum(Script, "script"), default=Script.cyrillic)
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    notes: Mapped[str | None] = mapped_column(Text)
+    # Lower-cased, accent-free name parts plus Ukrainian→Latin transliteration.
+    search_text: Mapped[str] = mapped_column(Text, default="", server_default="")
+
+    person: Mapped[Person] = relationship(back_populates="names")

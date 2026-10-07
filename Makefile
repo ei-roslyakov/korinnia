@@ -62,8 +62,8 @@ psql: ## Open psql in the database
 	$(COMPOSE) exec postgres sh -c 'psql -U $$POSTGRES_USER -d $$POSTGRES_DB'
 
 .PHONY: seed
-seed: ## Load demo family data (available from phase 3)
-	@echo "Seed data is added together with the core data model (phase 3)."
+seed: ## Load the demo family (25 people, 5 generations) into the running stack
+	$(COMPOSE) exec backend python -m app.seed
 
 # --- Quality ----------------------------------------------------------------------------
 .PHONY: test

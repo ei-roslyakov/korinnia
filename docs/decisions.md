@@ -105,3 +105,42 @@ Tests run against a real PostgreSQL. The schema is migrated once per session, an
 
 ### D28. Separate image tags for dev builds
 The dev override tags its images `korinnia/backend:dev` and `korinnia/nginx:dev`, so a production build (`:latest`, without test tools) can't overwrite the dev image or the other way round.
+
+## Phase 3: core genealogical data
+
+### D29. Partial dates: plain columns + a derived sort date
+Each partial date (D2) is stored as columns `<prefix>_year`, `_month`, `_day`, `_precision`, `_end_year`, `_end_month`, `_end_day`, `_phrase`, plus `<prefix>_sort` (a real `date`, indexed) for ordering. SQLAlchemy maps them onto one `PartialDate` value object (`composite()`). The precision rules are strict: `exact` needs day and month, `between` needs an end that isn't before the start, and impossible dates such as 30 February are rejected. The API infers precision from the parts given. `_phrase` keeps the original wording ("Easter 1888", GEDCOM date phrases). JSON was considered and rejected: plain columns stay queryable (search by year) and can be read with any SQL tool.
+
+### D30. Birth and death are Events, exposed as fields
+They are stored as `events` of type `birth`/`death` with exactly one principal participant, so they get places, descriptions, sources and history like any other event. The API also exposes `birth` and `death` on the person: writing them creates, updates or removes the underlying event. At most one live birth and one live death per person, enforced in the service (`vital_exists`).
+
+### D31. `is_living` defaults to "living" unless clearly dead
+If the editor doesn't set it: a recorded death → not living; born more than 110 years ago → not living; otherwise **living**, including when the birth date is unknown. Wrongly hiding a dead ancestor in a share link is harmless; exposing a living person's details is not. Recording a death sets `is_living = false`.
+
+### D32. Name search: stored transliteration + trigram index
+`person_names.search_text` and `places.search_text` hold lower-cased, accent-free tokens **plus** the Ukrainian→Latin transliteration (official KMU 2010 system, including word-initial forms and "зг"→"zgh"). The query is normalised and transliterated the same way, so "kovalenko" finds "Коваленко" and "Ковал" finds "Kovalenko". PostgreSQL's `unaccent()` isn't immutable and so can't be indexed; doing it in Python keeps the index (`gin_trgm_ops`) usable for `ILIKE '%…%'`. A 4-digit query term matches birth/death years. Spellings that differ beyond transliteration (e.g. Polish "Kowalenko") are found by partial matches or stored as explicit name variants.
+
+### D33. Hard errors vs. soft warnings
+Structural impossibilities are **errors**: self-relations, cycles (recursive CTE over ancestors), duplicate links, a third biological parent, duplicate birth/death. Contradictory or implausible *dates* are only **warnings** (`{code, params}`), returned with the relationship and on every person. Sources often disagree and the archive must be able to record what they say. Warnings only fire when dates are *certainly* implausible given their precision; approximate dates get ±5 years of slack. Thresholds: parent younger than 12, mother older than 60, father older than 90, lifespan over 120, child born after the mother's death or more than ~10 months after the father's.
+
+### D34. Revisions are full snapshots in the audit log
+For genealogical entities, `audit_log.before/after` store the **complete** state:
+- a person with all names and birth/death,
+- an event with its participants,
+- a relationship, or a place.
+Restoring a revision (`POST /history/{id}/restore`) makes the entity equal to that entry's `after` and is itself recorded as a new revision, so a restore can be undone. Deleted entities are restored from the trash, not from history. Members with any role can read history (IP addresses only for tree admins). Editors restore.
+
+### D35. Soft delete in batches; no permanent deletion yet
+Deleting a person soft-deletes their relationships and the events in which they are the only participant. Shared events stay and the person is hidden from them. All rows share `deleted_batch_id` = the person's id, and the trash lists only these "roots". Restoring a root restores the batch; a relationship whose identical live copy was created in the meantime stays in the trash. A place cannot be deleted while live events or partnerships use it (`place_in_use`). Permanent purging is deliberately not offered (preservation first). It may come in phase 10, admin-only, if needed.
+
+### D36. Event participants are synced in place
+Replacing an ORM collection wholesale makes SQLAlchemy INSERT the new rows before DELETEing the old ones, which violates `UNIQUE(event_id, person_id)`. Participants are therefore diffed: existing rows keep their id with an updated role, new ones are added and missing ones removed.
+
+### D37. Enumerations live in `app.core.enums`
+They were in `app.models.enums`, but importing them from `app.core.dates` loaded the whole `app.models` package, which imports `app.core.dates`: a circular import that only worked when models happened to load first. Enums now live in a dependency-free module.
+
+### D38. Partnership dates live on the partnership
+A partnership carries its own start/end partial dates, place and end reason, so the family structure is complete without events. `marriage`/`divorce` events stay available for extra detail, such as a church wedding with witnesses, and may coexist.
+
+### D39. Seed data goes through the services
+`python -m app.seed` builds the demo family through the same services as the API, so it is validated, appears in the history, and its own test asserts that the family produces **no** plausibility warnings. It is idempotent: nothing happens while the demo tree exists.

@@ -40,5 +40,40 @@ Media files are stored as plain files under the media root (`/data/media`). The 
 | `password_reset_tokens` | One-time reset links | `token_hash`, `user_id`, `expires_at`, `used_at`, `created_by_id` |
 | `audit_log` | Append-only change history | `created_at`, `user_id`, `user_label`, `action` (e.g. `tree.update`), `entity_type`, `entity_id`, `tree_id`, `before`/`after` (JSONB, changed fields only, never secrets), `ip_address` |
 
+### Phase 3: genealogical data
+All tables below have `tree_id`, `created_by_id`, `updated_by_id`, `created_at`, `updated_at`, and soft-delete columns `deleted_at` + `deleted_batch_id` (rows deleted together share the id of the entity the user deleted).
+
+| Table | Purpose | Key columns |
+|---|---|---|
+| `persons` | A person | `gender` (`male`/`female`/`other`/`unknown`), `is_living`, `short_summary`, `biography` (Markdown), `occupation`, `education`, `religion`, `nationality`, `notes_for_descendants` (Markdown), `research_status` (`complete`/`partial`/`unknown`), `primary_photo_id` |
+| `person_names` | All names of a person | `type` (`birth`/`married`/`nickname`/`alias`/`religious`/`other`), `first_name`, `middle_name`, `patronymic`, `last_name`, `maiden_name`, `script` (`cyrillic`/`latin`/`other`), `is_primary`, `sort_order`, `notes`, `search_text` |
+| `places` | A place | `name` (current), `historical_names` (JSON list of `{name, from_year, until_year, note}`), `country`, `region`, `latitude`, `longitude` (WGS84 decimal degrees), `notes`, `search_text` |
+| `events` | Life events | `type` (birth, baptism, death, burial, marriage, divorce, education, graduation, military_service, occupation, residence, emigration, immigration, award, illness, custom), `title`, `description` (Markdown), `date_*` (partial date, below), `place_id`, `cemetery_name`, `burial_plot`, `latitude`, `longitude` |
+| `event_participants` | Who took part in an event | `event_id`, `person_id` (unique together), `role` (`principal`/`spouse`/`witness`/`godparent`/`officiant`/`other`) |
+| `parent_child` | Parent → child link | `parent_id`, `child_id`, `type` (`biological`/`adoptive`/`step`/`foster`/`unknown`), `notes`. One live link per pair |
+| `partnerships` | Couple | `person_a_id`, `person_b_id`, `type` (`marriage`/`civil_union`/`partnership`), `start_*` and `end_*` (partial dates), `end_reason` (`divorce`/`death`/`separation`/`other`), `place_id`, `notes` |
+
+Birth and death are rows in `events` (type `birth`/`death`) with one `principal` participant.
+
+#### Partial dates
+A date stored with prefix `date_` (or `start_`, `end_`) consists of:
+
+| Column | Meaning |
+|---|---|
+| `<p>_year`, `<p>_month`, `<p>_day` | Known parts only. A year-only date has no month or day |
+| `<p>_precision` | `exact` (Y-M-D), `month` (Y-M), `year`, `approx` (about), `before`, `after`, `between` (range), `unknown` |
+| `<p>_end_year`, `<p>_end_month`, `<p>_end_day` | End of the range, only for `between` |
+| `<p>_phrase` | Original wording, free text |
+| `<p>_sort` | Derived first possible day, for ordering. Not a fact |
+
+Example: "between 1914 and 1918" → `year=1914, precision=between, end_year=1918`.
+
+#### History snapshots (`audit_log.before` / `after` for genealogical entities)
+- `person`: all person fields + `names` (list) + `birth`/`death` (`{date, place_id, description}` or null)
+- `event`: all fields + `date` + `participants` (`[{person_id, role}]`)
+- `parent_child`, `partnership`, `place`: all fields
+
+Dates in snapshots use the column names above without the prefix (`{"year": 1914, "precision": "between", "end_year": 1918, …}`).
+
 ### Planned
-People, names, events, places and relationships (phase 3); media (phase 6); sources, citations, stories, suggestions, comments and open questions (phase 7). Each section is documented here when it is implemented.
+Media (phase 6); sources, citations, stories, suggestions, comments and open questions (phase 7). Each section is documented here when it is implemented.

@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import TreeRole
+from app.core.enums import TreeRole
 from app.schemas.common import Email, Schema
 from app.schemas.users import InvitationOut
 

@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import Language, TreeRole
+from app.core.enums import Language, TreeRole
 from app.schemas.common import DisplayName, Email, NewPassword, Schema
 
 

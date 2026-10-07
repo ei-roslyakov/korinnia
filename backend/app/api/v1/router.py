@@ -7,13 +7,15 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from app.api.v1 import admin, auth, trees
+from app.api.v1 import admin, auth, events, history, persons, places, relationships, trees
 from app.core.config import Settings, get_settings
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
 api_router.include_router(trees.router)
 api_router.include_router(admin.router)
+for genealogy in (persons, places, events, relationships, history):
+    api_router.include_router(genealogy.router)
 
 
 class MetaInfo(BaseModel):

@@ -5,7 +5,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, model_validator
 
-from app.models.enums import Language, TreeRole
+from app.core.enums import Language, TreeRole
 from app.schemas.common import DisplayName, Email, NewPassword, Schema
 
 

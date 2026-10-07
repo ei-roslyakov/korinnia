@@ -8,8 +8,8 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.enums import Language
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin, text_enum, utcnow_column
-from app.models.enums import Language
 
 
 class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):

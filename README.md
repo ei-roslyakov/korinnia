@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phases 1–2 of 11 are complete (scaffolding; users, roles and administration). See [Features](#features) for what works today.
+> **Status:** Phases 1–3 of 11 are complete (scaffolding; users and roles; core family data API). The tree canvas UI is next. See [Features](#features) for what works today.
 
 ---
 
@@ -59,12 +59,20 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - 📋 Read-only share links (revocable, expiring) — phase 10
 - 📋 Moderation queue for contributors' suggestions — phase 7
 
-### People & relationships
-- 📋 People with multiple names (birth, married, nickname, religious…; Cyrillic + Latin)
-- 📋 Life events with partial / approximate dates and places; birth & death as first-class fields
-- 📋 Parent–child (biological, adoptive, step, foster) and partnerships; validation (cycles, implausible dates)
-- 📋 Places with historical names and coordinates; burial details
-- 📋 Revision history for every change, restore of previous versions, soft delete with trash bin
+### People & relationships (REST API; UI in phases 4–5)
+- ✅ People with any number of names (birth, married, nickname, alias, religious…), each in Cyrillic, Latin or other script, with patronymic and maiden name
+- ✅ Life events (16 types) with several participants, partial / approximate dates (exact, month, year, about, before, after, between) and places; birth & death exposed as first-class fields
+- ✅ Burial details: cemetery, plot, GPS coordinates
+- ✅ Places with historical names (e.g. Stanislau → Stanisławów → Stanyslaviv → Ivano-Frankivsk) and coordinates
+- ✅ Parent–child links (biological, adoptive, step, foster, unknown) and partnerships (marriage, civil union, partnership) with start/end and end reason
+- ✅ Validation: no cycles, no self-relations, max 2 biological parents; warnings for implausible dates (child born before parent, parent younger than 12, death before birth, events outside a lifetime, …)
+- ✅ Relatives computed per person: parents, children, partners, full and half siblings
+- ✅ Search by any name variant with Ukrainian↔Latin transliteration (KMU 2010), maiden names, or birth/death year
+- ✅ Whole-tree graph endpoint for the canvas (2,000 people in ≈80 ms)
+- ✅ Full revision history of every change (complete snapshots) and restore of any earlier version
+- ✅ Soft delete with impact preview; trash bin with restore (a person comes back together with their relationships and events)
+- ✅ Living-person flag inferred when not set (privacy-first default)
+- ✅ Demo seed family: 25 people, 5 generations (`make seed`)
 
 ### Tree view
 - 📋 Infinite canvas (pan, zoom, fit, minimap) with person cards
@@ -130,7 +138,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 3. **Start:** `make up`. This builds the images and starts PostgreSQL, the backend (which applies migrations), the worker, the Vite dev server and nginx, then waits until they're healthy.
 4. **Open:** <http://localhost:8080>
 
-Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). Seed data (`make seed`) arrives with the data model in phase 3.
+Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). To load the demo family (25 people, 5 generations), run `make seed`.
 
 ### URLs (development)
 
@@ -167,6 +175,7 @@ make lint            # ruff, mypy, eslint, prettier, tsc
 make fmt             # auto-format everything
 make migrate         # apply migrations manually
 make revision m="add person table"   # autogenerate a migration
+make seed            # load the demo family (once)
 make psql            # database shell
 make down            # stop (volumes, i.e. your data, are kept)
 ```

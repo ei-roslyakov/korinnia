@@ -11,8 +11,8 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.enums import TreeRole
 from app.models.base import Base, UUIDPrimaryKeyMixin, text_enum, utcnow_column
-from app.models.enums import TreeRole
 from app.models.tree import Tree
 from app.models.user import User
 
