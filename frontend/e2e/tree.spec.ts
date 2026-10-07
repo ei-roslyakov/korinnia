@@ -9,7 +9,7 @@ async function openDemoTree(page: Page) {
   await page.getByLabel("Електронна пошта").fill(ADMIN_EMAIL);
   await page.getByLabel("Пароль").fill(ADMIN_PASSWORD);
   await page.getByRole("button", { name: "Увійти" }).click();
-  await page.getByRole("link", { name: DEMO_TREE }).click();
+  await page.getByRole("link", { name: new RegExp(DEMO_TREE.replace(/[()]/g, "\\$&")) }).click();
   await expect(page.getByRole("heading", { name: DEMO_TREE })).toBeVisible();
   // Other tests may add people to the shared demo tree in parallel.
   const count = page.getByText(/^Людей: \d+$/);

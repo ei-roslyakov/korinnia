@@ -970,9 +970,5 @@
     "light": "Jasny",
     "dark": "Ciemny",
     "sepia": "Archiwalny"
-  },
-  "footer": {
-    "rights": "Wszelkie prawa zastrzeżone",
-    "thirdParty": "Licencje komponentów zewnętrznych"
   }
 }

@@ -34,7 +34,7 @@ test("admin creates a tree and invites a relative who joins it", async ({ page }
   await page.getByRole("button", { name: "Новий родовід" }).click();
   await page.getByLabel("Назва").fill(treeName);
   await page.getByRole("button", { name: "Створити" }).click();
-  await page.getByRole("link", { name: treeName }).click();
+  await page.getByRole("link", { name: new RegExp(treeName) }).click();
   await expect(page.getByRole("heading", { name: treeName })).toBeVisible();
 
   // Invite a new relative as editor.
@@ -58,7 +58,7 @@ test("admin creates a tree and invites a relative who joins it", async ({ page }
 
   // They land on their tree list with the editor role and no admin access.
   await expect(page.getByRole("heading", { name: "Родоводи" })).toBeVisible();
-  const card = page.getByRole("link", { name: treeName });
+  const card = page.getByRole("link", { name: new RegExp(treeName) });
   await expect(card).toContainText("Редактор");
   await expect(page.getByRole("link", { name: "Адміністрування" })).toHaveCount(0);
 
