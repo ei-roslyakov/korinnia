@@ -2,12 +2,15 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 
-import { Badge, Card, ErrorAlert, PageHeader, Spinner } from "@/components/ui";
+import { Badge, ErrorAlert, PageHeader } from "@/components/ui";
 import { useStories } from "@/features/collab/api";
 import { useTree } from "@/features/tree/api";
 import { formatPartialDate } from "@/lib/dates";
 import type { StoryStatus } from "@/lib/genealogy";
 import { atLeast } from "@/lib/types";
+import { EmptyState } from "@/components/EmptyState";
+import { CardsSkeleton } from "@/components/Skeleton";
+import { Logo } from "@/components/Logo";
 
 const TABS: (StoryStatus | "all")[] = ["published", "pending_review", "draft"];
 
@@ -54,35 +57,50 @@ export function StoriesPage() {
           ))}
         </nav>
       )}
-      {stories.isPending && <Spinner />}
+      {stories.isPending && <CardsSkeleton count={2} label={t("common.loading")} />}
       <ErrorAlert error={stories.error} />
       {stories.data?.items.length === 0 && (
-        <p className="text-bark-700 text-sm">{t("collab.story.none")}</p>
+        <EmptyState title={t("collab.story.none")} hint={t("collab.story.noneHint")} />
       )}
-      <ul className="space-y-3">
+      <ul className="space-y-4">
         {stories.data?.items.map((s) => (
           <li key={s.id}>
-            <Card>
-              <Link
-                to={`/trees/${treeId}/stories/${s.id}`}
-                className="text-leaf-700 font-serif text-lg font-semibold hover:underline"
-              >
-                {s.title}
-              </Link>
-              <div className="text-bark-700 text-xs">
-                {[
-                  formatPartialDate(s.date, t, i18n.language),
-                  s.narrator && t("collab.story.toldBy", { name: s.narrator }),
-                  s.author?.display_name,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}{" "}
-                {s.status !== "published" && (
-                  <Badge tone="amber">{t(`collab.storyStatus.${s.status}`)}</Badge>
-                )}
+            <Link
+              to={`/trees/${treeId}/stories/${s.id}`}
+              className="group border-bark-100 bg-surface hover:border-leaf-600 flex gap-4 overflow-hidden rounded-lg border shadow-sm transition"
+            >
+              {s.cover_url ? (
+                <img
+                  src={s.cover_url}
+                  alt=""
+                  loading="lazy"
+                  className="h-32 w-28 shrink-0 object-cover sm:w-40"
+                />
+              ) : (
+                <div className="bg-bark-50 flex h-32 w-28 shrink-0 items-center justify-center sm:w-40">
+                  <Logo className="size-14 opacity-50" />
+                </div>
+              )}
+              <div className="min-w-0 py-3 pr-4">
+                <h2 className="text-leaf-700 font-serif text-xl font-semibold group-hover:underline">
+                  {s.title}
+                </h2>
+                <div className="text-bark-700 text-xs">
+                  {[
+                    formatPartialDate(s.date, t, i18n.language),
+                    s.narrator && t("collab.story.toldBy", { name: s.narrator }),
+                    s.author?.display_name,
+                    t("collab.story.readingTime", { count: s.reading_minutes ?? 1 }),
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}{" "}
+                  {s.status !== "published" && (
+                    <Badge tone="amber">{t(`collab.storyStatus.${s.status}`)}</Badge>
+                  )}
+                </div>
+                <p className="text-bark-900 mt-1 line-clamp-3 font-serif text-sm">{s.excerpt}</p>
               </div>
-              <p className="text-bark-700 mt-1 text-sm">{s.excerpt}</p>
-            </Card>
+            </Link>
           </li>
         ))}
       </ul>

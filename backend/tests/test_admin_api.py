@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 
+import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,6 +32,7 @@ async def test_user_crud(
     assert resp.status_code == 201
     user = resp.json()
     assert user["email"] == "taras@example.com"
+    assert user["preferred_language"] == "en"  # the installation default (DEFAULT_LANGUAGE)
     resp = await admin.post(
         "/api/v1/admin/users",
         json={"email": "taras@example.com", "display_name": "Dup", "password": "long-password-1"},
@@ -177,3 +179,27 @@ async def test_audit_log_filters(make_user: MakeUser, make_client: MakeClient) -
     actions = (await admin.get("/api/v1/admin/audit-log/actions")).json()
     assert "user.create" in actions
     assert (await admin.get("/api/v1/admin/audit-log?limit=500")).status_code == 422
+
+
+async def test_new_users_get_the_installation_language(
+    make_user: MakeUser, make_client: MakeClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.core.config import get_settings
+
+    admin, _ = await _admin(make_user, make_client)
+    monkeypatch.setattr(get_settings(), "default_language", "uk")
+    resp = await admin.post(
+        "/api/v1/admin/users",
+        json={"email": "olena@example.com", "display_name": "Олена", "password": "long-password-1"},
+    )
+    assert resp.json()["preferred_language"] == "uk"
+    resp = await admin.post(
+        "/api/v1/admin/users",
+        json={
+            "email": "anna@example.com",
+            "display_name": "Anna",
+            "password": "long-password-1",
+            "preferred_language": "pl",
+        },
+    )
+    assert resp.json()["preferred_language"] == "pl"  # an explicit choice wins

@@ -5,15 +5,16 @@ import { Link } from "react-router";
 import {
   Badge,
   Button,
-  Card,
   Dialog,
   ErrorAlert,
   Field,
   Input,
   PageHeader,
-  Spinner,
   TextArea,
 } from "@/components/ui";
+import { EmptyState } from "@/components/EmptyState";
+import { Logo } from "@/components/Logo";
+import { CardsSkeleton } from "@/components/Skeleton";
 import { useMe } from "@/features/auth/api";
 
 import { useCreateTree, useTrees } from "./api";
@@ -34,14 +35,18 @@ export function TreesPage() {
           )
         }
       />
-      {trees.isPending && <Spinner />}
+      {trees.isPending && <CardsSkeleton label={t("common.loading")} />}
       <ErrorAlert error={trees.error} />
       {trees.data?.length === 0 && (
-        <Card>
-          <p className="text-bark-700">
-            {me.data?.is_superadmin ? t("trees.emptyAdmin") : t("trees.empty")}
-          </p>
-        </Card>
+        <EmptyState
+          title={t("trees.emptyTitle")}
+          hint={me.data?.is_superadmin ? t("trees.emptyAdmin") : t("trees.empty")}
+          action={
+            me.data?.is_superadmin && (
+              <Button onClick={() => setCreating(true)}>{t("trees.create")}</Button>
+            )
+          }
+        />
       )}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {trees.data?.map((tree) => (
@@ -50,13 +55,36 @@ export function TreesPage() {
               to={`/trees/${tree.id}`}
               className="border-bark-100 hover:border-leaf-600 bg-surface block h-full rounded-lg border p-4 shadow-sm transition"
             >
-              <div className="mb-2 flex items-start justify-between gap-2">
-                <h2 className="font-serif text-lg font-semibold">{tree.name}</h2>
+              <div className="mb-3 flex items-start justify-between gap-2">
+                {tree.cover?.length ? (
+                  <div className="flex -space-x-3" aria-hidden="true">
+                    {tree.cover.map((url) => (
+                      <img
+                        key={url}
+                        src={url}
+                        alt=""
+                        loading="lazy"
+                        className="border-surface size-12 rounded-full border-2 object-cover shadow-sm"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Logo className="size-12" />
+                )}
                 <span className="flex shrink-0 gap-1">
                   {tree.is_demo && <Badge tone="amber">{t("trees.demo")}</Badge>}
                   <Badge>{t(`roles.${tree.my_role}`)}</Badge>
                 </span>
               </div>
+              <h2 className="font-serif text-lg font-semibold">{tree.name}</h2>
+              <p className="text-bark-700 mb-2 text-xs">
+                {[
+                  t("trees.people", { count: tree.person_count ?? 0 }),
+                  tree.first_year && tree.last_year && `${tree.first_year} – ${tree.last_year}`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
               {tree.description && (
                 <p className="text-bark-700 line-clamp-3 text-sm">{tree.description}</p>
               )}

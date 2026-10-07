@@ -15,6 +15,7 @@ import { atLeast, type Role } from "@/lib/types";
 import { MediaSections } from "@/features/media/MediaSections";
 
 import { Avatar } from "./Avatar";
+import { LifeBar } from "./LifeBar";
 
 export type PersonLink = (personId: string) => string;
 
@@ -52,15 +53,17 @@ function RelativeLink({
   note?: string;
 }) {
   return (
-    <li>
-      <Link to={to(person.id)} className="text-leaf-700 hover:underline">
-        {person.display_name}
-      </Link>
-      <span className="text-bark-700 text-sm">
-        {" "}
-        {lifeYears(person.birth, person.death, person.is_living)}
-        {note && ` · ${note}`}
-      </span>
+    <li className="flex items-center gap-2">
+      <Avatar name={person.display_name} gender={person.gender} url={person.avatar_url} size="sm" />
+      <div className="min-w-0">
+        <Link to={to(person.id)} className="text-leaf-700 block truncate hover:underline">
+          {person.display_name}
+        </Link>
+        <div className="text-bark-700 text-xs">
+          {lifeYears(person.birth, person.death, person.is_living)}
+          {note && ` · ${note}`}
+        </div>
+      </div>
     </li>
   );
 }
@@ -137,7 +140,7 @@ export function PersonView({
           name={person.display_name}
           gender={person.gender}
           url={person.avatar_url}
-          size="lg"
+          size="xl"
         />
         <div className="min-w-0 space-y-1">
           <h2 className="font-serif text-2xl leading-tight font-semibold">{person.display_name}</h2>
@@ -184,6 +187,8 @@ export function PersonView({
           </div>
         </div>
       </header>
+
+      <LifeBar person={person} />
 
       {facts.length > 0 && (
         <Section title={t("person.facts")}>
@@ -271,7 +276,7 @@ export function PersonView({
           {person.parents.length > 0 && (
             <div>
               <h4 className="text-sm font-medium">{t("person.parents")}</h4>
-              <ul className="text-sm">
+              <ul className="mt-1 space-y-1.5 text-sm">
                 {person.parents.map((r) => (
                   <RelativeLink
                     key={r.relationship_id}
@@ -286,7 +291,7 @@ export function PersonView({
           {person.partners.length > 0 && (
             <div>
               <h4 className="text-sm font-medium">{t("person.partners")}</h4>
-              <ul className="text-sm">
+              <ul className="mt-1 space-y-1.5 text-sm">
                 {person.partners.map((p) => (
                   <RelativeLink
                     key={p.partnership_id}
@@ -307,7 +312,7 @@ export function PersonView({
           {person.children.length > 0 && (
             <div>
               <h4 className="text-sm font-medium">{t("person.children")}</h4>
-              <ul className="text-sm">
+              <ul className="mt-1 space-y-1.5 text-sm">
                 {person.children.map((r) => (
                   <RelativeLink
                     key={r.relationship_id}
@@ -322,7 +327,7 @@ export function PersonView({
           {person.siblings.length > 0 && (
             <div>
               <h4 className="text-sm font-medium">{t("person.siblings")}</h4>
-              <ul className="text-sm">
+              <ul className="mt-1 space-y-1.5 text-sm">
                 {person.siblings.map((s) => (
                   <RelativeLink
                     key={s.person.id}

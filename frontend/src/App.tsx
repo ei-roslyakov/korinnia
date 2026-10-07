@@ -30,201 +30,204 @@ import { TreeViewPage } from "@/features/tree/TreeViewPage";
 import { TreesPage } from "@/features/tree/TreesPage";
 import { Spinner } from "@/components/ui";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { ToastProvider } from "@/components/Toast";
 
 // Leaflet and the map page load only when the map is opened.
 const MapPage = lazy(() => import("@/features/map/MapPage"));
 
 export function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        {/* Public */}
-        <Route path="login" element={<LoginPage />} />
-        <Route path="invite/:token" element={<AcceptInvitePage />} />
-        <Route path="reset-password/:token" element={<ResetPasswordPage />} />
+    <ToastProvider>
+      <Routes>
+        <Route element={<Layout />}>
+          {/* Public */}
+          <Route path="login" element={<LoginPage />} />
+          <Route path="invite/:token" element={<AcceptInvitePage />} />
+          <Route path="reset-password/:token" element={<ResetPasswordPage />} />
 
-        {/* Signed-in users */}
-        <Route
-          index
-          element={
-            <RequireAuth>
-              <TreesPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="profile"
-          element={
-            <RequireAuth>
-              <ProfilePage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId"
-          element={
-            <RequireAuth>
-              <TreeViewPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/people/:personId"
-          element={
-            <RequireAuth>
-              <PersonPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/people/:personId/edit"
-          element={
-            <RequireAuth>
-              <PersonEditorPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/sources"
-          element={
-            <RequireAuth>
-              <SourcesPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/stories"
-          element={
-            <RequireAuth>
-              <StoriesPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/stories/new"
-          element={
-            <RequireAuth>
-              <StoryEditorPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/stories/:storyId"
-          element={
-            <RequireAuth>
-              <StoryPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/stories/:storyId/edit"
-          element={
-            <RequireAuth>
-              <StoryEditorPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/moderation"
-          element={
-            <RequireAuth>
-              <ModerationPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/quality"
-          element={
-            <RequireAuth>
-              <QualityPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/timeline"
-          element={
-            <RequireAuth>
-              <TimelinePage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/map"
-          element={
-            <RequireAuth>
-              <Suspense fallback={<Spinner />}>
-                <MapPage />
-              </Suspense>
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/on-this-day"
-          element={
-            <RequireAuth>
-              <OnThisDayPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/relationship"
-          element={
-            <RequireAuth>
-              <RelationshipPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/stats"
-          element={
-            <RequireAuth>
-              <StatsPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/trash"
-          element={
-            <RequireAuth>
-              <TrashPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/members"
-          element={
-            <RequireAuth>
-              <MembersPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="trees/:treeId/audit"
-          element={
-            <RequireAuth>
-              <AuditLogPage />
-            </RequireAuth>
-          }
-        />
+          {/* Signed-in users */}
+          <Route
+            index
+            element={
+              <RequireAuth>
+                <TreesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <RequireAuth>
+                <ProfilePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId"
+            element={
+              <RequireAuth>
+                <TreeViewPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/people/:personId"
+            element={
+              <RequireAuth>
+                <PersonPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/people/:personId/edit"
+            element={
+              <RequireAuth>
+                <PersonEditorPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/sources"
+            element={
+              <RequireAuth>
+                <SourcesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/stories"
+            element={
+              <RequireAuth>
+                <StoriesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/stories/new"
+            element={
+              <RequireAuth>
+                <StoryEditorPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/stories/:storyId"
+            element={
+              <RequireAuth>
+                <StoryPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/stories/:storyId/edit"
+            element={
+              <RequireAuth>
+                <StoryEditorPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/moderation"
+            element={
+              <RequireAuth>
+                <ModerationPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/quality"
+            element={
+              <RequireAuth>
+                <QualityPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/timeline"
+            element={
+              <RequireAuth>
+                <TimelinePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/map"
+            element={
+              <RequireAuth>
+                <Suspense fallback={<Spinner />}>
+                  <MapPage />
+                </Suspense>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/on-this-day"
+            element={
+              <RequireAuth>
+                <OnThisDayPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/relationship"
+            element={
+              <RequireAuth>
+                <RelationshipPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/stats"
+            element={
+              <RequireAuth>
+                <StatsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/trash"
+            element={
+              <RequireAuth>
+                <TrashPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/members"
+            element={
+              <RequireAuth>
+                <MembersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/audit"
+            element={
+              <RequireAuth>
+                <AuditLogPage />
+              </RequireAuth>
+            }
+          />
 
-        {/* Superadmin */}
-        <Route
-          path="admin"
-          element={
-            <RequireAuth superadmin>
-              <AdminLayout />
-            </RequireAuth>
-          }
-        >
-          <Route index element={<Navigate to="users" replace />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="invitations" element={<InvitationsPage />} />
-          <Route path="audit" element={<AuditLogPage />} />
-          <Route path="system" element={<SystemPage />} />
+          {/* Superadmin */}
+          <Route
+            path="admin"
+            element={
+              <RequireAuth superadmin>
+                <AdminLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<Navigate to="users" replace />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="invitations" element={<InvitationsPage />} />
+            <Route path="audit" element={<AuditLogPage />} />
+            <Route path="system" element={<SystemPage />} />
+          </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
-
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
+      </Routes>
+    </ToastProvider>
   );
 }

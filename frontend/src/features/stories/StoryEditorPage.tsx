@@ -12,6 +12,7 @@ import { PersonCombobox } from "@/features/person/PersonCombobox";
 import { useTree } from "@/features/tree/api";
 import type { PartialDateInput as DateValue, MediaItem, Story } from "@/lib/genealogy";
 import { atLeast } from "@/lib/types";
+import { useToast } from "@/lib/toast";
 
 export function StoryEditorPage() {
   const { treeId = "", storyId } = useParams();
@@ -41,6 +42,7 @@ function StoryForm({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const save = useSaveStory(treeId);
+  const toast = useToast();
   const action = useStoryAction(treeId);
   const [title, setTitle] = useState(story?.title ?? "");
   const [narrator, setNarrator] = useState(story?.narrator ?? "");
@@ -64,6 +66,7 @@ function StoryForm({
       ...(story ? {} : { status: then === "publish" ? "published" : "draft" }),
     });
     clearDraft(draftKey);
+    toast(t("common.saved"));
     if (then === "submit" && saved.status === "draft")
       await action.mutateAsync({ id: saved.id, action: "submit" });
     if (then === "publish" && story && saved.status !== "published")

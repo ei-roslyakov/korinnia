@@ -428,3 +428,56 @@ export function hiddenRelatives(
     down: (rel.children.get(id) ?? []).some((e) => !included.has(e.child_id)),
   };
 }
+
+/** A person's own line: all ancestors, all descendants, and the partners of the person and
+ * of the descendants. Siblings, cousins and in-laws' families stay out. */
+export function lineage(rel: Relations, id: string): Set<string> {
+  const out = new Set<string>([id]);
+  for (const p of rel.partners.get(id) ?? []) out.add(p);
+  const walk = (start: string, next: (x: string) => string[]) => {
+    const queue = [start];
+    while (queue.length) {
+      for (const n of next(queue.shift()!)) {
+        if (!out.has(n)) {
+          out.add(n);
+          queue.push(n);
+        }
+      }
+    }
+  };
+  walk(id, (x) => (rel.parents.get(x) ?? []).map((e) => e.parent_id));
+  // Descendants: not through the ancestors already added, so siblings stay unlit.
+  const down = new Set<string>([id]);
+  const queue = [id];
+  while (queue.length) {
+    for (const e of rel.children.get(queue.shift()!) ?? []) {
+      if (!down.has(e.child_id)) {
+        down.add(e.child_id);
+        out.add(e.child_id);
+        // Their partners too, so each couple's branch stays lit.
+        for (const p of rel.partners.get(e.child_id) ?? []) out.add(p);
+        queue.push(e.child_id);
+      }
+    }
+  }
+  return out;
+}
+
+const ROMAN: [number, string][] = [
+  [10, "X"],
+  [9, "IX"],
+  [5, "V"],
+  [4, "IV"],
+  [1, "I"],
+];
+
+export function roman(n: number): string {
+  let out = "";
+  for (const [v, s] of ROMAN) {
+    while (n >= v) {
+      out += s;
+      n -= v;
+    }
+  }
+  return out;
+}

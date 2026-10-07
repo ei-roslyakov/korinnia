@@ -48,6 +48,9 @@ class StorySummary(BaseModel):
     author: UserRef | None
     person_ids: list[uuid.UUID]
     updated_at: datetime
+    # Thumbnail of the story's first photo or scan, for the story list.
+    cover_url: str | None = None
+    reading_minutes: int = 1
 
 
 class StoryOut(StorySummary):

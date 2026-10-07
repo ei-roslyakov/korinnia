@@ -1,12 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 
-import { ErrorAlert, Spinner } from "@/components/ui";
+import { ErrorAlert } from "@/components/ui";
 import { useTree } from "@/features/tree/api";
 import { atLeast } from "@/lib/types";
 
 import { usePerson } from "./api";
 import { PersonView } from "./PersonView";
+import { TextSkeleton } from "@/components/Skeleton";
 
 /** Full-page view of one person (shareable link, printable). */
 export function PersonPage() {
@@ -23,7 +24,7 @@ export function PersonPage() {
       >
         ← {t("person.backToTree")}
       </Link>
-      {person.isPending && <Spinner />}
+      {person.isPending && <TextSkeleton lines={6} label={t("common.loading")} />}
       <ErrorAlert error={person.error} />
       {person.data && (
         <PersonView

@@ -84,7 +84,8 @@ class InvitationInfo(BaseModel):
 class AcceptInvitationRequest(BaseModel):
     display_name: DisplayName
     password: NewPassword
-    preferred_language: Language = Language.uk
+    # Default: the installation's DEFAULT_LANGUAGE.
+    preferred_language: Language | None = None
 
 
 class PasswordResetInfo(BaseModel):

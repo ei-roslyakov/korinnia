@@ -321,3 +321,13 @@ Portraits are drawn deterministically with Pillow (supersampled, DejaVu fonts fo
 
 ### D80. X-Accel-Redirect only for requests that came through nginx (bug fix)
 Opening the app on the Vite dev server (`:5173`) showed every image broken: Vite proxies `/api` straight to the backend, which answered file requests with an empty body and `X-Accel-Redirect`, a header only nginx understands. nginx now adds `X-Media-Accel: 1` to everything it proxies to the API (overwriting any client value), and the backend hands files over only when that header is present. Otherwise (Vite, direct `:8000`, tests) it streams the file itself. Production behaviour is unchanged.
+
+### D81. English by default, configurable per installation
+`DEFAULT_LANGUAGE` (default `en`) sets the interface language for visitors who have not chosen one and the starting preference of new accounts. `/api/v1/meta` exposes it, so the frontend can switch to it on the first visit. An explicit choice wins over the default: the header switcher (remembered in the browser and, for signed-in users, in the profile). The end-to-end stack runs with `DEFAULT_LANGUAGE=uk`, because its tests are written against the Ukrainian interface.
+
+### D82. Visual polish without new dependencies (except fonts)
+- **Fonts:** Lora (headings) and Inter (text) are self-hosted from `@fontsource-variable`. They were named in CSS before but never loaded, so browsers fell back to whatever was installed. The Latin and Cyrillic subsets are split by `unicode-range`, so a page downloads only what it uses. The CSP (`font-src 'self'`) needs no change.
+- **Tree:** cards carry a gender accent, † and a hover preview. Hovering or selecting a person highlights their line: ancestors, descendants and partners (`lineage()` in `familyGraph.ts`). Each row is labelled with its generation (Roman numerals, counted from the oldest) and the decade of its median birth year.
+- **Overviews come from the API:** the tree list's portraits, people count and years covered (three grouped queries for all trees), and each story's cover thumbnail and reading time (180 words per minute).
+- **Historical context on the timeline** is a static list in the frontend (`features/insights/history.ts`), shown only within the years the family's facts cover. It is context, not data, so it is never stored or exported.
+- **Feedback:** toasts (`useToast`, polite live region) replace inline "saved" messages; loading placeholders replace spinners where the page shape is known; the side panel and toasts animate only with `motion-safe`.

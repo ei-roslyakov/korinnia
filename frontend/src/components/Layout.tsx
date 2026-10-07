@@ -1,10 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useMatch, useNavigate } from "react-router";
 
 import { useLogout, useMe } from "@/features/auth/api";
+import { hadStoredLanguage } from "@/i18n";
+import { getMeta } from "@/lib/api";
 
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { Logo } from "./Logo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export function Layout() {
@@ -21,6 +25,19 @@ export function Layout() {
     if (preferred && preferred !== i18n.resolvedLanguage) void i18n.changeLanguage(preferred);
   }, [preferred, i18n]);
 
+  // Visitors who never chose a language get the installation default (DEFAULT_LANGUAGE).
+  const meta = useQuery({
+    queryKey: ["meta"],
+    queryFn: getMeta,
+    staleTime: Infinity,
+    retry: false,
+  });
+  const installDefault = meta.data?.default_language;
+  useEffect(() => {
+    if (preferred || hadStoredLanguage || !installDefault) return;
+    if (installDefault !== i18n.resolvedLanguage) void i18n.changeLanguage(installDefault);
+  }, [installDefault, preferred, i18n]);
+
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `text-sm ${isActive ? "font-semibold text-leaf-700" : "text-bark-700 hover:text-bark-900"}`;
 
@@ -29,7 +46,11 @@ export function Layout() {
       <header className="border-bark-100 bg-surface border-b">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3 print:hidden">
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-leaf-700 font-serif text-xl font-semibold">
+            <Link
+              to="/"
+              className="text-leaf-700 flex items-center gap-2 font-serif text-xl font-semibold"
+            >
+              <Logo className="size-9 shrink-0" />
               {t("app.name")}
             </Link>
             {me.data && (

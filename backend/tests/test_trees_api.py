@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from collections.abc import Awaitable, Callable
 from typing import Any
 
@@ -8,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import AuditLog, Tree, TreeRole, User
 from tests.conftest import ApiClient
+from tests.helpers import Ctx
 
 MakeUser = Callable[..., Awaitable[User]]
 MakeClient = Callable[[], Awaitable[ApiClient]]
@@ -183,3 +185,20 @@ async def test_accepting_invitation_for_deleted_tree_fails(
     ).status_code == 404
     assert TreeRole.admin.at_least(TreeRole.editor)
     assert not TreeRole.viewer.at_least(TreeRole.contributor)
+
+
+async def test_tree_list_overview(ctx: Ctx, session: AsyncSession) -> None:
+    from app.models import Person
+
+    a = await ctx.person("Іван", birth={"date": {"year": 1890}})
+    await ctx.person("Марія", birth={"date": {"year": 1925}}, death={"date": {"year": 1990}})
+    row = await session.get(Person, uuid.UUID(a["id"]))
+    assert row is not None
+    row.avatar_key = f"avatars/{ctx.tree.id}/{a['id']}/x.webp"
+    await session.commit()
+
+    trees = (await ctx.editor.get("/api/v1/trees")).json()
+    t = next(x for x in trees if x["id"] == str(ctx.tree.id))
+    assert (t["person_count"], t["first_year"], t["last_year"]) == (2, 1890, 1990)
+    assert len(t["cover"]) == 1
+    assert t["cover"][0].startswith(f"/api/v1/trees/{ctx.tree.id}/persons/{a['id']}/avatar")

@@ -3,7 +3,7 @@ import { memo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/features/person/Avatar";
-import { lifeYears } from "@/lib/dates";
+import { formatPartialDate, lifeYears } from "@/lib/dates";
 import type { PersonSummary, RelativeRelation } from "@/lib/genealogy";
 
 import { FAMILY_SIZE, PERSON_HEIGHT, PERSON_WIDTH } from "./familyGraph";
@@ -22,26 +22,56 @@ export type FamilyFlowNode = Node<Record<string, never>, "family">;
 
 const hidden = "!h-1 !w-1 !min-h-0 !min-w-0 !border-0 !bg-transparent";
 
+// A thin accent on the left of each card (pastel, readable in every theme).
+const ACCENT: Record<string, string> = {
+  male: "border-l-sky-400",
+  female: "border-l-rose-400",
+  other: "border-l-violet-400",
+  unknown: "border-l-stone-400",
+};
+
 export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { person, highlighted, hiddenUp, hiddenDown, onAdd } = data;
   const ring = highlighted || selected ? "ring-2 ring-leaf-600" : "";
+  const died = Boolean(person.death) || !person.is_living;
+  const dates = [
+    person.birth && `${t("person.born")}: ${formatPartialDate(person.birth, t, i18n.language)}`,
+    person.death && `${t("person.died")}: ${formatPartialDate(person.death, t, i18n.language)}`,
+  ].filter(Boolean);
   return (
     <div
       style={{ width: PERSON_WIDTH, height: PERSON_HEIGHT }}
-      className={`border-bark-100 bg-surface relative flex cursor-pointer items-center gap-3 rounded-lg border px-3 shadow-sm transition-shadow hover:shadow-md ${ring}`}
+      className={`group border-bark-100 bg-surface relative flex cursor-pointer items-center gap-2.5 rounded-lg border border-l-4 pr-2 pl-2 shadow-sm transition-shadow hover:shadow-md ${ACCENT[person.gender] ?? ACCENT.unknown} ${ring}`}
       data-testid="person-card"
-      title={person.display_name}
     >
       {/* The tree grows upwards: the link from the parents arrives at the bottom of a card,
           links to the person's own family leave from the top. */}
       <Handle type="target" position={Position.Bottom} className={hidden} isConnectable={false} />
-      <Avatar name={person.display_name} gender={person.gender} url={person.avatar_url} size="sm" />
+      <Avatar name={person.display_name} gender={person.gender} url={person.avatar_url} size="md" />
       <div className="min-w-0">
         <div className="line-clamp-2 text-sm leading-tight font-medium">{person.display_name}</div>
         <div className="text-bark-700 text-xs">
           {lifeYears(person.birth, person.death, person.is_living)}
+          {died && person.death && (
+            <span className="ml-1" aria-hidden="true">
+              †
+            </span>
+          )}
         </div>
+      </div>
+      {/* Hover preview with the full name, dates and birthplace. */}
+      <div
+        role="tooltip"
+        className="border-bark-100 bg-surface pointer-events-none invisible absolute top-full left-1/2 z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border p-3 text-left opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100"
+      >
+        <div className="font-serif text-sm font-semibold">{person.display_name}</div>
+        {dates.map((d) => (
+          <div key={d as string} className="text-bark-700 text-xs">
+            {d}
+          </div>
+        ))}
+        {person.birth_place && <div className="text-bark-700 text-xs">📍 {person.birth_place}</div>}
       </div>
       {onAdd && <AddButtons personId={person.id} onAdd={onAdd} />}
       {!onAdd && hiddenUp && (
@@ -206,5 +236,21 @@ export const GroundNode = memo(function GroundNode({ data }: NodeProps<GroundFlo
         </g>
       ))}
     </svg>
+  );
+});
+
+export interface RowLabelData extends Record<string, unknown> {
+  generation: string;
+  period: string | null;
+}
+export type RowLabelFlowNode = Node<RowLabelData, "rowLabel">;
+
+/** "III покоління · 1910-ті" at the left of each generation row. Decorative. */
+export const RowLabelNode = memo(function RowLabelNode({ data }: NodeProps<RowLabelFlowNode>) {
+  return (
+    <div className="text-bark-700 pointer-events-none w-48 text-right leading-tight select-none">
+      <div className="font-serif text-sm font-semibold">{data.generation}</div>
+      {data.period && <div className="text-xs opacity-80">{data.period}</div>}
+    </div>
   );
 });

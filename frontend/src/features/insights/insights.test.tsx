@@ -127,6 +127,13 @@ describe("timeline", () => {
     expect(await screen.findByRole("heading", { name: "1990-ті" })).toBeInTheDocument();
     expect(calls.at(-1)).toContain("offset=2");
 
+    // Historical context between the family's first and last facts, and it can be hidden.
+    expect(screen.getByText("Голодомор — штучний голод, геноцид українців")).toBeInTheDocument();
+    expect(screen.getByText("Друга світова війна")).toBeInTheDocument();
+    expect(screen.queryByText("Перша світова війна")).not.toBeInTheDocument(); // before 1923
+    await userEvent.click(screen.getByRole("checkbox", { name: "Показувати історичні події" }));
+    expect(screen.queryByText("Друга світова війна")).not.toBeInTheDocument();
+
     await userEvent.click(screen.getByRole("button", { name: "Смерть і поховання" }));
     expect(calls.at(-1)).toContain("type=death&type=burial");
   });

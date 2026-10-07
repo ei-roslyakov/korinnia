@@ -348,6 +348,8 @@ export interface StorySummary {
   author: UserRef | null;
   person_ids: string[];
   updated_at: string;
+  cover_url?: string | null;
+  reading_minutes?: number;
 }
 
 export interface Story extends StorySummary {

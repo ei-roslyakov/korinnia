@@ -1,3 +1,7 @@
+// Self-hosted variable fonts (Latin, Cyrillic and more; the browser loads only the subsets a
+// page needs). Imported before our CSS so the font families exist when it references them.
+import "@fontsource-variable/inter";
+import "@fontsource-variable/lora";
 import "./index.css";
 import "./i18n";
 

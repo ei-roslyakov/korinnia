@@ -11,6 +11,8 @@ import type { Source } from "@/lib/genealogy";
 import { atLeast } from "@/lib/types";
 
 import { SourceDialog } from "./SourceDialog";
+import { EmptyState } from "@/components/EmptyState";
+import { TextSkeleton } from "@/components/Skeleton";
 
 export function SourcesPage() {
   const { t } = useTranslation();
@@ -45,10 +47,10 @@ export function SourcesPage() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
-      {sources.isPending && <Spinner />}
+      {sources.isPending && <TextSkeleton label={t("common.loading")} />}
       <ErrorAlert error={sources.error ?? del.error} />
       {sources.data?.items.length === 0 && (
-        <p className="text-bark-700 text-sm">{t("collab.sourcesPage.none")}</p>
+        <EmptyState title={t("collab.sourcesPage.none")} hint={t("collab.sourcesPage.noneHint")} />
       )}
       <ul className="space-y-2">
         {sources.data?.items.map((s) => (

@@ -18,9 +18,14 @@ export function Avatar({
   name: string;
   gender: Gender;
   url?: string | null;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }) {
-  const sizes = { sm: "size-10 text-sm", md: "size-12 text-base", lg: "size-20 text-2xl" };
+  const sizes = {
+    sm: "size-10 text-sm",
+    md: "size-12 text-base",
+    lg: "size-20 text-2xl",
+    xl: "size-28 text-4xl",
+  };
   if (url) {
     return (
       <img

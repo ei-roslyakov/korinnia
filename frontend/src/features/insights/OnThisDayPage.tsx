@@ -1,12 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router";
 
-import { Card, ErrorAlert, Input, PageHeader, Select, Spinner } from "@/components/ui";
+import { Card, ErrorAlert, Input, PageHeader, Select } from "@/components/ui";
 import { localIsoDate } from "@/lib/dates";
 import type { Anniversary } from "@/lib/genealogy";
 
 import { useOnThisDay } from "./api";
 import { FactLine } from "./FactLine";
+import { EmptyState } from "@/components/EmptyState";
+import { TextSkeleton } from "@/components/Skeleton";
 
 const RANGES = [0, 7, 30] as const;
 
@@ -72,12 +74,13 @@ export function OnThisDayPage() {
       </div>
       <p className="text-bark-700 text-xs">{t("insights.onThisDay.hint")}</p>
 
-      {data.isPending && <Spinner />}
+      {data.isPending && <TextSkeleton lines={3} label={t("common.loading")} />}
       <ErrorAlert error={data.error} />
       {data.data && byDay.length === 0 && (
-        <Card>
-          <p className="text-bark-700 text-sm">{t("insights.onThisDay.empty")}</p>
-        </Card>
+        <EmptyState
+          title={t("insights.onThisDay.empty")}
+          hint={t("insights.onThisDay.emptyHint")}
+        />
       )}
       {byDay.map(([day, items]) => (
         <Card key={day} className="space-y-2">

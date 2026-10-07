@@ -12,7 +12,7 @@ import {
   type Node,
   type NodeChange,
 } from "@xyflow/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Spinner } from "@/components/ui";
@@ -28,7 +28,10 @@ import {
   hiddenRelatives,
   indexRelations,
   junctionY,
+  lineage,
+  roman,
   toElkGraph,
+  type Family,
 } from "./familyGraph";
 import { computeLayout } from "./layout";
 import { BRANCH, BRANCH_COLOR, GROUND_HEIGHT, TRUNK_REACH, branchWidth } from "./treeStyle";
@@ -85,6 +88,18 @@ function CanvasInner({
   const { theme } = useTheme();
   const rf = useReactFlow();
   const rel = useMemo(() => indexRelations(graph), [graph]);
+  // The person whose line is highlighted: the one under the pointer, else the selected one.
+  const [hovered, setHovered] = useState<string | null>(null);
+  const focusPerson = hovered ?? selectedId ?? null;
+  const lit = useMemo(() => (focusPerson ? lineage(rel, focusPerson) : null), [rel, focusPerson]);
+  /** A family junction on the highlighted line (or nothing highlighted). */
+  const familyLit = useCallback(
+    (f: Family) =>
+      !lit ||
+      (f.parents.some((p) => lit.has(p)) &&
+        (f.children.some((c) => lit.has(c.id)) || f.parents.includes(focusPerson ?? ""))),
+    [lit, focusPerson],
+  );
   const families = useMemo(() => buildFamilies(graph, included), [graph, included]);
   const personIds = useMemo(
     () => graph.persons.filter((p) => included.has(p.id)).map((p) => p.id),
@@ -136,6 +151,36 @@ function CanvasInner({
     if (!pos) return [];
     const byId = new Map(graph.persons.map((p) => [p.id, p]));
     const moved = (id: string) => Boolean(offsets?.[id] || dragging[id]);
+    // "III покоління · 1910-ті" beside each row (rows counted from the oldest, at the bottom).
+    const rowLabels = (): Node[] => {
+      const placed = personIds.filter((id) => personPos[id]);
+      if (!placed.length) return [];
+      const left = Math.min(...placed.map((id) => personPos[id]!.x)) - 230;
+      const rows = [...new Set(placed.map((id) => personPos[id]!.y))].sort((a, b) => b - a);
+      return rows.map((y, i) => {
+        const years = placed
+          .filter((id) => personPos[id]!.y === y)
+          .map((id) => byId.get(id)?.birth?.year)
+          .filter((v): v is number => typeof v === "number")
+          .sort((a, b) => a - b);
+        const median = years[Math.floor(years.length / 2)];
+        return {
+          id: `row:${i}`,
+          type: "rowLabel",
+          position: { x: left, y: y + PERSON_HEIGHT / 2 - 18 },
+          selectable: false,
+          draggable: false,
+          focusable: false,
+          data: {
+            generation: t("canvas.generationRow", { n: roman(i + 1) }),
+            period:
+              median !== undefined
+                ? t("insights.timeline.decade", { decade: Math.floor(median / 10) * 10 })
+                : null,
+          },
+        };
+      });
+    };
     // Soil under the oldest generation, with a trunk under each founding couple.
     const groundNodes = (): Node[] => {
       const placed = personIds.map((id) => personPos[id]).filter(Boolean) as XY[];
@@ -181,6 +226,7 @@ function CanvasInner({
           initialHeight: PERSON_HEIGHT,
           selected: id === selectedId,
           draggable: builder,
+          style: { opacity: lit && !lit.has(id) ? 0.3 : 1, transition: "opacity 150ms" },
           data: {
             person: byId.get(id)!,
             highlighted: id === center?.personId,
@@ -218,6 +264,7 @@ function CanvasInner({
           id: f.id,
           type: "family",
           position,
+          style: { opacity: familyLit(f) ? 1 : 0.3, transition: "opacity 150ms" },
           initialWidth: FAMILY_SIZE,
           initialHeight: FAMILY_SIZE,
           selectable: false,
@@ -225,7 +272,7 @@ function CanvasInner({
           data: {},
         };
       });
-    return [...groundNodes(), ...personNodes, ...familyNodes];
+    return [...groundNodes(), ...rowLabels(), ...personNodes, ...familyNodes];
   }, [
     layout.data,
     graph,
@@ -241,6 +288,9 @@ function CanvasInner({
     onAddRelative,
     offsets,
     dragging,
+    lit,
+    familyLit,
+    t,
   ]);
 
   const onNodesChange = (changes: NodeChange[]) => {
@@ -274,13 +324,18 @@ function CanvasInner({
       families.flatMap((f) => {
         const rank = Math.min(...f.parents.map(rankOf));
         const branch = { stroke: BRANCH, strokeLinecap: "round" as const };
+        const on = familyLit(f);
         return [
           ...f.parents.map((p) => ({
             id: `${p}->${f.id}`,
             source: p,
             target: f.id,
             type: "default",
-            style: { ...branch, strokeWidth: branchWidth(rank) },
+            style: {
+              ...branch,
+              strokeWidth: branchWidth(rank),
+              strokeOpacity: on && (!lit || lit.has(p)) ? 1 : 0.18,
+            },
           })),
           ...f.children.map((c) => ({
             id: `${f.id}->${c.id}`,
@@ -291,11 +346,12 @@ function CanvasInner({
               ...branch,
               strokeWidth: branchWidth(rank + 0.5),
               strokeDasharray: c.type === "biological" ? undefined : "6 5",
+              strokeOpacity: on && (!lit || lit.has(c.id)) ? 1 : 0.18,
             },
           })),
         ];
       }),
-    [families, rankOf],
+    [families, rankOf, familyLit, lit],
   );
 
   // Fit the whole tree once (first layout); afterwards only move the view on explicit
@@ -344,6 +400,8 @@ function CanvasInner({
       edges={edges}
       nodeTypes={nodeTypes}
       onNodeClick={(_, node) => node.type === "person" && onSelectPerson(node.id)}
+      onNodeMouseEnter={(_, node) => node.type === "person" && setHovered(node.id)}
+      onNodeMouseLeave={() => setHovered(null)}
       onNodesChange={onNodesChange}
       onNodeDragStop={onNodeDragStop}
       nodesDraggable={builder}

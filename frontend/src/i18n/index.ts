@@ -14,7 +14,19 @@ export const SUPPORTED_LANGUAGES = [
 
 export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number]["code"];
 
-export const DEFAULT_LANGUAGE: LanguageCode = "uk";
+/** Before the server says otherwise (DEFAULT_LANGUAGE in /api/v1/meta). */
+export const DEFAULT_LANGUAGE: LanguageCode = "en";
+
+const LANGUAGE_KEY = "korinnia.lang";
+
+/** Whether this browser had an explicit language choice before the app started. */
+export const hadStoredLanguage = (() => {
+  try {
+    return localStorage.getItem(LANGUAGE_KEY) !== null;
+  } catch {
+    return false;
+  }
+})();
 
 void i18n
   .use(LanguageDetector)
@@ -25,9 +37,10 @@ void i18n
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     interpolation: { escapeValue: false },
     detection: {
-      // Explicit choice (localStorage) wins; otherwise Ukrainian by default, not the browser locale.
+      // Explicit choice (localStorage) wins; otherwise the installation default, not the
+      // browser locale.
       order: ["localStorage"],
-      lookupLocalStorage: "korinnia.lang",
+      lookupLocalStorage: LANGUAGE_KEY,
       caches: ["localStorage"],
     },
   });

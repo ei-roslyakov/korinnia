@@ -5,6 +5,7 @@ import { Button, Dialog, ErrorAlert, Field, Input, Select, TextArea } from "@/co
 import { useSaveSource } from "@/features/collab/api";
 import { MediaAttach } from "@/features/media/MediaAttach";
 import { SOURCE_TYPES, type MediaItem, type Source, type SourceType } from "@/lib/genealogy";
+import { useToast } from "@/lib/toast";
 
 export function SourceDialog({
   treeId,
@@ -21,6 +22,7 @@ export function SourceDialog({
 }) {
   const { t } = useTranslation();
   const save = useSaveSource(treeId);
+  const toast = useToast();
   const [v, setV] = useState({
     title: source?.title ?? initialTitle,
     type: (source?.type ?? "archive_document") as SourceType,
@@ -49,7 +51,13 @@ export function SourceDialog({
         notes: orNull(v.notes),
         media_ids: media.map((m) => m.id),
       },
-      { onSuccess: (s) => (onSaved ? onSaved(s) : onClose()) },
+      {
+        onSuccess: (s) => {
+          toast(t("common.saved"));
+          if (onSaved) onSaved(s);
+          else onClose();
+        },
+      },
     );
   };
 

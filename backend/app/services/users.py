@@ -77,7 +77,7 @@ async def create_user(
     email: str,
     display_name: str,
     password: str | None,
-    preferred_language: Language = Language.uk,
+    preferred_language: Language | None = None,
     is_superadmin: bool = False,
     actor: Actor,
     commit: bool = True,
@@ -88,7 +88,7 @@ async def create_user(
         email=email.strip().lower(),
         display_name=display_name.strip(),
         password_hash=hash_password(password) if password else None,
-        preferred_language=preferred_language,
+        preferred_language=preferred_language or get_settings().default_language,
         is_superadmin=is_superadmin,
     )
     session.add(user)
@@ -340,7 +340,7 @@ async def accept_invitation(
     *,
     display_name: str,
     password: str,
-    preferred_language: Language,
+    preferred_language: Language | None,
     actor: Actor,
 ) -> User:
     inv = await get_valid_invitation(session, token)

@@ -20,6 +20,11 @@ class TreeOut(Schema):
     updated_at: datetime
     my_role: TreeRole
     is_demo: bool = False
+    # Overview for the tree list (only filled there).
+    person_count: int = 0
+    first_year: int | None = None
+    last_year: int | None = None
+    cover: list[str] = Field(default_factory=list)  # up to four portrait URLs
 
 
 class CreateTreeRequest(BaseModel):

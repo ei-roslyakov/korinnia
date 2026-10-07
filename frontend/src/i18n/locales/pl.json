@@ -22,7 +22,8 @@
     "link": "Link",
     "previous": "Poprzednia",
     "next": "Następna",
-    "range": "{{from}}–{{to}} z {{total}}"
+    "range": "{{from}}–{{to}} z {{total}}",
+    "loading": "Ładowanie…"
   },
   "status": {
     "title": "Stan systemu",
@@ -105,7 +106,12 @@
     "settings": "Ustawienia drzewa",
     "delete": "Usuń drzewo",
     "confirmDelete": "Usunąć drzewo „{{name}}”? Zostanie ukryte dla wszystkich (dane są zachowane i można je przywrócić).",
-    "demo": "Demo"
+    "demo": "Demo",
+    "emptyTitle": "Tu wyrośnie wasze drzewo",
+    "people_one": "{{count}} osoba",
+    "people_few": "{{count}} osoby",
+    "people_many": "{{count}} osób",
+    "people_other": "{{count}} osoby"
   },
   "members": {
     "title": "Członkowie",
@@ -271,7 +277,7 @@
     "generations": "Pokolenia",
     "fit": "Dopasuj do ekranu",
     "empty": "To drzewo nie ma jeszcze żadnych osób.",
-    "emptyHint": "Osoby będzie można dodać w trybie edycji (następny etap) lub zaimportować z pliku GEDCOM.",
+    "emptyHint": "Osoby pojawią się tutaj, gdy redaktor doda pierwszą.",
     "layouting": "Układanie drzewa…",
     "focusHere": "Skup się tutaj",
     "openPage": "Otwórz stronę",
@@ -283,7 +289,9 @@
     "minimap": "Mapa poglądowa",
     "controls": "Powiększenie",
     "zoomIn": "Powiększ",
-    "zoomOut": "Pomniejsz"
+    "zoomOut": "Pomniejsz",
+    "generationRow": "{{n}} pokolenie",
+    "emptyHintEditor": "Zacznij od siebie, rodziców albo najdawniejszego znanego przodka — drzewo wyrośnie stamtąd."
   },
   "person": {
     "names": "Imiona i nazwiska",
@@ -319,7 +327,13 @@
     "researchStatus": "Badania",
     "noBiography": "Biografia nie została jeszcze napisana.",
     "writeBiography": "Napisz biografię",
-    "suggestBiography": "Zaproponuj biografię"
+    "suggestBiography": "Zaproponuj biografię",
+    "lifeBar": "Życie od {{from}} do {{to}}",
+    "today": "dziś",
+    "yearsLived_one": "{{count}} rok",
+    "yearsLived_few": "{{count}} lata",
+    "yearsLived_many": "{{count}} lat",
+    "yearsLived_other": "{{count}} roku"
   },
   "gender": {
     "male": "Mężczyzna",
@@ -704,7 +718,8 @@
       "none": "Brak źródeł.",
       "citations": "Cytowań: {{count}}",
       "confirmDelete": "Przenieść źródło i wszystkie jego cytowania do kosza?",
-      "scans": "Skany i pliki źródła"
+      "scans": "Skany i pliki źródła",
+      "noneHint": "Metryki, spisy, listy, akta archiwalne: dodaj źródło, by potwierdzić fakty w drzewie."
     },
     "cite": {
       "hint": "Dodaj źródła potwierdzające informacje o tej osobie.",
@@ -736,7 +751,12 @@
       "body": "Historia",
       "saveDraft": "Zapisz szkic",
       "moderationNote": "Historia zostanie opublikowana po przeglądzie redaktora.",
-      "media": "Zdjęcia i dokumenty"
+      "media": "Zdjęcia i dokumenty",
+      "noneHint": "Zapisz wspomnienie: jak poznali się dziadkowie, gdzie mieszkała rodzina, co gotowano na święta.",
+      "readingTime_one": "{{count}} min czytania",
+      "readingTime_few": "{{count}} min czytania",
+      "readingTime_many": "{{count}} min czytania",
+      "readingTime_other": "{{count}} min czytania"
     },
     "moderation": {
       "title": "Moderacja",
@@ -832,7 +852,8 @@
       "undated_one": "{{count}} wydarzenie bez daty nie jest pokazane.",
       "undated_few": "{{count}} wydarzenia bez daty nie są pokazane.",
       "undated_many": "{{count}} wydarzeń bez daty nie jest pokazanych.",
-      "undated_other": "{{count}} wydarzenia bez daty nie są pokazane."
+      "undated_other": "{{count}} wydarzenia bez daty nie są pokazane.",
+      "emptyHint": "Dodaj daty urodzin, ślubów i innych wydarzeń — a tu powstanie historia rodziny."
     },
     "onThisDay": {
       "title": "Tego dnia",
@@ -849,7 +870,8 @@
       "yearsAgo_one": "{{count}} rok temu",
       "yearsAgo_few": "{{count}} lata temu",
       "yearsAgo_many": "{{count}} lat temu",
-      "yearsAgo_other": "{{count}} roku temu"
+      "yearsAgo_other": "{{count}} roku temu",
+      "emptyHint": "Wybierz inną datę lub cały tydzień — pojawią się tu urodziny, rocznice i dni pamięci."
     },
     "map": {
       "title": "Mapa rodziny",
@@ -921,6 +943,19 @@
       "births": "Urodzenia",
       "deaths": "Zgony",
       "none": "Brak danych."
+    },
+    "history": {
+      "show": "Pokaż wydarzenia historyczne",
+      "emancipation": "Uwłaszczenie chłopów w Imperium Rosyjskim",
+      "ww1": "I wojna światowa",
+      "revolution": "Rewolucja ukraińska i walka o niepodległość",
+      "holodomor": "Hołodomor — sztuczny głód, ludobójstwo Ukraińców",
+      "ww2": "II wojna światowa",
+      "famine1947": "Głód lat 1946–1947",
+      "chornobyl": "Katastrofa w Czarnobylu",
+      "independence": "Ukraina ogłasza niepodległość",
+      "dignity": "Rewolucja Godności; początek rosyjskiej agresji",
+      "invasion": "Pełnoskalowa inwazja Rosji na Ukrainę"
     }
   },
   "theme": {

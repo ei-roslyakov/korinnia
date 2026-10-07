@@ -6,8 +6,8 @@
  * redefines these variables. `inline` makes utilities read the variables at runtime.
  */
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Lora", ui-serif, Georgia, serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Lora Variable", ui-serif, Georgia, serif;
   --color-bark-50: var(--k-bark-50);
   --color-bark-100: var(--k-bark-100);
   --color-bark-700: var(--k-bark-700);
@@ -84,6 +84,12 @@
   --k-branch: #7a5638;
   --k-grass: #a3b86c;
   --k-soil: #8a6a48;
+
+  /* Logo */
+  --k-logo-leaf: #4d7c0f;
+  --k-logo-leaf-light: #84b53a;
+  --k-logo-trunk: #7a5638;
+  --k-logo-ground: #a3b86c;
 }
 
 /* Dark: warm charcoal, light text, a brighter leaf green with dark text on it. */
@@ -126,6 +132,11 @@
   --k-branch: #b08a62;
   --k-grass: #4f6b2a;
   --k-soil: #6b4f34;
+
+  --k-logo-leaf: #79b347;
+  --k-logo-leaf-light: #a8d878;
+  --k-logo-trunk: #c49a6c;
+  --k-logo-ground: #5d7a35;
 }
 
 /* Archive: parchment and sepia ink, like an old family album. */
@@ -145,6 +156,12 @@
   --k-branch: #6b4a2b;
   --k-grass: #9c8a4e;
   --k-soil: #7a5a3a;
+
+  /* Olive foliage on parchment, like a hand-tinted engraving. */
+  --k-logo-leaf: #6b6a2e;
+  --k-logo-leaf-light: #959248;
+  --k-logo-trunk: #6b4a2b;
+  --k-logo-ground: #9c8a4e;
 }
 
 html,
@@ -155,6 +172,25 @@ body,
 
 body {
   @apply bg-bark-50 text-bark-900 antialiased;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+/* A hovered card (and its preview) stays above its neighbours on the tree. */
+.react-flow__node-person:hover {
+  z-index: 1000 !important;
 }
 
 /* Darker map tiles in the dark theme. */

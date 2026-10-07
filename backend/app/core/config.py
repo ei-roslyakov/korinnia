@@ -10,6 +10,8 @@ from urllib.parse import quote
 from pydantic import Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.enums import Language
+
 
 class Settings(BaseSettings):
     # ../.env lets backend tools run from backend/ on the host with the repo-root .env.
@@ -56,6 +58,10 @@ class Settings(BaseSettings):
     # --- Bootstrap ----------------------------------------------------------------
     superadmin_email: str | None = None
     superadmin_password: SecretStr | None = None
+
+    # --- Language -----------------------------------------------------------------
+    # Interface language for visitors who have not chosen one, and for new accounts.
+    default_language: Language = Language.en
 
     # --- Demo ---------------------------------------------------------------------
     # Give every new account its own copy of the fictional demo family to explore.

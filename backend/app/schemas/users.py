@@ -25,7 +25,8 @@ class CreateUserRequest(BaseModel):
     email: Email
     display_name: DisplayName
     password: NewPassword
-    preferred_language: Language = Language.uk
+    # Default: the installation's DEFAULT_LANGUAGE.
+    preferred_language: Language | None = None
     is_superadmin: bool = False
 
 

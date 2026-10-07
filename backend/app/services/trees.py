@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import uuid
+from dataclasses import dataclass, field
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import aliased, selectinload
 
 from app.core.errors import AppError, NotFoundError
 from app.core.security import utcnow
@@ -218,3 +219,57 @@ async def remove_member(session: AsyncSession, membership: TreeMembership, actor
     )
     await session.delete(membership)
     await session.commit()
+
+
+@dataclass(slots=True)
+class Overview:
+    person_count: int = 0
+    first_year: int | None = None
+    last_year: int | None = None
+    cover: list[str] = field(default_factory=list)
+
+
+COVER_SIZE = 4
+
+
+async def overviews(session: AsyncSession, tree_ids: list[uuid.UUID]) -> dict[uuid.UUID, Overview]:
+    """People count, years covered and a few portraits per tree, in three queries."""
+    from app.models import Event, Person
+    from app.services.genealogy.media_urls import avatar_url
+
+    out = {tid: Overview() for tid in tree_ids}
+    if not tree_ids:
+        return out
+    for tid, count in await session.execute(
+        select(Person.tree_id, func.count())
+        .where(Person.tree_id.in_(tree_ids), Person.deleted_at.is_(None))
+        .group_by(Person.tree_id)
+    ):
+        out[tid].person_count = count
+    for tid, first, last in await session.execute(
+        select(Event.tree_id, func.min(Event.date_sort), func.max(Event.date_sort))
+        .where(Event.tree_id.in_(tree_ids), Event.deleted_at.is_(None))
+        .group_by(Event.tree_id)
+    ):
+        out[tid].first_year = first.year if first else None
+        out[tid].last_year = last.year if last else None
+    ranked = (
+        select(
+            Person,
+            func.row_number()
+            .over(partition_by=Person.tree_id, order_by=(Person.created_at, Person.id))
+            .label("n"),
+        )
+        .where(
+            Person.tree_id.in_(tree_ids),
+            Person.deleted_at.is_(None),
+            Person.avatar_key.is_not(None),
+        )
+        .subquery()
+    )
+    person = aliased(Person, ranked)
+    for p in await session.scalars(select(person).where(ranked.c.n <= COVER_SIZE)):
+        url = avatar_url(p, None)
+        if url:
+            out[p.tree_id].cover.append(url)
+    return out

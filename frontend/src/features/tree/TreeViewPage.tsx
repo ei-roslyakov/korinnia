@@ -16,6 +16,7 @@ import { TreeNav } from "./TreeNav";
 import { defaultFocus, focusSet, indexRelations } from "./canvas/familyGraph";
 import { TreeCanvas, type CenterRequest } from "./canvas/TreeCanvas";
 import { SearchBox } from "./SearchBox";
+import { EmptyState } from "@/components/EmptyState";
 
 /** Trees larger than this open in focus mode instead of showing everyone. */
 const FOCUS_THRESHOLD = 150;
@@ -193,9 +194,18 @@ export function TreeViewPage() {
 
       <div className="relative min-h-0 flex-1">
         {count === 0 ? (
-          <div className="text-bark-700 mx-auto max-w-lg p-8 text-center">
-            <p className="font-medium">{t("canvas.empty")}</p>
-            <p className="mt-2 text-sm">{t("canvas.emptyHint")}</p>
+          <div className="mx-auto max-w-lg p-8">
+            <EmptyState
+              title={t("canvas.empty")}
+              hint={canEdit ? t("canvas.emptyHintEditor") : t("canvas.emptyHint")}
+              action={
+                canEdit && (
+                  <Button onClick={() => setAdding({ relativeId: null, relation: null })}>
+                    + {t("builder.addPerson")}
+                  </Button>
+                )
+              }
+            />
           </div>
         ) : (
           <TreeCanvas
@@ -270,7 +280,7 @@ function PersonPanel({
   return (
     <aside
       aria-label={person.data?.display_name}
-      className="border-bark-100 bg-surface absolute inset-y-0 right-0 z-10 flex w-full flex-col border-l shadow-xl sm:w-[28rem]"
+      className="border-bark-100 bg-surface absolute inset-y-0 right-0 z-10 flex w-full flex-col border-l shadow-xl motion-safe:animate-[panel-in_200ms_ease-out] sm:w-[28rem]"
     >
       <div className="border-bark-100 flex items-center justify-between gap-2 border-b px-4 py-2">
         <div className="flex gap-2">

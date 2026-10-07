@@ -38,8 +38,13 @@ from app.services import users as user_service
 router = APIRouter(prefix="/trees", tags=["trees"])
 
 
-def tree_out(tree: Tree, role: TreeRole) -> TreeOut:
+def tree_out(tree: Tree, role: TreeRole, overview: tree_service.Overview | None = None) -> TreeOut:
+    o = overview or tree_service.Overview()
     return TreeOut(
+        person_count=o.person_count,
+        first_year=o.first_year,
+        last_year=o.last_year,
+        cover=o.cover,
         id=tree.id,
         name=tree.name,
         description=tree.description,
@@ -64,7 +69,9 @@ def member_out(membership: TreeMembership, user: User) -> MemberOut:
 
 @router.get("", response_model=list[TreeOut])
 async def list_trees(user: CurrentUser, session: SessionDep) -> list[TreeOut]:
-    return [tree_out(t, r) for t, r in await tree_service.list_trees_for_user(session, user)]
+    trees = await tree_service.list_trees_for_user(session, user)
+    info = await tree_service.overviews(session, [t.id for t, _ in trees])
+    return [tree_out(t, r, info[t.id]) for t, r in trees]
 
 
 @router.post("", response_model=TreeOut, status_code=status.HTTP_201_CREATED)

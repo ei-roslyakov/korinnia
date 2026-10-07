@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 
+import { Logo } from "@/components/Logo";
 import { Button, Card, ErrorAlert, Field, Input } from "@/components/ui";
 import { safeNext } from "@/lib/nav";
 
@@ -42,6 +43,7 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto max-w-sm py-8">
+      <Logo className="mx-auto mb-2 size-20" />
       <h1 className="text-leaf-700 mb-1 text-center font-serif text-3xl font-semibold">
         {t("app.name")}
       </h1>

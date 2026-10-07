@@ -86,12 +86,13 @@ test-backend: .env test-db ## Backend tests with coverage (uses a separate test 
 test-frontend: .env ## Frontend unit tests (Vitest)
 	$(COMPOSE) run --rm --no-deps frontend sh -c "npm ci --no-audit --no-fund --loglevel=error && npm test"
 
-# Test accounts do not need their own demo family; the admin gets one from app.seed.
+# Test accounts do not need their own demo family (the admin gets one from app.seed); the
+# end-to-end tests are written against the Ukrainian interface.
 .PHONY: test-e2e
 test-e2e: .env ## End-to-end tests (Playwright) on a throwaway production-build stack
 	@set -e; \
 	E2E="docker compose -p $(PROJECT)-e2e -f docker-compose.yml"; \
-	HTTP_PORT=$(E2E_PORT) ENVIRONMENT=production DEMO_TREE_FOR_NEW_USERS=false \
+	HTTP_PORT=$(E2E_PORT) ENVIRONMENT=production DEMO_TREE_FOR_NEW_USERS=false DEFAULT_LANGUAGE=uk \
 	  $$E2E up -d --build --wait; \
 	$$E2E exec -T backend python -m app.seed; \
 	status=0; \

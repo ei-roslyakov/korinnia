@@ -144,6 +144,7 @@ export function qs(params: Record<string, string | number | boolean | null | und
 // --- System -------------------------------------------------------------------------------
 
 export interface MetaInfo {
+  default_language?: "uk" | "en" | "pl";
   name: string;
   version: string;
   environment: string;

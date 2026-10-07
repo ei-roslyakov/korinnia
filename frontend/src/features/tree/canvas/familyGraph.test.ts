@@ -16,6 +16,8 @@ import {
   hiddenRelatives,
   indexRelations,
   junctionY,
+  lineage,
+  roman,
   toElkGraph,
 } from "./familyGraph";
 import { computeLayout } from "./layout";
@@ -182,5 +184,41 @@ describe("family graph", () => {
     expect(j.x + FAMILY_SIZE / 2).toBe((x("dad") + x("mom")) / 2 + PERSON_WIDTH / 2);
     expect(j.y + FAMILY_SIZE).toBeLessThan(y("dad"));
     expect(j.y).toBeGreaterThan(y("kid1") + PERSON_HEIGHT);
+  });
+
+  it("finds a person's line: ancestors, descendants and their partners", () => {
+    const rel = indexRelations(graph);
+    expect([...lineage(rel, "kid1")].sort()).toEqual([
+      "dad",
+      "gp1",
+      "gp2",
+      "gp3",
+      "grandkid",
+      "kid1",
+      "mom",
+    ]);
+    // kid2's partner is included; kid1 (a sibling) is not.
+    const kid2 = lineage(rel, "kid2");
+    expect(kid2.has("gp3")).toBe(true);
+    expect(kid2.has("kid1")).toBe(false);
+    // From the top: every descendant and each one's partner.
+    const gp1 = lineage(rel, "gp1");
+    expect(["gp2", "dad", "kid1", "kid2", "half", "grandkid"].every((id) => gp1.has(id))).toBe(
+      true,
+    );
+    expect(gp1.has("mom")).toBe(true); // dad's partner
+  });
+
+  it("writes generation numbers in Roman numerals", () => {
+    expect([1, 2, 3, 4, 5, 9, 12, 14].map(roman)).toEqual([
+      "I",
+      "II",
+      "III",
+      "IV",
+      "V",
+      "IX",
+      "XII",
+      "XIV",
+    ]);
   });
 });

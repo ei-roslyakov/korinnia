@@ -15,6 +15,7 @@ import { EventsTab } from "./EventsTab";
 import { FamilyTab } from "./FamilyTab";
 import { HistoryTab } from "./HistoryTab";
 import { PersonForm } from "./PersonForm";
+import { useToast } from "@/lib/toast";
 
 const TABS = ["details", "media", "events", "family", "sources", "history"] as const;
 type Tab = (typeof TABS)[number];
@@ -28,6 +29,7 @@ export function PersonEditorPage() {
   const person = usePerson(treeId, personId);
   const [deleting, setDeleting] = useState(false);
   const [saved, setSaved] = useState<PersonDetail | null>(null);
+  const toast = useToast();
   const tab = (TABS as readonly string[]).includes(params.get("tab") ?? "")
     ? (params.get("tab") as Tab)
     : "details";
@@ -77,7 +79,6 @@ export function PersonEditorPage() {
       </nav>
       {saved && tab === "details" && (
         <div className="mb-4 space-y-2">
-          <Alert kind="success">{t("common.saved")}</Alert>
           {saved.warnings.length > 0 && (
             <Alert kind="info">
               {saved.warnings.map((w, i) => (
@@ -89,7 +90,15 @@ export function PersonEditorPage() {
       )}
       {tab === "details" && (
         // Remount on external changes (e.g. a restored revision) to show fresh data.
-        <PersonForm key={p.updated_at} treeId={treeId} person={p} onSaved={setSaved} />
+        <PersonForm
+          key={p.updated_at}
+          treeId={treeId}
+          person={p}
+          onSaved={(saved) => {
+            setSaved(saved);
+            toast(t("common.saved"));
+          }}
+        />
       )}
       {tab === "media" && (
         <MediaTab treeId={treeId} person={p} onChanged={() => void person.refetch()} />

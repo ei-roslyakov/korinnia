@@ -33,6 +33,7 @@ async def test_meta(client: AsyncClient) -> None:
     body = resp.json()
     assert body["name"] == "Korinnia"
     assert body["environment"] == "test"
+    assert body["default_language"] == "en"
 
 
 async def test_openapi_available_outside_production(client: AsyncClient) -> None:

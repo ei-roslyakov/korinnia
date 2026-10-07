@@ -12,6 +12,7 @@ data:
   MAX_UPLOAD_SIZE_MB: {{ .Values.config.maxUploadSizeMb | quote }}
   WORKER_CONCURRENCY: {{ .Values.config.workerConcurrency | quote }}
   DEMO_TREE_FOR_NEW_USERS: {{ .Values.config.demoTreeForNewUsers | quote }}
+  DEFAULT_LANGUAGE: {{ .Values.config.defaultLanguage | quote }}
   MEDIA_ROOT: /data/media
   POSTGRES_HOST: {{ .Values.database.host | quote }}
   POSTGRES_PORT: {{ .Values.database.port | quote }}

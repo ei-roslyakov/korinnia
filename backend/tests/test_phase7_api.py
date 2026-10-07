@@ -506,3 +506,27 @@ async def test_data_quality(ctx: Ctx, roles: dict[str, ApiClient]) -> None:
     assert dq["open_questions"][0]["question"] == "Коли народився?"
     assert (await roles["viewer"].get(f"{ctx.base}/data-quality")).status_code == 403
     assert (await roles["contributor"].get(f"{ctx.base}/moderation")).status_code == 403
+
+
+async def test_story_cover_and_reading_time(ctx: Ctx, session: Any, local_storage: Any) -> None:
+    from app.services.genealogy import media as media_service
+    from tests.test_media_api import jpeg, upload
+
+    photo = (await upload(ctx, "wedding.jpg", jpeg())).json()
+    await media_service.process_media(session, local_storage, uuid.UUID(photo["id"]))
+    body = " ".join(["слово"] * 900)  # ~5 minutes
+    resp = await ctx.editor.post(
+        f"{ctx.base}/stories",
+        json={"title": "Весілля", "body": body, "status": "published", "media_ids": [photo["id"]]},
+    )
+    assert resp.status_code == 201, resp.text
+    listing = (await ctx.editor.get(f"{ctx.base}/stories")).json()["items"]
+    story = next(s for s in listing if s["title"] == "Весілля")
+    assert story["reading_minutes"] == 5
+    assert story["cover_url"].startswith(
+        f"/api/v1/trees/{ctx.tree.id}/media/{photo['id']}/file/thumb"
+    )
+
+    resp = await ctx.editor.post(f"{ctx.base}/stories", json={"title": "Коротко", "body": "Так."})
+    assert resp.json()["reading_minutes"] == 1
+    assert resp.json()["cover_url"] is None

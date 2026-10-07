@@ -41,7 +41,9 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Health probes `/healthz` (liveness) and `/readyz` (database + storage)
 - ✅ Structured JSON logging (backend, worker, nginx access log)
 - ✅ Security headers (CSP, nosniff, frame-deny, referrer & permissions policy)
-- ✅ UI shell with Ukrainian (default), English and Polish
+- ✅ UI in English (default, configurable with `DEFAULT_LANGUAGE`), Ukrainian and Polish; each user's choice is remembered
+- ✅ Tree logo in the header and on the sign-in page, coloured per theme; self-hosted Lora and Inter fonts (with Cyrillic); illustrated empty states, loading placeholders, toast notifications
+- ✅ Tree list with portrait covers, people count and years covered; stories shown magazine-style (cover, reading time, drop cap)
 - ✅ Themes: light, dark and archive (sepia), or follow the device setting; remembered per device
 - ✅ GitHub Actions CI, pre-commit hooks
 - ✅ Basic manual backup / restore scripts (database + media)
@@ -60,6 +62,8 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Audit log of every change (who, when, before/after) with filters — global and per tree
 - ✅ Profile: display name, interface language (synced across devices), password change
 - 📋 Read-only share links (revocable, expiring) — phase 10
+- 📋 Sign-up by email (optional, off by default): register, confirm the address by a link, then wait for an admin to grant access to a tree
+- 📋 Sign in with Google (OAuth / OpenID Connect), linked to an existing account by verified email; password and 2FA stay available
 - ✅ Moderation queue for contributors' suggestions and stories (see below)
 
 ### People & relationships (REST API; UI in phases 4–5)
@@ -80,8 +84,9 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 ### Tree view
 - ✅ Infinite canvas: drag to pan, wheel / pinch to zoom, fit to screen, zoom buttons, minimap
 - ✅ Drawn as a real tree growing upwards: the oldest generation stands on the ground with a trunk and roots, one row per generation above it, partners always side by side, curved brown branches that thin out towards the youngest generations; adoptive/step/foster links dashed; layout (ELK) runs in a Web Worker
-- ✅ Person cards: portrait placeholder (photos in phase 6), primary name, life years with uncertainty markers (~1850, <1944)
-- ✅ Click a card → side panel; full person page with shareable link: all names, birth / death / burial (with map link), facts, rendered Markdown biography, life timeline, relatives as links, notes for descendants, data notes (editors)
+- ✅ Person cards: portrait, primary name, life years with uncertainty markers (~1850, <1944) and † for the deceased; coloured accent by gender; hover preview with full name, dates and birthplace
+- ✅ Hover or select a person to highlight their line (ancestors, descendants, partners); generation labels beside each row ("III покоління · 1920-ті")
+- ✅ Click a card → side panel; full person page with shareable link: all names, birth / death / burial (with map link), facts, rendered Markdown biography, life timeline, relatives with portraits, a life bar with the events of their life, notes for descendants, data notes (editors)
 - ✅ Search by any name variant (Cyrillic ↔ Latin), place (incl. historical names) or year; the result is centred and opened
 - ✅ Focus mode: 1–6 generations around a person, markers for hidden ancestors/descendants; large trees (>150 people) open in focus mode
 - ✅ Works on tablet and mobile (touch pan/zoom, full-width panel)
@@ -89,7 +94,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Gallery, documents, audio/video on the person page; sources, stories, research questions and comments
 - ✅ Relationship calculator: "how is B related to A?" with the kinship term in Ukrainian (двоюрідний, троюрідний…; тесть / свекор…), English (first cousin once removed…) or Polish, half / adoptive notes, the closest common ancestors and the path through the tree
 - ✅ Family map (OpenStreetMap): places of birth, life, marriage, migration, death and burial (graves at their own GPS point); filters by event type and person, with the person's life path drawn in order
-- ✅ Family timeline: every dated event and marriage in chronological order, grouped by decade; filters by event type, person and years
+- ✅ Family timeline: every dated event and marriage in chronological order, grouped by decade; filters by event type, person and years; optional historical context (World Wars, Holodomor, Chornobyl, independence…)
 - ✅ "On this day": birthdays, wedding anniversaries and memorial days for a date or the coming week / month
 - ✅ Statistics: people, generations, period covered, oldest ancestor, longest life, average lifespan, surnames (spellings in different scripts grouped), first names, births and deaths by decade
 - ✅ Tree navigation bar with all views; "How are we related?", "On the map" and "Timeline" links on every person page
@@ -132,6 +137,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 
 ### Data safety
 - 📋 GEDCOM 5.5.1 import with preview and duplicate detection
+- 📋 AI-assisted import from social media: upload an exported archive (e.g. Facebook / Instagram data download) or posts and photos; AI suggests people, relationships, dates, places and stories for an editor to review before anything is saved
 - 📋 Periodic integrity check of stored originals (SHA-256)
 - 📋 Scheduled backups with retention and an off-site copy (3-2-1)
 
@@ -195,6 +201,7 @@ Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** 
 | `PUBLIC_BASE_URL` | Public URL of the app, used to build invitation and password-reset links |
 | `COOKIE_SECURE` | `true` (default) marks auth cookies HTTPS-only. Set `false` only for plain-HTTP local development |
 | `MAX_UPLOAD_SIZE_MB` | Maximum size of one upload; also sets nginx `client_max_body_size` |
+| `DEFAULT_LANGUAGE` | Interface language for visitors who have not chosen one and for new accounts: `en` (default), `uk` or `pl` |
 | `DEMO_TREE_FOR_NEW_USERS` | Give each new account its own copy of the demo family (default `true`; set `false` for a production archive) |
 | `WORKER_CONCURRENCY` | Number of jobs the worker runs in parallel |
 | `HTTP_PORT` | Host port for nginx (8080 in dev) |

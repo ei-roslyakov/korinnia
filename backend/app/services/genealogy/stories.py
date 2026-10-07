@@ -19,6 +19,7 @@ from app.core.errors import AppError, NotFoundError, PermissionDeniedError
 from app.core.security import utcnow
 from app.models import (
     MediaFile,
+    MediaKind,
     Person,
     Story,
     StoryMedia,
@@ -40,6 +41,7 @@ from app.services.genealogy.common import (
     to_partial,
 )
 from app.services.genealogy.media import media_out_many
+from app.services.genealogy.media_urls import file_url
 from app.services.genealogy.sources import user_refs
 from app.services.genealogy.summaries import summary_map
 
@@ -201,11 +203,35 @@ async def list_stories(
     return list(rows), total
 
 
+WORDS_PER_MINUTE = 180
+
+
+def reading_minutes(body: str) -> int:
+    return max(1, round(len(body.split()) / WORDS_PER_MINUTE))
+
+
 async def summaries(session: AsyncSession, stories: Sequence[Story]) -> list[StorySummary]:
     if not stories:
         return []
-    persons, _ = await _links(session, [s.id for s in stories])
+    persons, media = await _links(session, [s.id for s in stories])
     authors = await user_refs(session, [s.author_user_id for s in stories])
+    media_ids = {m for ids in media.values() for m in ids}
+    files = (
+        {
+            m.id: m
+            for m in await session.scalars(select(MediaFile).where(MediaFile.id.in_(media_ids)))
+        }
+        if media_ids
+        else {}
+    )
+
+    def cover(story_id: uuid.UUID) -> str | None:
+        for mid in media[story_id]:
+            m = files.get(mid)
+            if m and m.thumb_key and m.kind in (MediaKind.photo, MediaKind.document_scan):
+                return file_url(m, "thumb")
+        return None
+
     return [
         StorySummary(
             id=s.id,
@@ -217,6 +243,8 @@ async def summaries(session: AsyncSession, stories: Sequence[Story]) -> list[Sto
             author=authors.get(s.author_user_id) if s.author_user_id else None,
             person_ids=persons[s.id],
             updated_at=s.updated_at,
+            cover_url=cover(s.id),
+            reading_minutes=reading_minutes(s.body),
         )
         for s in stories
     ]

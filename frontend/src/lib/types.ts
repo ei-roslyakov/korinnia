@@ -68,6 +68,10 @@ export interface Tree {
   my_role: Role;
   /** The user's own copy of the fictional demo family. */
   is_demo?: boolean;
+  person_count?: number;
+  first_year?: number | null;
+  last_year?: number | null;
+  cover?: string[];
 }
 
 export interface Member {

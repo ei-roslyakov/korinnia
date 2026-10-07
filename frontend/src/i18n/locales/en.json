@@ -22,7 +22,8 @@
     "link": "Link",
     "previous": "Previous",
     "next": "Next",
-    "range": "{{from}}–{{to}} of {{total}}"
+    "range": "{{from}}–{{to}} of {{total}}",
+    "loading": "Loading…"
   },
   "status": {
     "title": "System status",
@@ -105,7 +106,10 @@
     "settings": "Tree settings",
     "delete": "Delete tree",
     "confirmDelete": "Delete the tree “{{name}}”? It will be hidden for everyone (data is kept and can be restored).",
-    "demo": "Demo"
+    "demo": "Demo",
+    "emptyTitle": "Your family tree will grow here",
+    "people_one": "{{count}} person",
+    "people_other": "{{count}} people"
   },
   "members": {
     "title": "Members",
@@ -271,7 +275,7 @@
     "generations": "Generations",
     "fit": "Fit to screen",
     "empty": "This tree has no people yet.",
-    "emptyHint": "People can be added in builder mode (coming in the next phase) or by importing a GEDCOM file later.",
+    "emptyHint": "People will appear here once an editor adds the first person.",
     "layouting": "Arranging the tree…",
     "focusHere": "Focus here",
     "openPage": "Open full page",
@@ -283,7 +287,9 @@
     "minimap": "Overview map",
     "controls": "Zoom controls",
     "zoomIn": "Zoom in",
-    "zoomOut": "Zoom out"
+    "zoomOut": "Zoom out",
+    "generationRow": "Generation {{n}}",
+    "emptyHintEditor": "Start with yourself, your parents or the oldest known ancestor; the tree grows from there."
   },
   "person": {
     "names": "Names",
@@ -319,7 +325,11 @@
     "researchStatus": "Research",
     "noBiography": "No biography has been written yet.",
     "writeBiography": "Write a biography",
-    "suggestBiography": "Suggest a biography"
+    "suggestBiography": "Suggest a biography",
+    "lifeBar": "Life from {{from}} to {{to}}",
+    "today": "today",
+    "yearsLived_one": "{{count}} year",
+    "yearsLived_other": "{{count}} years"
   },
   "gender": {
     "male": "Male",
@@ -702,7 +712,8 @@
       "none": "No sources yet.",
       "citations": "Cited {{count}}×",
       "confirmDelete": "Move this source and all its citations to the trash?",
-      "scans": "Scans and files of this source"
+      "scans": "Scans and files of this source",
+      "noneHint": "Birth records, censuses, letters, archive files: add a source to back up the facts in the tree."
     },
     "cite": {
       "hint": "Attach the sources that confirm this person's facts.",
@@ -734,7 +745,10 @@
       "body": "Story",
       "saveDraft": "Save draft",
       "moderationNote": "Your story is published after an editor reviews it.",
-      "media": "Photos and documents"
+      "media": "Photos and documents",
+      "noneHint": "Write down a memory: how the grandparents met, where the family lived, what was cooked for holidays.",
+      "readingTime_one": "{{count}} min read",
+      "readingTime_other": "{{count}} min read"
     },
     "moderation": {
       "title": "Moderation",
@@ -828,7 +842,8 @@
       "more": "Show more",
       "shown": "Showing {{shown}} of {{total}}",
       "undated_one": "{{count}} event without a date is not shown.",
-      "undated_other": "{{count}} events without a date are not shown."
+      "undated_other": "{{count}} events without a date are not shown.",
+      "emptyHint": "Add dates of births, marriages and other events, and the family's story will take shape here."
     },
     "onThisDay": {
       "title": "On this day",
@@ -843,7 +858,8 @@
       "hint": "Birthdays, wedding anniversaries and memorial days. Only exactly known dates (day, month and year) are included.",
       "empty": "No exactly known dates fall on these days.",
       "yearsAgo_one": "{{count}} year ago",
-      "yearsAgo_other": "{{count}} years ago"
+      "yearsAgo_other": "{{count}} years ago",
+      "emptyHint": "Pick another date or the whole week; birthdays, anniversaries and memorial days will appear here."
     },
     "map": {
       "title": "Family map",
@@ -905,6 +921,19 @@
       "births": "Births",
       "deaths": "Deaths",
       "none": "No data yet."
+    },
+    "history": {
+      "show": "Show historical events",
+      "emancipation": "Emancipation of serfs in the Russian Empire",
+      "ww1": "First World War",
+      "revolution": "Ukrainian Revolution and War of Independence",
+      "holodomor": "Holodomor, the man-made famine and genocide of Ukrainians",
+      "ww2": "Second World War",
+      "famine1947": "Famine of 1946–1947",
+      "chornobyl": "Chornobyl disaster",
+      "independence": "Ukraine declares independence",
+      "dignity": "Revolution of Dignity; start of Russian aggression",
+      "invasion": "Russia's full-scale invasion of Ukraine"
     }
   },
   "theme": {

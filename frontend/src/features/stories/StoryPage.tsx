@@ -11,6 +11,8 @@ import { MediaSections } from "@/features/media/MediaSections";
 import { useTree } from "@/features/tree/api";
 import { formatPartialDate } from "@/lib/dates";
 import { atLeast } from "@/lib/types";
+import { Avatar } from "@/features/person/Avatar";
+import { isVisual } from "@/lib/genealogy";
 
 export function StoryPage() {
   const { t, i18n } = useTranslation();
@@ -27,6 +29,7 @@ export function StoryPage() {
   if (story.isPending || tree.isPending) return <Spinner />;
   if (story.error || tree.error) return <ErrorAlert error={story.error ?? tree.error} />;
   const s = story.data;
+  const cover = s.media.find((m) => isVisual(m) && m.urls.web);
   const role = tree.data.my_role;
   const isEditor = atLeast(role, "editor");
   const isAuthor = s.author?.id === me.data?.id;
@@ -39,13 +42,26 @@ export function StoryPage() {
       >
         ← {t("collab.stories")}
       </Link>
-      <header className="space-y-1">
-        <h1 className="font-serif text-3xl font-semibold">{s.title}</h1>
+      {cover && (
+        <figure className="overflow-hidden rounded-lg">
+          <img
+            src={cover.urls.web}
+            alt={cover.title ?? ""}
+            className="max-h-96 w-full object-cover sepia-[15%]"
+          />
+          {cover.title && (
+            <figcaption className="text-bark-700 mt-1 text-xs italic">{cover.title}</figcaption>
+          )}
+        </figure>
+      )}
+      <header className="space-y-2">
+        <h1 className="font-serif text-4xl leading-tight font-semibold">{s.title}</h1>
         <div className="text-bark-700 text-sm">
           {[
             formatPartialDate(s.date, t, i18n.language),
             s.narrator && t("collab.story.toldBy", { name: s.narrator }),
             s.author && t("collab.story.writtenBy", { name: s.author.display_name }),
+            t("collab.story.readingTime", { count: s.reading_minutes ?? 1 }),
           ]
             .filter(Boolean)
             .join(" · ")}
@@ -54,14 +70,15 @@ export function StoryPage() {
           <Badge tone="amber">{t(`collab.storyStatus.${s.status}`)}</Badge>
         )}
         {s.persons.length > 0 && (
-          <div className="flex flex-wrap gap-2 text-sm">
-            {t("collab.story.about")}:
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-bark-700">{t("collab.story.about")}:</span>
             {s.persons.map((p) => (
               <Link
                 key={p.id}
                 to={`/trees/${treeId}/people/${p.id}`}
-                className="text-leaf-700 underline"
+                className="border-bark-100 bg-surface text-leaf-700 hover:border-leaf-600 flex items-center gap-2 rounded-full border py-0.5 pr-3 pl-0.5"
               >
+                <Avatar name={p.display_name} gender={p.gender} url={p.avatar_url} size="sm" />
                 {p.display_name}
               </Link>
             ))}
@@ -131,7 +148,9 @@ export function StoryPage() {
           </Button>
         </div>
       )}
-      <Markdown className="font-serif text-lg">{s.body}</Markdown>
+      <Markdown className="[&>p:first-of-type]:first-letter:text-leaf-700 font-serif text-lg [&>p:first-of-type]:first-letter:float-left [&>p:first-of-type]:first-letter:mt-1 [&>p:first-of-type]:first-letter:mr-2 [&>p:first-of-type]:first-letter:font-serif [&>p:first-of-type]:first-letter:text-6xl [&>p:first-of-type]:first-letter:leading-[0.8] [&>p:first-of-type]:first-letter:font-semibold">
+        {s.body}
+      </Markdown>
       <MediaSections
         media={s.media}
         personLink={(id) => `/trees/${treeId}/people/${id}`}
