@@ -12,6 +12,7 @@ import { PersonView } from "@/features/person/PersonView";
 import { atLeast, type Role } from "@/lib/types";
 
 import { useTree } from "./api";
+import { TreeNav } from "./TreeNav";
 import { defaultFocus, focusSet, indexRelations } from "./canvas/familyGraph";
 import { TreeCanvas, type CenterRequest } from "./canvas/TreeCanvas";
 import { SearchBox } from "./SearchBox";
@@ -94,7 +95,6 @@ export function TreeViewPage() {
       </div>
     );
   }
-  const isAdmin = atLeast(tree.data.my_role, "admin");
   const canEdit = atLeast(tree.data.my_role, "editor");
   const builder = canEdit && params.get("mode") === "edit";
   const count = graph.data.persons.length;
@@ -188,42 +188,7 @@ export function TreeViewPage() {
             )}
           </div>
         )}
-        <div className="ml-auto flex flex-wrap gap-3 text-sm">
-          <Link to={`/trees/${treeId}/stories`} className="text-leaf-700 hover:underline">
-            {t("collab.stories")}
-          </Link>
-          <Link to={`/trees/${treeId}/sources`} className="text-leaf-700 hover:underline">
-            {t("collab.sources")}
-          </Link>
-          {atLeast(tree.data.my_role, "contributor") && (
-            <Link to={`/trees/${treeId}/quality`} className="text-leaf-700 hover:underline">
-              {t("collab.quality.title")}
-            </Link>
-          )}
-          {canEdit && (
-            <Link to={`/trees/${treeId}/moderation`} className="text-leaf-700 hover:underline">
-              {t("collab.moderation.title")}
-              {pending > 0 && (
-                <span
-                  className="ml-1 rounded-full bg-amber-500 px-1.5 text-xs text-white"
-                  aria-label={t("collab.moderation.pending", { count: pending })}
-                >
-                  {pending}
-                </span>
-              )}
-            </Link>
-          )}
-          {isAdmin && (
-            <>
-              <Link to={`/trees/${treeId}/members`} className="text-leaf-700 hover:underline">
-                {t("members.title")}
-              </Link>
-              <Link to={`/trees/${treeId}/audit`} className="text-leaf-700 hover:underline">
-                {t("canvas.history")}
-              </Link>
-            </>
-          )}
-        </div>
+        <TreeNav treeId={treeId} role={tree.data.my_role} pending={pending} />
       </div>
 
       <div className="relative min-h-0 flex-1">

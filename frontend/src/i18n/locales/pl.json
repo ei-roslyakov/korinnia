@@ -629,7 +629,20 @@
     "addPerson": "Dodaj osobę do tego pliku…",
     "done": "Gotowe",
     "cropHint": "Zaznacz kwadratem twarz do portretu na drzewie.",
-    "cropNote": "Portret to osobna przycięta kopia; oryginalne zdjęcie nigdy nie jest zmieniane."
+    "cropNote": "Portret to osobna przycięta kopia; oryginalne zdjęcie nigdy nie jest zmieniane.",
+    "comments": "Komentarze",
+    "picker": {
+      "title": "Mediateka drzewa",
+      "search": "Szukaj plików…",
+      "upload": "Prześlij nowe",
+      "empty": "Nie znaleziono plików.",
+      "done": "Gotowe",
+      "add": "Dodaj media",
+      "selected_one": "Wybrano {{count}} plik",
+      "selected_few": "Wybrano {{count}} pliki",
+      "selected_many": "Wybrano {{count}} plików",
+      "selected_other": "Wybrano {{count}} pliku"
+    }
   },
   "collab": {
     "sources": "Źródła",
@@ -686,7 +699,8 @@
       "search": "Szukaj źródeł…",
       "none": "Brak źródeł.",
       "citations": "Cytowań: {{count}}",
-      "confirmDelete": "Przenieść źródło i wszystkie jego cytowania do kosza?"
+      "confirmDelete": "Przenieść źródło i wszystkie jego cytowania do kosza?",
+      "scans": "Skany i pliki źródła"
     },
     "cite": {
       "hint": "Dodaj źródła potwierdzające informacje o tej osobie.",
@@ -717,7 +731,8 @@
       "addPerson": "Dodaj osobę, której dotyczy historia…",
       "body": "Historia",
       "saveDraft": "Zapisz szkic",
-      "moderationNote": "Historia zostanie opublikowana po przeglądzie redaktora."
+      "moderationNote": "Historia zostanie opublikowana po przeglądzie redaktora.",
+      "media": "Zdjęcia i dokumenty"
     },
     "moderation": {
       "title": "Moderacja",
@@ -775,6 +790,133 @@
       "date": "Data",
       "place_id": "Miejsce",
       "description": "Opis"
+    }
+  },
+  "insights": {
+    "nav": {
+      "label": "Sekcje drzewa",
+      "timeline": "Oś czasu",
+      "map": "Mapa",
+      "onThisDay": "Tego dnia",
+      "relationship": "Pokrewieństwo",
+      "stats": "Statystyki"
+    },
+    "clearPerson": "Usuń osobę",
+    "categories": {
+      "label": "Rodzaje wydarzeń",
+      "birth": "Urodzenia",
+      "family": "Śluby",
+      "life": "Życie",
+      "migration": "Przeprowadzki",
+      "death": "Zgony i pochówki"
+    },
+    "factTypes": {
+      "civil_union": "Związek cywilny",
+      "partnership": "Związek partnerski",
+      "separation": "Separacja",
+      "partnership_end": "Koniec związku"
+    },
+    "timeline": {
+      "title": "Oś czasu rodziny",
+      "person": "Wydarzenia jednej osoby…",
+      "from": "Od roku",
+      "to": "Do roku",
+      "decade": "Lata {{decade}}.",
+      "empty": "Nie znaleziono wydarzeń.",
+      "more": "Pokaż więcej",
+      "shown": "Pokazano {{shown}} z {{total}}",
+      "undated_one": "{{count}} wydarzenie bez daty nie jest pokazane.",
+      "undated_few": "{{count}} wydarzenia bez daty nie są pokazane.",
+      "undated_many": "{{count}} wydarzeń bez daty nie jest pokazanych.",
+      "undated_other": "{{count}} wydarzenia bez daty nie są pokazane."
+    },
+    "onThisDay": {
+      "title": "Tego dnia",
+      "date": "Data",
+      "range": "Zakres",
+      "ranges": {
+        "0": "Tylko ten dzień",
+        "7": "Ten dzień i 7 kolejnych",
+        "30": "Najbliższe 30 dni"
+      },
+      "today": "Dziś",
+      "hint": "Urodziny, rocznice ślubów i dni pamięci. Uwzględniane są tylko dokładnie znane daty (dzień, miesiąc i rok).",
+      "empty": "W te dni nie ma dokładnie znanych dat.",
+      "yearsAgo_one": "{{count}} rok temu",
+      "yearsAgo_few": "{{count}} lata temu",
+      "yearsAgo_many": "{{count}} lat temu",
+      "yearsAgo_other": "{{count}} roku temu"
+    },
+    "map": {
+      "title": "Mapa rodziny",
+      "person": "Miejsca jednej osoby…",
+      "onMap": "Na mapie",
+      "allPlaces": "Wszystkie miejsca",
+      "empty": "Brak miejsc ze współrzędnymi dla tych filtrów.",
+      "places_one": "{{count}} miejsce",
+      "places_few": "{{count}} miejsca",
+      "places_many": "{{count}} miejsc",
+      "places_other": "{{count}} miejsca",
+      "unplaced_one": "{{count}} wydarzenie nie jest widoczne: jego miejsce nie ma współrzędnych.",
+      "unplaced_few": "{{count}} wydarzenia nie są widoczne: ich miejsca nie mają współrzędnych.",
+      "unplaced_many": "{{count}} wydarzeń nie jest widocznych: ich miejsca nie mają współrzędnych.",
+      "unplaced_other": "{{count}} wydarzenia nie są widoczne: ich miejsca nie mają współrzędnych."
+    },
+    "kinship": {
+      "title": "Jak jesteśmy spokrewnieni?",
+      "howRelated": "Pokrewieństwo",
+      "personA": "Pierwsza osoba",
+      "personB": "Druga osoba",
+      "choose": "Znajdź osobę…",
+      "swap": "Zamień",
+      "hint": "Wybierz dwie osoby, aby zobaczyć, jak są spokrewnione.",
+      "whoIs": "Kim jest {{b}} dla: {{a}}",
+      "commonAncestors": "Najbliżsi wspólni przodkowie",
+      "path": "Ścieżka w drzewie",
+      "legend": "↑ rodzic · ↓ dziecko · ⚭ małżeństwo lub związek",
+      "edges": {
+        "parent": "rodzic",
+        "child": "dziecko",
+        "partner": "partner"
+      },
+      "nonBiological": "Powiązanie prowadzi przez adopcję, rodzinę zastępczą lub przybranego rodzica.",
+      "steps_one": "Powiązani przez {{count}} krok w drzewie.",
+      "steps_few": "Powiązani przez {{count}} kroki w drzewie.",
+      "steps_many": "Powiązani przez {{count}} kroków w drzewie.",
+      "steps_other": "Powiązani przez {{count}} kroku w drzewie."
+    },
+    "stats": {
+      "title": "Statystyki",
+      "persons": "Osób",
+      "generations": "Pokoleń",
+      "period": "Okres",
+      "partnerships": "Par",
+      "places": "Miejsc",
+      "events": "Wydarzeń",
+      "male": "Mężczyzn",
+      "female": "Kobiet",
+      "living": "Żyjących",
+      "media": "Plików",
+      "sources": "Źródeł",
+      "stories": "Historii",
+      "notable": "Ciekawostki",
+      "oldestAncestor": "Najdawniejszy przodek",
+      "longestLived": "Najdłuższe życie",
+      "averageLifespan": "Średnia długość życia",
+      "age_one": "{{count}} rok",
+      "age_few": "{{count}} lata",
+      "age_many": "{{count}} lat",
+      "age_other": "{{count}} roku",
+      "averageValue_one": "{{years}} lat (na podstawie {{count}} osoby ze znanymi datami)",
+      "averageValue_few": "{{years}} lat (na podstawie {{count}} osób ze znanymi datami)",
+      "averageValue_many": "{{years}} lat (na podstawie {{count}} osób ze znanymi datami)",
+      "averageValue_other": "{{years}} lat (na podstawie {{count}} osób ze znanymi datami)",
+      "surnames": "Nazwiska",
+      "firstNames": "Najczęstsze imiona",
+      "byDecade": "Urodzenia i zgony według dekad",
+      "births": "Urodzenia",
+      "deaths": "Zgony",
+      "none": "Brak danych."
     }
   }
 }

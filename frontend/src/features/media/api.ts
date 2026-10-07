@@ -1,7 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { api, ApiError, csrfToken } from "@/lib/api";
+import { api, ApiError, csrfToken, qs } from "@/lib/api";
 import type { MediaItem, PartialDateInput, Region } from "@/lib/genealogy";
+import type { Page } from "@/lib/types";
 
 const base = (treeId: string) => `/api/v1/trees/${treeId}`;
 
@@ -129,5 +130,14 @@ export function useReorderMedia(treeId: string, personId: string) {
     mutationFn: (mediaIds: string[]) =>
       api.put(`${base(treeId)}/persons/${personId}/media-order`, { media_ids: mediaIds }),
     onSuccess: invalidate,
+  });
+}
+
+/** The tree's media library (newest first), for pickers. */
+export function useTreeMedia(treeId: string, q: string) {
+  return useQuery({
+    queryKey: ["tree", treeId, "media-library", q],
+    queryFn: () => api.get<Page<MediaItem>>(`${base(treeId)}/media${qs({ q, limit: 60 })}`),
+    placeholderData: keepPreviousData,
   });
 }

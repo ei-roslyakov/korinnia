@@ -73,3 +73,9 @@ export function lifeYears(
   if (!b && !d) return "";
   return `${b || "?"} – ${d || "?"}`;
 }
+
+/** A calendar date in the viewer's time zone, as YYYY-MM-DD (today by default). */
+export function localIsoDate(d = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}

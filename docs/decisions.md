@@ -250,3 +250,37 @@ E2E runs showed an intermittently blank tree after adding a person: React Flow h
 
 ### D67. Dialogs are never nested in the DOM
 "Create a new source" opened from the citation dialog is rendered next to it, not inside it. Nested native modal dialogs make the outer one inert while the inner one is open; the E2E test caught input landing in the wrong dialog.
+
+## Phase 8: map, timeline, relationship calculator, statistics, on this day
+
+### D68. One loader for all dated facts
+Timeline, map and "on this day" share `services/genealogy/facts.py`, which turns the tree into a list of *facts*: every live event, plus the start and end of each partnership. Marriages are usually recorded on the partnership (start date and place) rather than as a separate event, so without this they would be missing from all three views. If a marriage or divorce *event* exists for the same couple, it wins and the partnership fact is dropped, so nothing appears twice. A partnership that ended by death adds no fact, because the death is already one.
+
+Facts are loaded in a fixed number of queries and filtered in Python. At the target scale (≤ 2,000 people, a few thousand events) that is milliseconds and keeps the three views consistent.
+
+### D69. "On this day" uses exact dates only
+Only facts with precision `exact` (day, month and year known) produce anniversaries; "about 1850" or "May 1902" would give false dates. 29 February falls on 28 February in common years. The client sends its own local date, so the result follows the viewer's calendar day rather than the server's time zone. Dates are treated as Gregorian; old Julian-calendar records should be entered converted, with the original wording in the date phrase.
+
+### D70. Map points: a precise spot beats the place
+A fact appears at the event's own coordinates when it has them (a grave's GPS pin) and otherwise at its place's coordinates. Facts at the same coordinates (5 decimal places, about 1 m) are grouped into one point. Facts whose place has no coordinates are counted and their places listed, so editors know what to complete. A list of places next to the map makes it usable by keyboard and screen readers, since Leaflet markers are not focusable. Leaflet and the map page are loaded only when the map is opened.
+
+### D71. Kinship is computed as structure on the server and named on the client
+The server finds the relationship as structure:
+- **same person** or **partners**;
+- **blood:** the closest common ancestor(s) by the fewest total steps (breadth-first over all parent links), giving `up`/`down` generations. Half relations are flagged when the two branch children each have two known parents and share exactly one. Non-biological links (adoptive, step, foster, unknown) are flagged rather than hidden;
+- **in-law:** one partnership at either end (b is a blood relative of a's partner, or the partner of a's blood relative), choosing the closest;
+- **distant:** any other chain of parent / child / partner links (breadth-first), returned as a path;
+- **none.**
+
+The word is chosen in the browser by a small generator per language (`features/insights/kinship.ts`). The vocabularies are not translations of each other:
+- **Ukrainian** numbers collateral lines with "-юрідний" (двоюрідний дядько, троюрідний дід) and names in-laws by the speaker's sex (тесть / свекор, шурин / дівер).
+- **English** counts cousins and "removed" generations.
+- **Polish** uses descriptive forms beyond uncles and nephews (brat dziadka, wnuk siostry, kuzyn 2. stopnia).
+
+When a person's gender is unknown both forms are shown ("брат / сестра"). The path and common ancestors are always shown as well, so the answer can be checked against the tree.
+
+### D72. Statistics group spellings across scripts
+Surnames and first names are grouped by their KMU 2010 transliteration (the same normalisation used by search), so "Коваленко" and "Kovalenko" count as one surname, shown under the most common spelling with the others as variants. Each person counts once per surname. "Generations" is the longest parent → child line. Ages and the average lifespan use only birth and death dates with exact, month or year precision, and ignore implausible values (< 0 or > 125 years).
+
+### D73. Locale parity is tested
+A unit test checks that `uk`, `en` and `pl` have the same keys (plural suffixes folded) and that every pluralised key has all the plural forms its language needs (`one`/`few`/`many`/`other` for Ukrainian and Polish).

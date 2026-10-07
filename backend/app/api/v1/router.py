@@ -13,6 +13,7 @@ from app.api.v1 import (
     collaboration,
     events,
     history,
+    insights,
     media,
     persons,
     places,
@@ -37,6 +38,7 @@ for genealogy in (
     sources,
     stories,
     collaboration,
+    insights,
 ):
     api_router.include_router(genealogy.router)
 

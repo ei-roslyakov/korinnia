@@ -150,6 +150,28 @@ export function PersonView({
             <Badge>
               {t("person.researchStatus")}: {t(`research.${person.research_status}`)}
             </Badge>
+            {treeId && (
+              <span className="ml-1 flex flex-wrap gap-3 text-sm print:hidden">
+                <Link
+                  to={`/trees/${treeId}/relationship?a=${person.id}`}
+                  className="text-leaf-700 hover:underline"
+                >
+                  {t("insights.kinship.howRelated")}
+                </Link>
+                <Link
+                  to={`/trees/${treeId}/map?person=${person.id}`}
+                  className="text-leaf-700 hover:underline"
+                >
+                  {t("insights.map.onMap")}
+                </Link>
+                <Link
+                  to={`/trees/${treeId}/timeline?person=${person.id}`}
+                  className="text-leaf-700 hover:underline"
+                >
+                  {t("insights.nav.timeline")}
+                </Link>
+              </span>
+            )}
             {treeId && role === "contributor" && (
               <Button
                 variant="secondary"
@@ -198,7 +220,12 @@ export function PersonView({
         </Section>
       )}
 
-      <MediaSections media={person.media} personLink={personLink} Section={Section} />
+      <MediaSections
+        media={person.media}
+        personLink={personLink}
+        Section={Section}
+        comments={treeId && role ? { treeId, role } : undefined}
+      />
 
       <Section title={t("person.timeline")}>
         {timeline.length === 0 ? (

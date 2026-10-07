@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 
 import { Badge, Button, Card, ErrorAlert, Input, PageHeader, Spinner } from "@/components/ui";
 import { CitationList } from "@/features/collab/CitationList";
 import { useDeleteSource, useSourceCitations, useSources } from "@/features/collab/api";
+import { MediaSections } from "@/features/media/MediaSections";
 import { useTree } from "@/features/tree/api";
 import type { Source } from "@/lib/genealogy";
 import { atLeast } from "@/lib/types";
@@ -100,6 +101,12 @@ export function SourcesPage() {
                 </div>
               </div>
               {s.notes && <p className="text-sm whitespace-pre-line">{s.notes}</p>}
+              <MediaSections
+                media={s.media}
+                personLink={(id) => `/trees/${treeId}/people/${id}`}
+                Section={ScanSection}
+                comments={tree.data ? { treeId, role: tree.data.my_role } : undefined}
+              />
               {open === s.id && <SourceCitations treeId={treeId} sourceId={s.id} />}
             </Card>
           </li>
@@ -113,6 +120,15 @@ export function SourcesPage() {
         />
       )}
     </div>
+  );
+}
+
+function ScanSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="space-y-1">
+      <h3 className="text-bark-700 text-xs font-semibold uppercase">{title}</h3>
+      {children}
+    </section>
   );
 }
 

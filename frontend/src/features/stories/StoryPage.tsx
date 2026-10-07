@@ -135,6 +135,7 @@ export function StoryPage() {
       <MediaSections
         media={s.media}
         personLink={(id) => `/trees/${treeId}/people/${id}`}
+        comments={{ treeId, role }}
         Section={({ title, children }) => (
           <section className="space-y-2">
             <h2 className="text-bark-700 text-xs font-semibold tracking-wide uppercase">{title}</h2>

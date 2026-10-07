@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phases 1–7 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media; sources, stories and collaboration). Map, timeline, relationship calculator and statistics are next. See [Features](#features) for what works today.
+> **Status:** Phases 1–8 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media; sources, stories and collaboration; map, timeline, relationship calculator, statistics and "On this day"). GEDCOM import, integrity checks and scheduled backups are next. See [Features](#features) for what works today.
 
 ---
 
@@ -86,7 +86,12 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Works on tablet and mobile (touch pan/zoom, full-width panel)
 - ✅ Smooth with 2,000+ people (viewport culling; layout in worker)
 - ✅ Gallery, documents, audio/video on the person page; sources, stories, research questions and comments
-- 📋 Relationship calculator, map view, family timeline, "On this day", statistics (phase 8)
+- ✅ Relationship calculator: "how is B related to A?" with the kinship term in Ukrainian (двоюрідний, троюрідний…; тесть / свекор…), English (first cousin once removed…) or Polish, half / adoptive notes, the closest common ancestors and the path through the tree
+- ✅ Family map (OpenStreetMap): places of birth, life, marriage, migration, death and burial (graves at their own GPS point); filters by event type and person, with the person's life path drawn in order
+- ✅ Family timeline: every dated event and marriage in chronological order, grouped by decade; filters by event type, person and years
+- ✅ "On this day": birthdays, wedding anniversaries and memorial days for a date or the coming week / month
+- ✅ Statistics: people, generations, period covered, oldest ancestor, longest life, average lifespan, surnames (spellings in different scripts grouped), first names, births and deaths by decade
+- ✅ Tree navigation bar with all views; "How are we related?", "On the map" and "Timeline" links on every person page
 
 ### Builder mode (editors and admins)
 - ✅ View / Builder toggle on the tree
@@ -122,7 +127,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Comments on people and stories; open research questions per person (open → resolved with an answer)
 - ✅ Data-quality panel: people without a birth record, without a photo, without any source, with date problems, and open research questions
 - ✅ Sources, citations and stories have full history and go through the trash bin
-- 🚧 Attaching scans to sources, media to stories, and comments on media: available in the API, UI in phase 8
+- ✅ Media picker (tree library, search, upload for editors) to attach scans to sources and photos / documents to stories; comments on photos and videos in the lightbox
 
 ### Data safety
 - 📋 GEDCOM 5.5.1 import with preview and duplicate detection

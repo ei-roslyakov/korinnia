@@ -7,9 +7,10 @@ import { useSaveStory, useStory, useStoryAction } from "@/features/collab/api";
 import { clearDraft, fromPartialDate, toPayload } from "@/features/builder/helpers";
 import { MarkdownEditor } from "@/features/builder/MarkdownEditor";
 import { PartialDateInput } from "@/features/builder/PartialDateInput";
+import { MediaAttach } from "@/features/media/MediaAttach";
 import { PersonCombobox } from "@/features/person/PersonCombobox";
 import { useTree } from "@/features/tree/api";
-import type { PartialDateInput as DateValue, Story } from "@/lib/genealogy";
+import type { PartialDateInput as DateValue, MediaItem, Story } from "@/lib/genealogy";
 import { atLeast } from "@/lib/types";
 
 export function StoryEditorPage() {
@@ -48,6 +49,7 @@ function StoryForm({
   const [people, setPeople] = useState(
     story?.persons.map((p) => ({ id: p.id, name: p.display_name })) ?? [],
   );
+  const [media, setMedia] = useState<MediaItem[]>(story?.media ?? []);
   const draftKey = `korinnia.draft.story.${story?.id ?? "new"}`;
 
   const submit = async (then: "stay" | "submit" | "publish") => {
@@ -58,6 +60,7 @@ function StoryForm({
       date: toPayload(date),
       body,
       person_ids: people.map((p) => p.id),
+      media_ids: media.map((m) => m.id),
       ...(story ? {} : { status: then === "publish" ? "published" : "draft" }),
     });
     clearDraft(draftKey);
@@ -127,6 +130,13 @@ function StoryForm({
         onChange={setBody}
         draftKey={draftKey}
         rows={16}
+      />
+      <MediaAttach
+        treeId={treeId}
+        label={t("collab.story.media")}
+        value={media}
+        onChange={setMedia}
+        canUpload={isEditor}
       />
       <ErrorAlert error={save.error ?? action.error} />
       <div className="flex flex-wrap gap-2">

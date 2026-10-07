@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router";
 
 import { Layout } from "@/components/Layout";
@@ -15,6 +16,10 @@ import { RequireAuth } from "@/features/auth/RequireAuth";
 import { ResetPasswordPage } from "@/features/auth/ResetPasswordPage";
 import { ModerationPage } from "@/features/collab/ModerationPage";
 import { QualityPage } from "@/features/collab/QualityPage";
+import { OnThisDayPage } from "@/features/insights/OnThisDayPage";
+import { RelationshipPage } from "@/features/insights/RelationshipPage";
+import { StatsPage } from "@/features/insights/StatsPage";
+import { TimelinePage } from "@/features/insights/TimelinePage";
 import { PersonPage } from "@/features/person/PersonPage";
 import { SourcesPage } from "@/features/sources/SourcesPage";
 import { StoriesPage } from "@/features/stories/StoriesPage";
@@ -23,7 +28,11 @@ import { StoryPage } from "@/features/stories/StoryPage";
 import { MembersPage } from "@/features/tree/MembersPage";
 import { TreeViewPage } from "@/features/tree/TreeViewPage";
 import { TreesPage } from "@/features/tree/TreesPage";
+import { Spinner } from "@/components/ui";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+
+// Leaflet and the map page load only when the map is opened.
+const MapPage = lazy(() => import("@/features/map/MapPage"));
 
 export function App() {
   return (
@@ -128,6 +137,48 @@ export function App() {
           element={
             <RequireAuth>
               <QualityPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/timeline"
+          element={
+            <RequireAuth>
+              <TimelinePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/map"
+          element={
+            <RequireAuth>
+              <Suspense fallback={<Spinner />}>
+                <MapPage />
+              </Suspense>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/on-this-day"
+          element={
+            <RequireAuth>
+              <OnThisDayPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/relationship"
+          element={
+            <RequireAuth>
+              <RelationshipPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/stats"
+          element={
+            <RequireAuth>
+              <StatsPage />
             </RequireAuth>
           }
         />

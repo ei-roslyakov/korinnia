@@ -104,5 +104,8 @@ New `persons` columns: `primary_photo_id` (FK `media_files`), `primary_photo_cro
 
 `citations`, `comments` and `edit_suggestions` point at their target with a plain (`entity_type`, `entity_id`) pair rather than a foreign key, so one table covers every kind of fact. The service checks that the target exists in the same tree.
 
+### Phase 8: insights
+No new tables. The timeline, map, "on this day", relationship calculator and statistics are computed from the tables above when requested.
+
 ### Planned
 GEDCOM import bookkeeping and integrity-check results (phase 9); share links (phase 10); export jobs (phase 11). Each section is documented here when it is implemented.

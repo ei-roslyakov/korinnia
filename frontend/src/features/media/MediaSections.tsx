@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { formatPartialDate } from "@/lib/dates";
 import { formatSize } from "@/lib/format";
 import { isVisual, type MediaItem } from "@/lib/genealogy";
+import type { Role } from "@/lib/types";
 
 import { Lightbox } from "./Lightbox";
 
@@ -17,9 +18,11 @@ export function MediaSections({
   media,
   personLink,
   Section,
+  comments,
 }: {
   media: MediaItem[];
   personLink: (id: string) => string;
+  comments?: { treeId: string; role: Role };
   Section: (props: { title: string; children: React.ReactNode }) => React.ReactNode;
 }) {
   const { t, i18n } = useTranslation();
@@ -155,6 +158,7 @@ export function MediaSections({
           onIndex={setOpen}
           onClose={() => setOpen(null)}
           personLink={personLink}
+          comments={comments}
         />
       )}
     </>

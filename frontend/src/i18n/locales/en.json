@@ -629,7 +629,18 @@
     "addPerson": "Add a person to this item…",
     "done": "Done",
     "cropHint": "Drag a square around the face for the portrait shown on the tree.",
-    "cropNote": "The portrait is a separate cropped copy; the original photo is never changed."
+    "cropNote": "The portrait is a separate cropped copy; the original photo is never changed.",
+    "comments": "Comments",
+    "picker": {
+      "title": "Tree media library",
+      "search": "Search files…",
+      "upload": "Upload new",
+      "empty": "No files found.",
+      "done": "Done",
+      "add": "Add media",
+      "selected_one": "{{count}} file selected",
+      "selected_other": "{{count}} files selected"
+    }
   },
   "collab": {
     "sources": "Sources",
@@ -686,7 +697,8 @@
       "search": "Search sources…",
       "none": "No sources yet.",
       "citations": "Cited {{count}}×",
-      "confirmDelete": "Move this source and all its citations to the trash?"
+      "confirmDelete": "Move this source and all its citations to the trash?",
+      "scans": "Scans and files of this source"
     },
     "cite": {
       "hint": "Attach the sources that confirm this person's facts.",
@@ -717,7 +729,8 @@
       "addPerson": "Add a person this story is about…",
       "body": "Story",
       "saveDraft": "Save draft",
-      "moderationNote": "Your story is published after an editor reviews it."
+      "moderationNote": "Your story is published after an editor reviews it.",
+      "media": "Photos and documents"
     },
     "moderation": {
       "title": "Moderation",
@@ -775,6 +788,119 @@
       "date": "Date",
       "place_id": "Place",
       "description": "Description"
+    }
+  },
+  "insights": {
+    "nav": {
+      "label": "Tree sections",
+      "timeline": "Timeline",
+      "map": "Map",
+      "onThisDay": "On this day",
+      "relationship": "Relationship",
+      "stats": "Statistics"
+    },
+    "clearPerson": "Clear person",
+    "categories": {
+      "label": "Event types",
+      "birth": "Births",
+      "family": "Marriages",
+      "life": "Life",
+      "migration": "Moves",
+      "death": "Deaths & burials"
+    },
+    "factTypes": {
+      "civil_union": "Civil union",
+      "partnership": "Partnership",
+      "separation": "Separation",
+      "partnership_end": "End of relationship"
+    },
+    "timeline": {
+      "title": "Family timeline",
+      "person": "One person's events…",
+      "from": "From year",
+      "to": "To year",
+      "decade": "{{decade}}s",
+      "empty": "No events found.",
+      "more": "Show more",
+      "shown": "Showing {{shown}} of {{total}}",
+      "undated_one": "{{count}} event without a date is not shown.",
+      "undated_other": "{{count}} events without a date are not shown."
+    },
+    "onThisDay": {
+      "title": "On this day",
+      "date": "Date",
+      "range": "Range",
+      "ranges": {
+        "0": "This day only",
+        "7": "This day and the next 7",
+        "30": "The next 30 days"
+      },
+      "today": "Today",
+      "hint": "Birthdays, wedding anniversaries and memorial days. Only exactly known dates (day, month and year) are included.",
+      "empty": "No exactly known dates fall on these days.",
+      "yearsAgo_one": "{{count}} year ago",
+      "yearsAgo_other": "{{count}} years ago"
+    },
+    "map": {
+      "title": "Family map",
+      "person": "One person's places…",
+      "onMap": "On the map",
+      "allPlaces": "All places",
+      "empty": "No places with coordinates for these filters.",
+      "places_one": "{{count}} place",
+      "places_other": "{{count}} places",
+      "unplaced_one": "{{count}} event is not shown: its place has no coordinates.",
+      "unplaced_other": "{{count}} events are not shown: their places have no coordinates."
+    },
+    "kinship": {
+      "title": "How are we related?",
+      "howRelated": "How are we related?",
+      "personA": "First person",
+      "personB": "Second person",
+      "choose": "Find a person…",
+      "swap": "Swap",
+      "hint": "Choose two people to see how they are related.",
+      "whoIs": "What {{b}} is to {{a}}",
+      "commonAncestors": "Closest common ancestors",
+      "path": "Path in the tree",
+      "legend": "↑ parent · ↓ child · ⚭ marriage or partnership",
+      "edges": {
+        "parent": "parent",
+        "child": "child",
+        "partner": "partner"
+      },
+      "nonBiological": "The connection runs through adoption, fostering or a step-parent.",
+      "steps_one": "Connected through {{count}} step in the tree.",
+      "steps_other": "Connected through {{count}} steps in the tree."
+    },
+    "stats": {
+      "title": "Statistics",
+      "persons": "People",
+      "generations": "Generations",
+      "period": "Period",
+      "partnerships": "Couples",
+      "places": "Places",
+      "events": "Events",
+      "male": "Men",
+      "female": "Women",
+      "living": "Living",
+      "media": "Media files",
+      "sources": "Sources",
+      "stories": "Stories",
+      "notable": "Notable",
+      "oldestAncestor": "Oldest known ancestor",
+      "longestLived": "Longest life",
+      "averageLifespan": "Average lifespan",
+      "age_one": "{{count}} year",
+      "age_other": "{{count}} years",
+      "averageValue_one": "{{years}} years (from {{count}} person with known dates)",
+      "averageValue_other": "{{years}} years (from {{count}} people with known dates)",
+      "surnames": "Surnames",
+      "firstNames": "Most common first names",
+      "byDecade": "Births and deaths by decade",
+      "births": "Births",
+      "deaths": "Deaths",
+      "none": "No data yet."
     }
   }
 }

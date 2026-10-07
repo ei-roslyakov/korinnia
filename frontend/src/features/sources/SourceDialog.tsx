@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import { Button, Dialog, ErrorAlert, Field, Input, Select, TextArea } from "@/components/ui";
 import { useSaveSource } from "@/features/collab/api";
-import { SOURCE_TYPES, type Source, type SourceType } from "@/lib/genealogy";
+import { MediaAttach } from "@/features/media/MediaAttach";
+import { SOURCE_TYPES, type MediaItem, type Source, type SourceType } from "@/lib/genealogy";
 
 export function SourceDialog({
   treeId,
@@ -29,6 +30,7 @@ export function SourceDialog({
     url: source?.url ?? "",
     notes: source?.notes ?? "",
   });
+  const [media, setMedia] = useState<MediaItem[]>(source?.media ?? []);
   const set = (patch: Partial<typeof v>) => setV({ ...v, ...patch });
   const orNull = (s: string) => s.trim() || null;
 
@@ -45,6 +47,7 @@ export function SourceDialog({
         reference_number: orNull(v.reference_number),
         url: orNull(v.url),
         notes: orNull(v.notes),
+        media_ids: media.map((m) => m.id),
       },
       { onSuccess: (s) => (onSaved ? onSaved(s) : onClose()) },
     );
@@ -126,6 +129,13 @@ export function SourceDialog({
             />
           )}
         </Field>
+        <MediaAttach
+          treeId={treeId}
+          label={t("collab.sourcesPage.scans")}
+          value={media}
+          onChange={setMedia}
+          canUpload
+        />
         <ErrorAlert error={save.error} />
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>

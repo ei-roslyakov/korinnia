@@ -406,3 +406,137 @@ export interface DataQuality {
   date_problems: { person: PersonSummary; warnings: DataWarning[] }[];
   open_questions: OpenQuestion[];
 }
+
+// --- Phase 8: timeline, map, on this day, kinship, statistics --------------------------------
+
+export type FactKind = "event" | "partnership_start" | "partnership_end";
+
+export interface FactPerson {
+  id: string;
+  display_name: string;
+  role: string;
+}
+
+/** An event, or the start / end of a partnership (type: marriage, civil_union, divorce…). */
+export interface Fact {
+  kind: FactKind;
+  id: string;
+  type: string;
+  title: string | null;
+  date: PartialDate | null;
+  place: PlaceSummary | null;
+  latitude: string | null;
+  longitude: string | null;
+  cemetery_name: string | null;
+  persons: FactPerson[];
+}
+
+export interface TimelinePage {
+  items: Fact[];
+  total: number;
+  limit: number;
+  offset: number;
+  undated: number;
+}
+
+export interface Anniversary {
+  on: string;
+  years: number;
+  fact: Fact;
+}
+
+export interface OnThisDay {
+  start: string;
+  days: number;
+  items: Anniversary[];
+}
+
+export interface MapPoint {
+  latitude: string;
+  longitude: string;
+  label: string;
+  place_id: string | null;
+  facts: Fact[];
+}
+
+export interface MapData {
+  points: MapPoint[];
+  unplaced: number;
+  places_without_coordinates: PlaceSummary[];
+}
+
+export type KinshipEdge = "parent" | "child" | "partner";
+export type KinshipKind = "same" | "blood" | "partner" | "in_law" | "distant" | "none";
+
+export interface PathStep {
+  person: PersonSummary;
+  edge: KinshipEdge | null;
+}
+
+export interface Relationship {
+  a: PersonSummary;
+  b: PersonSummary;
+  kind: KinshipKind;
+  up: number | null;
+  down: number | null;
+  half: boolean;
+  non_biological: boolean;
+  side: "partner_relative" | "relative_partner" | null;
+  via: PersonSummary | null;
+  common_ancestors: PersonSummary[];
+  path: PathStep[];
+}
+
+export interface NameCount {
+  name: string;
+  count: number;
+  variants: string[];
+}
+
+export interface TreeStats {
+  persons: number;
+  male: number;
+  female: number;
+  other_gender: number;
+  living: number;
+  deceased: number;
+  generations: number;
+  partnerships: number;
+  places: number;
+  events: number;
+  media: number;
+  sources: number;
+  stories: number;
+  earliest_year: number | null;
+  latest_year: number | null;
+  oldest_ancestor: { person: PersonSummary; years: number | null } | null;
+  longest_lived: { person: PersonSummary; years: number | null } | null;
+  average_lifespan: number | null;
+  lifespan_sample: number;
+  surnames: NameCount[];
+  first_names: NameCount[];
+  by_decade: { decade: number; births: number; deaths: number }[];
+}
+
+/** Fact types grouped for filters (timeline and map). */
+export const FACT_CATEGORIES = {
+  birth: ["birth", "baptism"],
+  family: ["marriage", "civil_union", "partnership", "divorce", "separation", "partnership_end"],
+  life: [
+    "education",
+    "graduation",
+    "military_service",
+    "occupation",
+    "residence",
+    "award",
+    "illness",
+    "custom",
+  ],
+  migration: ["emigration", "immigration"],
+  death: ["death", "burial"],
+} as const;
+export type FactCategory = keyof typeof FACT_CATEGORIES;
+export const factCategory = (type: string): FactCategory =>
+  (Object.keys(FACT_CATEGORIES) as FactCategory[]).find((c) =>
+    (FACT_CATEGORIES[c] as readonly string[]).includes(type),
+  ) ?? "life";
