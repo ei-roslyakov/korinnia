@@ -5,6 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+from urllib.parse import quote
 
 from pydantic import Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -56,6 +57,10 @@ class Settings(BaseSettings):
     superadmin_email: str | None = None
     superadmin_password: SecretStr | None = None
 
+    # --- Demo ---------------------------------------------------------------------
+    # Give every new account its own copy of the fictional demo family to explore.
+    demo_tree_for_new_users: bool = True
+
     # --- Uploads / media ----------------------------------------------------------
     max_upload_size_mb: int = 2048
     # Hand file downloads to nginx (X-Accel-Redirect to its internal /_media/ location).
@@ -67,9 +72,11 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         if self.database_url_override:
             return self.database_url_override
+        # Percent-encode credentials: generated passwords may contain URL characters (@ # / :).
+        user = quote(self.postgres_user, safe="")
+        password = quote(self.postgres_password.get_secret_value(), safe="")
         return (
-            f"postgresql+psycopg://{self.postgres_user}:"
-            f"{self.postgres_password.get_secret_value()}@{self.postgres_host}:"
+            f"postgresql+psycopg://{user}:{password}@{self.postgres_host}:"
             f"{self.postgres_port}/{self.postgres_db}"
         )
 

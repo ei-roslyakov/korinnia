@@ -18,6 +18,16 @@ def test_database_url_from_parts() -> None:
     assert s.libpq_conninfo == "postgresql://u:p@db:5432/d"
 
 
+def test_database_url_encodes_credentials() -> None:
+    s = Settings(
+        postgres_host="db",
+        postgres_user="app-db",
+        postgres_password=SecretStr("p@ss#w/rd:%"),
+        postgres_db="d",
+    )
+    assert s.database_url == "postgresql+psycopg://app-db:p%40ss%23w%2Frd%3A%25@db:5432/d"
+
+
 def test_database_url_override() -> None:
     s = Settings(DATABASE_URL="postgresql+psycopg://x:y@h/z")
     assert s.database_url == "postgresql+psycopg://x:y@h/z"
