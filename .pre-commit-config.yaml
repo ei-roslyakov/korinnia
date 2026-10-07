@@ -5,7 +5,9 @@ repos:
     rev: v6.0.0
     hooks:
       - id: trailing-whitespace
+        exclude: ^frontend/public/third-party-notices\.txt$  # generated (make notices)
       - id: end-of-file-fixer
+        exclude: ^frontend/public/third-party-notices\.txt$
       - id: check-yaml
         args: ["--unsafe"]  # syntax only: compose files use custom tags (!override)
         exclude: ^deploy/helm/.*/templates/  # Go templates, not plain YAML (helm lint checks them)

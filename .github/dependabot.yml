@@ -1,0 +1,14 @@
+# Actions are pinned to commit SHAs (supply-chain safety); Dependabot proposes updates to
+# newer releases as pull requests, keeping the SHA and the version comment in step.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Supply-chain safety: only propose releases that are at least a week old.
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]

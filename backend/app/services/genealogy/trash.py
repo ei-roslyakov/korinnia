@@ -11,7 +11,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import ScalarResult, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -185,7 +185,7 @@ async def _person_label(session: AsyncSession, person_id: uuid.UUID) -> str:
 async def list_trash(session: AsyncSession, tree_id: uuid.UUID) -> list[TrashItem]:
     items: list[TrashItem] = []
     for entity_type, model in MODELS.items():
-        roots = await session.scalars(
+        roots: ScalarResult[Any] = await session.scalars(
             select(model).where(
                 model.tree_id == tree_id,
                 model.deleted_at.is_not(None),

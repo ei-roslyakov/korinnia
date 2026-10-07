@@ -20,6 +20,8 @@ export default defineConfig({
     proxy: {
       "/api": { target: apiTarget, changeOrigin: false },
     },
+    // Live reload on its own path, so nginx forwards WebSocket upgrades only there.
+    hmr: { path: "/__vite_hmr" },
   },
   build: {
     sourcemap: true,

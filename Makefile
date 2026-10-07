@@ -62,6 +62,10 @@ revision: ## Autogenerate a migration: make revision m="add person table"
 psql: ## Open psql in the database
 	$(COMPOSE) exec postgres sh -c 'psql -U $$POSTGRES_USER -d $$POSTGRES_DB'
 
+.PHONY: notices
+notices: ## Regenerate third-party licence notices (frontend/public/third-party-notices.txt)
+	sh scripts/third-party-notices.sh
+
 .PHONY: seed
 seed: ## Give every user their own demo family (25 people, 5 generations)
 	$(COMPOSE) exec backend python -m app.seed --all-users

@@ -38,8 +38,8 @@ jobs:
       POSTGRES_PASSWORD: korinnia
       POSTGRES_DB: korinnia_test
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
         with:
           enable-cache: true
       - run: uv sync --frozen --python 3.12
@@ -55,8 +55,8 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
@@ -72,8 +72,8 @@ jobs:
     name: Helm chart — lint, render
     runs-on: korinnia-runners
     steps:
-      - uses: actions/checkout@v7
-      - uses: azure/setup-helm@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
       - run: |
           helm lint deploy/helm/korinnia --strict \
             --set secrets.secretKey=ci --set database.password=ci
@@ -88,12 +88,12 @@ jobs:
       contents: read
       packages: write  # push images on main
     steps:
-      - uses: actions/checkout@v7
-      - uses: docker/setup-buildx-action@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       # Self-hosted ARC runner image ships the docker CLI + buildx but not the compose plugin
-      - uses: docker/setup-compose-action@v1
+      - uses: docker/setup-compose-action@2fe291b7677a45ee1269ec56a42604c143505e7e # v1.3.0
       - name: Build backend image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: backend
           target: prod
@@ -105,7 +105,7 @@ jobs:
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
       - name: Build nginx image (includes frontend build)
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           file: deploy/nginx/Dockerfile
@@ -123,7 +123,7 @@ jobs:
           echo "ENVIRONMENT=production" >> .env
           docker compose -f docker-compose.yml up -d --no-build --wait
           docker compose -f docker-compose.yml exec -T backend python -m app.seed
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
@@ -143,7 +143,7 @@ jobs:
       # these sha-<commit> images to a version tag without rebuilding them.
       - name: Log in to GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: docker/login-action@v4
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

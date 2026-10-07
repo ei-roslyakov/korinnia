@@ -258,12 +258,19 @@ frontend/   React + TypeScript app (src/features/* per feature area, src/i18n lo
             Vitest unit tests, Playwright E2E tests (e2e/)
 deploy/     nginx/ (image, config, templates), scripts/ (backup.sh, restore.sh)
 docs/       Architecture decisions, data schema, backup & restore, user guide
+scripts/    Maintenance helpers (third-party licence notices)
 .github/    CI workflow
 ```
 
 ## Backup & restore
 
 `make backup` writes `backups/<UTC timestamp>/` containing a `pg_dump` of the database, a plain `tar` of the media volume and a `SHA256SUMS` file. `make restore dir=backups/<timestamp>` verifies the checksums, then replaces the database and the media. Scheduled backups, retention and off-site copies come in phase 9. See [docs/backup-restore.md](docs/backup-restore.md).
+
+## License
+
+Copyright © 2026 Yevhenii Rosliakov. **All rights reserved.** Korinnia is proprietary software: no licence to use, copy, modify or distribute it is granted without written permission (see [LICENSE](LICENSE)). Family content added to an installation belongs to its authors.
+
+Korinnia uses open-source components under their own licences; their notices are in [frontend/public/third-party-notices.txt](frontend/public/third-party-notices.txt), served by the app at `/third-party-notices.txt` and linked in the footer. Regenerate it after changing dependencies with `make notices`.
 
 ## Documentation
 

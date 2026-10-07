@@ -49,7 +49,7 @@ test("upload a photo, previews are generated, it becomes the portrait", async ({
   // Open the editor (search → panel → edit).
   await page.getByRole("button", { name: "Редагування" }).click();
   await page.getByRole("combobox", { name: /Знайти людину/ }).fill(surname);
-  await page.getByRole("option", { name: new RegExp(`Emily ${surname}`) }).click();
+  await page.getByRole("option", { name: `Emily ${surname}` }).click();
   await page.getByRole("complementary").getByRole("link", { name: "Редагувати" }).click();
   await page.getByRole("tab", { name: "Медіа" }).click();
 
@@ -100,7 +100,7 @@ test("upload a photo, previews are generated, it becomes the portrait", async ({
   await page.getByRole("link", { name: "Переглянути сторінку" }).click();
   const avatar = page.locator("article header img");
   await expect(avatar).toHaveAttribute("src", /\/avatar\?v=/, { timeout: 30_000 });
-  await page.getByRole("button", { name: new RegExp(`Emily ${tag}`) }).click();
+  await page.getByRole("button", { name: `Emily ${tag}` }).click();
   await expect(page.getByRole("dialog").locator("img").first()).toBeVisible();
   await page.keyboard.press("Escape");
 });

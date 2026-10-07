@@ -948,5 +948,9 @@
     "light": "Light",
     "dark": "Dark",
     "sepia": "Archive"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "thirdParty": "Third-party licences"
   }
 }

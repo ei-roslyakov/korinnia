@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Korinnia — self-hosted family archive & interactive family tree (backend)"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
+license = { text = "Proprietary. All rights reserved." }
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.32",
@@ -38,6 +39,8 @@ dev = [
 
 [tool.uv]
 package = false
+# Supply-chain safety: ignore package versions published in the last 7 days.
+exclude-newer = "7 days"
 
 [tool.ruff]
 line-length = 100
