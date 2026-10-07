@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "korinnia.fullname" . }}-backend
+  labels:
+    {{- include "korinnia.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      {{- include "korinnia.selectorLabels" (list . "backend") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "korinnia.selectorLabels" (list . "backend") | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: backend
+          image: {{ include "korinnia.image" (list . .Values.image.backend) }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Applies migrations and bootstraps the superadmin, then starts uvicorn.
+          args: ["api"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "korinnia.fullname" . }}-config
+          env:
+            {{- include "korinnia.backendEnv" . | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 8000
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60  # migrations may take a while
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          volumeMounts:
+            - name: media
+              mountPath: /data/media
+      volumes:
+        {{- include "korinnia.mediaVolume" . | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "korinnia.fullname" . }}-backend
+  labels:
+    {{- include "korinnia.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "korinnia.selectorLabels" (list . "backend") | nindent 4 }}
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http

@@ -9,6 +9,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+
+permissions:
+  contents: read
+
 jobs:
   backend:
     name: Backend — lint, types, tests
@@ -62,10 +68,25 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  chart:
+    name: Helm chart — lint, render
+    runs-on: korinnia-runners
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-helm@v4
+      - run: |
+          helm lint deploy/helm/korinnia --strict \
+            --set secrets.secretKey=ci --set database.password=ci
+          helm template korinnia deploy/helm/korinnia \
+            --set secrets.secretKey=ci --set database.password=ci --set ingress.enabled=true > /dev/null
+
   images-e2e:
     name: Docker images + end-to-end tests
     runs-on: korinnia-runners
     needs: [backend, frontend]
+    permissions:
+      contents: read
+      packages: write  # push images on main
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v4
@@ -77,6 +98,9 @@ jobs:
           context: backend
           target: prod
           tags: korinnia/backend:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           load: true
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
@@ -87,6 +111,9 @@ jobs:
           file: deploy/nginx/Dockerfile
           target: prod
           tags: korinnia/nginx:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           load: true
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,mode=max,scope=nginx
@@ -112,3 +139,23 @@ jobs:
       - name: Stack logs
         if: failure()
         run: docker compose -f docker-compose.yml logs
+      # Only images that passed the e2e tests are published. Releases (release.yml) promote
+      # these sha-<commit> images to a version tag without rebuilding them.
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push images
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          sha="sha-${GITHUB_SHA::7}"
+          for img in backend nginx; do
+            for tag in "$sha" main; do
+              docker tag "korinnia/$img:latest" "$IMAGE_PREFIX/$img:$tag"
+              docker push "$IMAGE_PREFIX/$img:$tag"
+            done
+            echo "- \`$IMAGE_PREFIX/$img:$sha\`" >> "$GITHUB_STEP_SUMMARY"
+          done

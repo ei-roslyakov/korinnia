@@ -1,0 +1,119 @@
+# Korinnia Helm chart. All application settings are environment variables (see .env.example).
+
+image:
+  registry: ghcr.io
+  backend:
+    repository: ei-roslyakov/korinnia/backend
+    # Defaults to the chart's appVersion.
+    tag: ""
+  nginx:
+    repository: ei-roslyakov/korinnia/nginx
+    tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+#  - name: ghcr-pull
+
+nameOverride: ""
+fullnameOverride: ""
+
+# --- Application settings ---------------------------------------------------------------
+config:
+  environment: production
+  logLevel: INFO
+  # Public URL of the app, used in invitation / password-reset links.
+  publicBaseUrl: https://korinnia.example.com
+  # Auth cookies get the Secure flag; keep true behind TLS.
+  cookieSecure: true
+  maxUploadSizeMb: 2048
+  workerConcurrency: 2
+  # Extra plain environment variables for backend and worker.
+  extraEnv: {}
+
+# --- Database (external PostgreSQL 16, e.g. a CloudNativePG cluster) ----------------------
+database:
+  host: postgres
+  port: 5432
+  name: korinnia
+  user: korinnia
+  # Secret holding the password (a CNPG basic-auth secret works as is).
+  existingSecret: ""
+  passwordKey: password
+  # Only used when existingSecret is empty (development; prefer existingSecret).
+  password: ""
+
+# --- Secrets ----------------------------------------------------------------------------
+# Either point at an existing Secret with the keys below, or let the chart create one.
+secrets:
+  existingSecret: ""
+  keys:
+    secretKey: secret-key
+    superadminEmail: superadmin-email
+    superadminPassword: superadmin-password
+  # Only used when existingSecret is empty.
+  secretKey: ""
+  superadminEmail: ""
+  superadminPassword: ""
+
+# --- Media volume (shared by backend, worker and nginx -> ReadWriteMany) -------------------
+persistence:
+  existingClaim: ""
+  storageClass: ""
+  accessMode: ReadWriteMany
+  size: 20Gi
+  # Never delete the media volume together with the release.
+  keep: true
+
+# --- Components -------------------------------------------------------------------------
+backend:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+
+worker:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      # ffmpeg transcodes video; give it room.
+      cpu: "2"
+      memory: 2Gi
+
+nginx:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 20m
+      memory: 32Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+podSecurityContext:
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+podAnnotations: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: korinnia.example.com
+  tls: []
+  #  - secretName: korinnia-tls
+  #    hosts: [korinnia.example.com]

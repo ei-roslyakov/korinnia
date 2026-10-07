@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "korinnia.fullname" . }}-nginx
+  labels:
+    {{- include "korinnia.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx
+spec:
+  replicas: {{ .Values.nginx.replicas }}
+  selector:
+    matchLabels:
+      {{- include "korinnia.selectorLabels" (list . "nginx") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "korinnia.selectorLabels" (list . "nginx") | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nginx
+          image: {{ include "korinnia.image" (list . .Values.image.nginx) }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: NGINX_BACKEND_UPSTREAM
+              value: "{{ include "korinnia.fullname" . }}-backend:8000"
+            - name: NGINX_MAX_BODY_SIZE
+              value: "{{ .Values.config.maxUploadSizeMb }}m"
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /nginx-health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /nginx-health
+              port: http
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.nginx.resources | nindent 12 }}
+          volumeMounts:
+            # Serves media after the backend authorises a request (X-Accel-Redirect).
+            - name: media
+              mountPath: /data/media
+              readOnly: true
+      volumes:
+        {{- include "korinnia.mediaVolume" . | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "korinnia.fullname" . }}
+  labels:
+    {{- include "korinnia.labels" . | nindent 4 }}
+    app.kubernetes.io/component: nginx
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "korinnia.selectorLabels" (list . "nginx") | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http

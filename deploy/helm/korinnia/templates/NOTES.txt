@@ -1,0 +1,11 @@
+Korinnia {{ .Chart.AppVersion }} deployed as "{{ .Release.Name }}" in "{{ .Release.Namespace }}".
+{{- if .Values.ingress.enabled }}
+
+  URL: {{ .Values.config.publicBaseUrl }}
+{{- else }}
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "korinnia.fullname" . }} 8080:{{ .Values.service.port }}
+{{- end }}
+
+Operator CLI:
+  kubectl -n {{ .Release.Namespace }} exec deploy/{{ include "korinnia.fullname" . }}-backend -- python -m app.cli --help

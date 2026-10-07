@@ -1,0 +1,113 @@
+name: Release
+
+# Cuts a version: promotes the images CI built and tested for the current main commit
+# (sha-<commit>) to X.Y.Z, publishes the Helm chart as an OCI artifact with the same version,
+# and tags the commit vX.Y.Z with a GitHub release. Argo CD (sandbox repo) deploys the chart
+# version pinned in its Application; Renovate opens a PR there when a new chart is published.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Which part of the version to increase
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write  # tag + GitHub release
+  packages: write  # image tags + chart
+
+env:
+  IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+  CHART_REPO: oci://ghcr.io/${{ github.repository_owner }}/charts
+
+jobs:
+  release:
+    name: Release
+    runs-on: korinnia-runners
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # all tags
+
+      - name: Next version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+          last=${last:-v0.0.0}
+          IFS=. read -r major minor patch <<< "${last#v}"
+          case "$BUMP" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+          version="$major.$minor.$patch"
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "::error::Tag v$version already exists"; exit 1
+          fi
+          echo "Releasing $last -> v$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "minor=$major.$minor" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Promote tested images
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          MINOR: ${{ steps.version.outputs.minor }}
+        run: |
+          sha="sha-${GITHUB_SHA::7}"
+          for img in backend nginx; do
+            if ! docker buildx imagetools inspect "$IMAGE_PREFIX/$img:$sha" >/dev/null 2>&1; then
+              echo "::error::$IMAGE_PREFIX/$img:$sha not found — wait for CI on this commit to pass"
+              exit 1
+            fi
+          done
+          for img in backend nginx; do
+            docker buildx imagetools create \
+              -t "$IMAGE_PREFIX/$img:$VERSION" \
+              -t "$IMAGE_PREFIX/$img:$MINOR" \
+              -t "$IMAGE_PREFIX/$img:latest" \
+              "$IMAGE_PREFIX/$img:$sha"
+          done
+
+      - uses: azure/setup-helm@v4
+      - name: Publish Helm chart
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GHCR_TOKEN" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+          helm package deploy/helm/korinnia --version "$VERSION" --app-version "$VERSION" -d dist
+          helm push "dist/korinnia-$VERSION.tgz" "$CHART_REPO"
+
+      - name: Tag and create GitHub release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v$VERSION" --target "$GITHUB_SHA" --title "v$VERSION" --generate-notes
+          {
+            echo "## Korinnia v$VERSION"
+            echo ""
+            echo "| Artifact | Reference |"
+            echo "| --- | --- |"
+            echo "| Backend image | \`$IMAGE_PREFIX/backend:$VERSION\` |"
+            echo "| nginx image | \`$IMAGE_PREFIX/nginx:$VERSION\` |"
+            echo "| Helm chart | \`$CHART_REPO/korinnia --version $VERSION\` |"
+            echo "| Commit | \`$GITHUB_SHA\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
