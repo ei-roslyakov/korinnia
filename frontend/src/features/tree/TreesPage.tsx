@@ -16,10 +16,10 @@ import { EmptyState } from "@/components/EmptyState";
 import { Logo } from "@/components/Logo";
 import { CardsSkeleton } from "@/components/Skeleton";
 import { useMe } from "@/features/auth/api";
-import { useErrorMessage } from "@/lib/hooks";
 import type { Tree } from "@/lib/types";
 
-import { useCreateTree, useDeleteTree, useTrees } from "./api";
+import { useCreateTree, useTrees } from "./api";
+import { TreeActions } from "./TreeActions";
 
 export function TreesPage() {
   const { t } = useTranslation();
@@ -60,18 +60,16 @@ export function TreesPage() {
   );
 }
 
-/** A tree's card; its admins can delete the tree from here (a soft delete). */
+/** A tree's card; its admins can rename or delete the tree from here. */
 function TreeCard({ tree }: { tree: Tree }) {
   const { t } = useTranslation();
-  const del = useDeleteTree(tree.id);
-  const errorMessage = useErrorMessage();
-  const canDelete = tree.my_role === "admin";
+  const canManage = tree.my_role === "admin";
 
   return (
     <li className="relative">
       <Link
         to={`/trees/${tree.id}`}
-        className={`border-bark-100 hover:border-leaf-600 bg-surface block h-full rounded-lg border p-4 shadow-sm transition ${canDelete ? "pb-12" : ""}`}
+        className={`border-bark-100 hover:border-leaf-600 bg-surface block h-full rounded-lg border p-4 shadow-sm transition ${canManage ? "pb-12" : ""}`}
       >
         <div className="mb-3 flex items-start justify-between gap-2">
           {tree.cover?.length ? (
@@ -107,27 +105,12 @@ function TreeCard({ tree }: { tree: Tree }) {
           <p className="text-bark-700 line-clamp-3 text-sm">{tree.description}</p>
         )}
       </Link>
-      {canDelete && (
-        // Outside the link: a button cannot sit inside an <a>.
-        <div className="absolute right-3 bottom-3 left-4 flex items-center justify-end gap-2">
-          {del.error && (
-            <span role="alert" className="truncate text-xs text-red-700">
-              {errorMessage(del.error)}
-            </span>
-          )}
-          <Button
-            variant="ghost"
-            className="text-xs text-red-700"
-            aria-label={t("trees.deleteNamed", { name: tree.name })}
-            busy={del.isPending}
-            onClick={() => {
-              if (window.confirm(t("trees.confirmDelete", { name: tree.name }))) del.mutate();
-            }}
-          >
-            {t("common.delete")}
-          </Button>
-        </div>
-      )}
+      {/* Outside the link: a button cannot sit inside an <a>. */}
+      <TreeActions
+        tree={tree}
+        className="absolute right-3 bottom-3 left-4 justify-end"
+        buttonClassName="text-xs"
+      />
     </li>
   );
 }

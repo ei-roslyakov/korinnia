@@ -4,6 +4,7 @@ import { Link, useParams, useSearchParams } from "react-router";
 
 import { Button, ErrorAlert, Select, Spinner } from "@/components/ui";
 import { AddRelativeDialog } from "@/features/builder/AddRelativeDialog";
+import { DeletePersonDialog } from "@/features/builder/DeletePersonDialog";
 import { useResetLayout, useSaveLayoutOffsets } from "@/features/builder/api";
 import { useModerationCounts } from "@/features/collab/api";
 import { useGraph, usePerson } from "@/features/person/api";
@@ -12,6 +13,7 @@ import { PersonView } from "@/features/person/PersonView";
 import { atLeast, type Role } from "@/lib/types";
 
 import { useTree } from "./api";
+import { TreeActions } from "./TreeActions";
 import { TreeNav } from "./TreeNav";
 import { defaultFocus, focusSet, indexRelations } from "./canvas/familyGraph";
 import { TreeCanvas, type CenterRequest } from "./canvas/TreeCanvas";
@@ -190,6 +192,7 @@ export function TreeViewPage() {
                 {t("builder.resetLayout")}
               </Button>
             )}
+            <TreeActions tree={tree.data} leaveTo="/" />
           </div>
         )}
         {count > 0 && (
@@ -251,6 +254,7 @@ export function TreeViewPage() {
             personId={personId}
             showWarnings={canEdit}
             editLink={canEdit ? `/trees/${treeId}/people/${personId}/edit` : null}
+            canDelete={builder}
             role={tree.data.my_role}
             personLink={personLink}
             onClose={() => update({ person: null })}
@@ -285,6 +289,7 @@ function PersonPanel({
   personId,
   showWarnings,
   editLink,
+  canDelete,
   personLink,
   onClose,
   onFocus,
@@ -295,19 +300,21 @@ function PersonPanel({
   showWarnings: boolean;
   role: Role;
   editLink: string | null;
+  canDelete: boolean;
   personLink: (id: string) => string;
   onClose: () => void;
   onFocus: () => void;
 }) {
   const { t } = useTranslation();
   const person = usePerson(treeId, personId);
+  const [deleting, setDeleting] = useState(false);
   return (
     <aside
       aria-label={person.data?.display_name}
       className="border-bark-100 bg-surface absolute inset-y-0 right-0 z-10 flex w-full flex-col border-l shadow-xl motion-safe:animate-[panel-in_200ms_ease-out] sm:w-[28rem]"
     >
       <div className="border-bark-100 flex items-center justify-between gap-2 border-b px-4 py-2">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={onFocus}>
             {t("canvas.focusHere")}
           </Button>
@@ -324,6 +331,16 @@ function PersonPanel({
             >
               {t("builder.edit")}
             </Link>
+          )}
+          {canDelete && (
+            <Button
+              variant="ghost"
+              className="text-red-700"
+              title={t("builder.delete.confirm")}
+              onClick={() => setDeleting(true)}
+            >
+              {t("common.delete")}
+            </Button>
           )}
         </div>
         <Button variant="ghost" onClick={onClose} aria-label={t("canvas.close")}>
@@ -343,6 +360,14 @@ function PersonPanel({
           />
         )}
       </div>
+      {deleting && (
+        <DeletePersonDialog
+          treeId={treeId}
+          personId={personId}
+          onClose={() => setDeleting(false)}
+          onDeleted={onClose}
+        />
+      )}
     </aside>
   );
 }

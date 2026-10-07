@@ -106,6 +106,8 @@
     "settings": "Ustawienia drzewa",
     "delete": "Usuń drzewo",
     "deleteNamed": "Usuń drzewo „{{name}}”",
+    "rename": "Zmień nazwę",
+    "renameNamed": "Zmień nazwę drzewa „{{name}}”",
     "confirmDelete": "Usunąć drzewo „{{name}}”? Zostanie ukryte dla wszystkich (dane są zachowane i można je przywrócić).",
     "demo": "Demo",
     "emptyTitle": "Tu wyrośnie wasze drzewo",

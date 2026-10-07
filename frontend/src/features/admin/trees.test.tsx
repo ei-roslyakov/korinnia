@@ -118,4 +118,70 @@ describe("admin trees", () => {
       expect(screen.queryByRole("link", { name: /Моя родина/ })).not.toBeInTheDocument(),
     );
   });
+
+  it("renames a tree from its card", async () => {
+    let body: unknown = null;
+    const tree = { id: "t1", description: null, my_role: "admin", person_count: 0 };
+    let trees = [{ ...tree, name: "Стара назва" }];
+    mockApi({
+      "GET /api/v1/auth/me": () => json(ME),
+      "GET /api/v1/trees": () => json(trees),
+      "PATCH /api/v1/trees/t1": (init) => {
+        body = JSON.parse(String(init.body));
+        trees = [{ ...tree, name: "Нова назва" }];
+        return json(trees[0]);
+      },
+    });
+    renderWithProviders(<App />, { route: "/" });
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Перейменувати родовід «Стара назва»" }),
+    );
+    const input = screen.getByRole("textbox", { name: "Назва" });
+    await userEvent.clear(input);
+    await userEvent.type(input, "Нова назва");
+    await userEvent.click(screen.getByRole("button", { name: "Зберегти" }));
+    expect(await screen.findByRole("link", { name: /Нова назва/ })).toBeInTheDocument();
+    expect(body).toEqual({ name: "Нова назва" });
+  });
+
+  it("renames and deletes the open tree from builder mode, for admins only", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    let role = "editor";
+    let name = "Родина";
+    let deleted = false;
+    const graph = { persons: [], parent_child: [], partnerships: [] };
+    mockApi({
+      "GET /api/v1/auth/me": () => json(ME),
+      "GET /api/v1/trees": () => json([]),
+      "GET /api/v1/trees/t1": () => json({ id: "t1", name, description: null, my_role: role }),
+      "GET /api/v1/trees/t1/graph": () => json(graph),
+      "PATCH /api/v1/trees/t1": (init) => {
+        name = (JSON.parse(String(init.body)) as { name: string }).name;
+        return json({ id: "t1", name, description: null, my_role: role });
+      },
+      "DELETE /api/v1/trees/t1": () => {
+        deleted = true;
+        return json(null, 204);
+      },
+    });
+    const editor = renderWithProviders(<App />, { route: "/trees/t1?mode=edit" });
+    expect(await screen.findByRole("heading", { name: "Родина" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Перейменувати родовід/ })).not.toBeInTheDocument();
+    editor.unmount();
+
+    role = "admin";
+    renderWithProviders(<App />, { route: "/trees/t1?mode=edit" });
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Перейменувати родовід «Родина»" }),
+    );
+    const input = screen.getByRole("textbox", { name: "Назва" });
+    await userEvent.clear(input);
+    await userEvent.type(input, "Наша родина");
+    await userEvent.click(screen.getByRole("button", { name: "Зберегти" }));
+    expect(await screen.findByRole("heading", { name: "Наша родина" })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Видалити родовід «Наша родина»" }));
+    await vi.waitFor(() => expect(deleted).toBe(true));
+    expect(await screen.findByRole("heading", { name: "Родоводи" })).toBeInTheDocument();
+  });
 });

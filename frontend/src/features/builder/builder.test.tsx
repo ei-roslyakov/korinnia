@@ -43,6 +43,38 @@ function api(role: string, extra: Record<string, Handler> = {}, graph: TreeGraph
 }
 
 describe("builder mode on the tree page", () => {
+  it("moves the selected person to the trash from the side panel", async () => {
+    let deleted = false;
+    api("editor", {
+      "GET /api/v1/trees/t1/persons/p2/delete-preview": () =>
+        json({
+          person: summary("p2", "Галина"),
+          parent_links: 1,
+          child_links: 0,
+          partnerships: 0,
+          events: 1,
+          shared_events: 0,
+        }),
+      "DELETE /api/v1/trees/t1/persons/p2": () => {
+        deleted = true;
+        return json(null, 204);
+      },
+    });
+    const view = renderWithProviders(<App />, { route: "/trees/t1?person=p2" });
+    const viewPanel = await screen.findByRole("complementary");
+    expect(await within(viewPanel).findByRole("link", { name: "Редагувати" })).toBeInTheDocument();
+    expect(within(viewPanel).queryByRole("button", { name: "Видалити" })).not.toBeInTheDocument();
+    view.unmount();
+
+    renderWithProviders(<App />, { route: "/trees/t1?mode=edit&person=p2" });
+    const panel = await screen.findByRole("complementary");
+    await userEvent.click(await within(panel).findByRole("button", { name: "Видалити" }));
+    const d = within(await screen.findByRole("dialog"));
+    await userEvent.click(await d.findByRole("button", { name: "Перемістити до кошика" }));
+    await waitFor(() => expect(deleted).toBe(true));
+    await waitFor(() => expect(screen.queryByRole("complementary")).not.toBeInTheDocument());
+  });
+
   it("is offered to editors only", async () => {
     api("viewer");
     const { unmount } = renderWithProviders(<App />, { route: "/trees/t1?mode=edit" });
