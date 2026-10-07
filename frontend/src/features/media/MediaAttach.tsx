@@ -112,7 +112,7 @@ export function MediaPicker({
                   <Thumb m={m} />
                   <span className="sr-only">{m.title ?? m.original_filename}</span>
                   {on && (
-                    <span className="bg-leaf-700 absolute top-1 right-1 rounded-full px-1.5 text-xs text-white">
+                    <span className="bg-leaf-700 text-on-leaf absolute top-1 right-1 rounded-full px-1.5 text-xs">
                       ✓
                     </span>
                   )}

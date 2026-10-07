@@ -51,7 +51,7 @@ export function PersonEditorPage() {
           <>
             <Link
               to={`/trees/${treeId}/people/${personId}`}
-              className="border-bark-100 hover:bg-bark-50 inline-flex items-center rounded-md border bg-white px-3 py-1.5 text-sm"
+              className="border-bark-100 hover:bg-bark-50 bg-surface inline-flex items-center rounded-md border px-3 py-1.5 text-sm"
             >
               {t("builder.viewPage")}
             </Link>

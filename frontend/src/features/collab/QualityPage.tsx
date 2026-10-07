@@ -78,7 +78,7 @@ export function QualityPage() {
           <a
             key={key}
             href={`#${key}`}
-            className="border-bark-100 hover:border-leaf-600 rounded-lg border bg-white p-3 text-center"
+            className="border-bark-100 hover:border-leaf-600 bg-surface rounded-lg border p-3 text-center"
           >
             <div className="text-2xl font-semibold">{d.counts[key]}</div>
             <div className="text-bark-700 text-xs">{t(`collab.quality.${key}`)}</div>

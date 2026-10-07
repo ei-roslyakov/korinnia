@@ -16,7 +16,7 @@ function PersonChip({ treeId, person }: { treeId: string; person: PersonSummary 
   return (
     <Link
       to={`/trees/${treeId}/people/${person.id}`}
-      className="border-bark-100 hover:border-leaf-600 flex items-center gap-2 rounded-lg border bg-white px-2 py-1"
+      className="border-bark-100 hover:border-leaf-600 bg-surface flex items-center gap-2 rounded-lg border px-2 py-1"
     >
       <Avatar name={person.display_name} gender={person.gender} url={person.avatar_url} size="sm" />
       <span className="text-sm">

@@ -61,7 +61,7 @@ export function MarkdownEditor({
               type="button"
               role="tab"
               aria-selected={tab === x}
-              className={`px-2 py-1 ${tab === x ? "bg-leaf-700 text-white" : "bg-white"}`}
+              className={`px-2 py-1 ${tab === x ? "bg-leaf-700 text-on-leaf" : "bg-surface"}`}
               onClick={() => setTab(x)}
             >
               {t(`builder.markdown.${x}`)}
@@ -103,7 +103,7 @@ export function MarkdownEditor({
           className="font-mono text-sm"
         />
       ) : (
-        <div className="border-bark-100 min-h-24 rounded-md border bg-white p-3">
+        <div className="border-bark-100 bg-surface min-h-24 rounded-md border p-3">
           {value.trim() ? (
             <Markdown>{value}</Markdown>
           ) : (

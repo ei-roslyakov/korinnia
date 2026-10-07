@@ -315,7 +315,10 @@
     "notFound": "Nie znaleziono osoby.",
     "backToTree": "Wróć do drzewa",
     "maiden": "z domu {{name}}",
-    "researchStatus": "Badania"
+    "researchStatus": "Badania",
+    "noBiography": "Biografia nie została jeszcze napisana.",
+    "writeBiography": "Napisz biografię",
+    "suggestBiography": "Zaproponuj biografię"
   },
   "gender": {
     "male": "Mężczyzna",
@@ -918,5 +921,12 @@
       "deaths": "Zgony",
       "none": "Brak danych."
     }
+  },
+  "theme": {
+    "label": "Motyw",
+    "system": "Systemowy",
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "sepia": "Archiwalny"
   }
 }

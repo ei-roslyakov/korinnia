@@ -69,7 +69,7 @@ export function PlaceInput({
       {open && (
         <ul
           role="listbox"
-          className="border-bark-100 absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-md border bg-white py-1 shadow-lg"
+          className="border-bark-100 bg-surface absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-md border py-1 shadow-lg"
         >
           {results.map((p) => (
             <li

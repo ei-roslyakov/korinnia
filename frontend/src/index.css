@@ -1,14 +1,150 @@
 @import "tailwindcss";
 
-@theme {
+/*
+ * Themes. Components use a small palette (bark = neutrals, leaf = accent, surface = cards,
+ * on-leaf = text on accent backgrounds, plus a few status colours); each theme only
+ * redefines these variables. `inline` makes utilities read the variables at runtime.
+ */
+@theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Lora", ui-serif, Georgia, serif;
-  --color-bark-50: #fafaf5;
-  --color-bark-100: #f2f0e6;
-  --color-bark-700: #4a4335;
-  --color-bark-900: #2a251c;
-  --color-leaf-600: #4d7c0f;
-  --color-leaf-700: #3f6212;
+  --color-bark-50: var(--k-bark-50);
+  --color-bark-100: var(--k-bark-100);
+  --color-bark-700: var(--k-bark-700);
+  --color-bark-900: var(--k-bark-900);
+  --color-leaf-600: var(--k-leaf-600);
+  --color-leaf-700: var(--k-leaf-700);
+  --color-surface: var(--k-surface);
+  --color-on-leaf: var(--k-on-leaf);
+
+  /* Status colours: pale backgrounds with dark text in light themes, flipped in dark. */
+  --color-green-50: var(--k-green-50);
+  --color-green-100: var(--k-green-100);
+  --color-green-200: var(--k-green-200);
+  --color-green-700: var(--k-green-700);
+  --color-green-800: var(--k-green-800);
+  --color-red-50: var(--k-red-50);
+  --color-red-100: var(--k-red-100);
+  --color-red-200: var(--k-red-200);
+  --color-red-700: var(--k-red-700);
+  --color-red-800: var(--k-red-800);
+  --color-amber-50: var(--k-amber-50);
+  --color-amber-100: var(--k-amber-100);
+  --color-amber-200: var(--k-amber-200);
+  --color-amber-700: var(--k-amber-700);
+  --color-amber-800: var(--k-amber-800);
+  --color-sky-100: var(--k-sky-100);
+  --color-sky-800: var(--k-sky-800);
+  --color-rose-100: var(--k-rose-100);
+  --color-rose-800: var(--k-rose-800);
+  --color-violet-100: var(--k-violet-100);
+  --color-violet-800: var(--k-violet-800);
+  --color-stone-200: var(--k-stone-200);
+  --color-stone-800: var(--k-stone-800);
+}
+
+/* Light (default) */
+:root {
+  color-scheme: light;
+  --k-bark-50: #fafaf5;
+  --k-bark-100: #f2f0e6;
+  --k-bark-700: #4a4335;
+  --k-bark-900: #2a251c;
+  --k-leaf-600: #4d7c0f;
+  --k-leaf-700: #3f6212;
+  --k-surface: #ffffff;
+  --k-on-leaf: #ffffff;
+  --k-green-50: #f0fdf4;
+  --k-green-100: #dcfce7;
+  --k-green-200: #bbf7d0;
+  --k-green-700: #15803d;
+  --k-green-800: #166534;
+  --k-red-50: #fef2f2;
+  --k-red-100: #fee2e2;
+  --k-red-200: #fecaca;
+  --k-red-700: #b91c1c;
+  --k-red-800: #991b1b;
+  --k-amber-50: #fffbeb;
+  --k-amber-100: #fef3c7;
+  --k-amber-200: #fde68a;
+  --k-amber-700: #b45309;
+  --k-amber-800: #92400e;
+  --k-sky-100: #e0f2fe;
+  --k-sky-800: #075985;
+  --k-rose-100: #ffe4e6;
+  --k-rose-800: #9f1239;
+  --k-violet-100: #ede9fe;
+  --k-violet-800: #5b21b6;
+  --k-stone-200: #e7e5e4;
+  --k-stone-800: #292524;
+
+  /* Tree canvas */
+  --k-canvas: linear-gradient(to bottom, #f1f6fa 0%, #f6f8f0 70%, #eef3e2 100%);
+  --k-canvas-dots: #e2e6dc;
+  --k-branch: #7a5638;
+  --k-grass: #a3b86c;
+  --k-soil: #8a6a48;
+}
+
+/* Dark: warm charcoal, light text, a brighter leaf green with dark text on it. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --k-bark-50: #171512;
+  --k-bark-100: #36312a;
+  --k-bark-700: #b9b0a0;
+  --k-bark-900: #ece6da;
+  --k-leaf-600: #8cc45a;
+  --k-leaf-700: #79b347;
+  --k-surface: #221f1b;
+  --k-on-leaf: #13180d;
+  --k-green-50: #16261a;
+  --k-green-100: #1d3322;
+  --k-green-200: #2b4a31;
+  --k-green-700: #7fd18f;
+  --k-green-800: #9be0a8;
+  --k-red-50: #2e1717;
+  --k-red-100: #3d1d1d;
+  --k-red-200: #5c2a2a;
+  --k-red-700: #f08b8b;
+  --k-red-800: #f6a3a3;
+  --k-amber-50: #2d2414;
+  --k-amber-100: #3b2f17;
+  --k-amber-200: #5a4620;
+  --k-amber-700: #f2bf63;
+  --k-amber-800: #f6cd80;
+  --k-sky-100: #183041;
+  --k-sky-800: #a5d8f5;
+  --k-rose-100: #3d1d26;
+  --k-rose-800: #f7b3c2;
+  --k-violet-100: #2c2346;
+  --k-violet-800: #cbbcf7;
+  --k-stone-200: #3a3632;
+  --k-stone-800: #e7e2dc;
+
+  --k-canvas: linear-gradient(to bottom, #12161c 0%, #161812 70%, #1b2014 100%);
+  --k-canvas-dots: #2a2d26;
+  --k-branch: #b08a62;
+  --k-grass: #4f6b2a;
+  --k-soil: #6b4f34;
+}
+
+/* Archive: parchment and sepia ink, like an old family album. */
+:root[data-theme="sepia"] {
+  color-scheme: light;
+  --k-bark-50: #f1e7d0;
+  --k-bark-100: #e2d3b1;
+  --k-bark-700: #5e4a32;
+  --k-bark-900: #3a2a18;
+  --k-leaf-600: #8a5a2b;
+  --k-leaf-700: #6f4520;
+  --k-surface: #fbf5e6;
+  --k-on-leaf: #fdf8ec;
+
+  --k-canvas: linear-gradient(to bottom, #f4ead2 0%, #efe2c3 70%, #e7d6b0 100%);
+  --k-canvas-dots: #e0cfa8;
+  --k-branch: #6b4a2b;
+  --k-grass: #9c8a4e;
+  --k-soil: #7a5a3a;
 }
 
 html,
@@ -19,4 +155,9 @@ body,
 
 body {
   @apply bg-bark-50 text-bark-900 antialiased;
+}
+
+/* Darker map tiles in the dark theme. */
+:root[data-theme="dark"] .leaflet-tile {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
 }

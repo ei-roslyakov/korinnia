@@ -42,6 +42,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Structured JSON logging (backend, worker, nginx access log)
 - ✅ Security headers (CSP, nosniff, frame-deny, referrer & permissions policy)
 - ✅ UI shell with Ukrainian (default), English and Polish
+- ✅ Themes: light, dark and archive (sepia), or follow the device setting; remembered per device
 - ✅ GitHub Actions CI, pre-commit hooks
 - ✅ Basic manual backup / restore scripts (database + media)
 

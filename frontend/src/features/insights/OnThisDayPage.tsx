@@ -84,7 +84,7 @@ export function OnThisDayPage() {
           <h2 className="font-semibold first-letter:uppercase">
             {dayTitle(day)}
             {day === today && (
-              <span className="bg-leaf-700 ml-2 rounded-full px-2 py-0.5 align-middle text-xs text-white">
+              <span className="bg-leaf-700 text-on-leaf ml-2 rounded-full px-2 py-0.5 align-middle text-xs">
                 {t("insights.onThisDay.today")}
               </span>
             )}

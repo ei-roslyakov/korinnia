@@ -128,10 +128,10 @@ export function MediaTab({
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        className={`rounded-lg border-2 border-dashed p-6 text-center ${dragging ? "border-leaf-600 bg-leaf-600/5" : "border-bark-100 bg-white"}`}
+        className={`rounded-lg border-2 border-dashed p-6 text-center ${dragging ? "border-leaf-600 bg-leaf-600/5" : "border-bark-100 bg-surface"}`}
       >
         <p className="text-bark-700 mb-3 text-sm">{t("media.dropHint")}</p>
-        <label className="bg-leaf-700 hover:bg-leaf-600 inline-flex cursor-pointer items-center rounded-md px-3 py-1.5 text-sm font-medium text-white">
+        <label className="bg-leaf-700 hover:bg-leaf-600 text-on-leaf inline-flex cursor-pointer items-center rounded-md px-3 py-1.5 text-sm font-medium">
           {t("media.chooseFiles")}
           <input
             type="file"
@@ -159,7 +159,7 @@ export function MediaTab({
       {uploads.length > 0 && (
         <ul className="space-y-2" aria-label={t("media.uploading")}>
           {uploads.map((u) => (
-            <li key={u.key} className="border-bark-100 rounded-md border bg-white p-2 text-sm">
+            <li key={u.key} className="border-bark-100 bg-surface rounded-md border p-2 text-sm">
               <div className="flex justify-between gap-2">
                 <span className="truncate">{u.name}</span>
                 {!u.error && <span>{Math.round(u.progress * 100)}%</span>}

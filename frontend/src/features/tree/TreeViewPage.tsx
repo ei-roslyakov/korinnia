@@ -101,7 +101,7 @@ export function TreeViewPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="border-bark-100 flex flex-wrap items-center gap-x-4 gap-y-2 border-b bg-white px-4 py-2">
+      <div className="border-bark-100 bg-surface flex flex-wrap items-center gap-x-4 gap-y-2 border-b px-4 py-2">
         <h1 className="font-serif text-lg font-semibold">{tree.data.name}</h1>
         <span className="text-bark-700 text-xs">{t("canvas.persons", { count })}</span>
         {count > 0 && <SearchBox treeId={treeId} onSelect={(p) => goTo(p.id)} />}
@@ -114,7 +114,7 @@ export function TreeViewPage() {
               <button
                 type="button"
                 aria-pressed={!focusId}
-                className={`px-2 py-1 whitespace-nowrap ${!focusId ? "bg-leaf-700 text-white" : "bg-white"}`}
+                className={`px-2 py-1 whitespace-nowrap ${!focusId ? "bg-leaf-700 text-on-leaf" : "bg-surface"}`}
                 onClick={() => update({ all: "1", focus: null })}
               >
                 {t("canvas.wholeTree")}
@@ -122,7 +122,7 @@ export function TreeViewPage() {
               <button
                 type="button"
                 aria-pressed={Boolean(focusId)}
-                className={`px-2 py-1 whitespace-nowrap ${focusId ? "bg-leaf-700 text-white" : "bg-white"}`}
+                className={`px-2 py-1 whitespace-nowrap ${focusId ? "bg-leaf-700 text-on-leaf" : "bg-surface"}`}
                 onClick={() =>
                   update({
                     all: null,
@@ -159,7 +159,7 @@ export function TreeViewPage() {
                 key={m}
                 type="button"
                 aria-pressed={(m === "edit") === builder}
-                className={`px-2 py-1 whitespace-nowrap ${(m === "edit") === builder ? "bg-leaf-700 text-white" : "bg-white"}`}
+                className={`px-2 py-1 whitespace-nowrap ${(m === "edit") === builder ? "bg-leaf-700 text-on-leaf" : "bg-surface"}`}
                 onClick={() => update({ mode: m === "edit" ? "edit" : null })}
               >
                 {t(`builder.mode.${m}`)}
@@ -270,7 +270,7 @@ function PersonPanel({
   return (
     <aside
       aria-label={person.data?.display_name}
-      className="border-bark-100 absolute inset-y-0 right-0 z-10 flex w-full flex-col border-l bg-white shadow-xl sm:w-[28rem]"
+      className="border-bark-100 bg-surface absolute inset-y-0 right-0 z-10 flex w-full flex-col border-l shadow-xl sm:w-[28rem]"
     >
       <div className="border-bark-100 flex items-center justify-between gap-2 border-b px-4 py-2">
         <div className="flex gap-2">
@@ -286,7 +286,7 @@ function PersonPanel({
           {editLink && (
             <Link
               to={editLink}
-              className="bg-leaf-700 hover:bg-leaf-600 inline-flex items-center rounded-md px-3 py-1.5 text-sm text-white"
+              className="bg-leaf-700 hover:bg-leaf-600 text-on-leaf inline-flex items-center rounded-md px-3 py-1.5 text-sm"
             >
               {t("builder.edit")}
             </Link>

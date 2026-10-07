@@ -1,5 +1,8 @@
 /** Look of the tree: brown branches that thin out towards the youngest generations. */
 
+/** Branch colour of the current theme (CSS variable, usable in SVG `style`). */
+export const BRANCH = "var(--k-branch)";
+/** Minimap colour for junctions (the minimap needs a literal colour). */
 export const BRANCH_COLOR = "#7a5638";
 export const GROUND_HEIGHT = 110;
 /** The trunk starts this far above the ground node, i.e. right under the founders' cards. */

@@ -10,7 +10,7 @@ import { useTreeStats } from "./api";
 
 function Figure({ value, label }: { value: ReactNode; label: string }) {
   return (
-    <div className="border-bark-100 rounded-lg border bg-white p-3 text-center">
+    <div className="border-bark-100 bg-surface rounded-lg border p-3 text-center">
       <div className="text-2xl font-semibold tabular-nums">{value}</div>
       <div className="text-bark-700 text-xs">{label}</div>
     </div>

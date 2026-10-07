@@ -112,7 +112,7 @@ function AuditRow({ entry }: { entry: AuditEntry }) {
   const formatDate = useFormatDate();
   const hasDetails = entry.before !== null || entry.after !== null;
   return (
-    <li className="border-bark-100 rounded-md border bg-white px-3 py-2 text-sm">
+    <li className="border-bark-100 bg-surface rounded-md border px-3 py-2 text-sm">
       <details>
         <summary
           className={`flex flex-wrap gap-x-3 ${hasDetails ? "cursor-pointer" : "list-none"}`}

@@ -9,24 +9,27 @@ export function LanguageSwitcher() {
   const me = useMe();
   const updateMe = useUpdateMe();
   return (
-    <select
-      aria-label={t("nav.language")}
-      className="border-bark-100 rounded-md border bg-white px-2 py-1 text-sm"
-      value={i18n.resolvedLanguage}
-      onChange={(e) => {
-        const lang = e.target.value as Language;
-        void i18n.changeLanguage(lang);
-        // Logged-in users: remember the choice in the profile (follows them across devices).
-        if (me.data && me.data.preferred_language !== lang) {
-          updateMe.mutate({ preferred_language: lang });
-        }
-      }}
-    >
-      {SUPPORTED_LANGUAGES.map((lang) => (
-        <option key={lang.code} value={lang.code}>
-          {lang.label}
-        </option>
-      ))}
-    </select>
+    <label className="text-bark-700 flex items-center gap-1.5 text-sm">
+      <span>{t("nav.language")}</span>
+      <select
+        aria-label={t("nav.language")}
+        className="border-bark-100 bg-surface text-bark-900 rounded-md border px-2 py-1 text-sm"
+        value={i18n.resolvedLanguage}
+        onChange={(e) => {
+          const lang = e.target.value as Language;
+          void i18n.changeLanguage(lang);
+          // Logged-in users: remember the choice in the profile (follows them across devices).
+          if (me.data && me.data.preferred_language !== lang) {
+            updateMe.mutate({ preferred_language: lang });
+          }
+        }}
+      >
+        {SUPPORTED_LANGUAGES.map((lang) => (
+          <option key={lang.code} value={lang.code}>
+            {lang.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

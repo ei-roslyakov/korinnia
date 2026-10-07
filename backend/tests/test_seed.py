@@ -30,6 +30,10 @@ async def test_seed_creates_demo_family(
     assert await count(ParentChild) == 29
     assert await count(Partnership) == 9
     assert await seed_module.seed(session, owner) is None  # idempotent
+    with_bio = await session.scalar(
+        select(func.count()).where(Person.tree_id == tree.id, Person.biography.is_not(None))
+    )
+    assert with_bio == len(seed_module.BIOGRAPHIES) + 1  # + Halyna's longer one
 
     # Seeded data is coherent: no implausibility warnings anywhere.
     for person in await session.scalars(select(Person).where(Person.tree_id == tree.id)):

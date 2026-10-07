@@ -34,7 +34,7 @@ export function HistoryTab({ treeId, personId }: { treeId: string; personId: str
           return (
             <li
               key={entry.id}
-              className="border-bark-100 rounded-md border bg-white px-3 py-2 text-sm"
+              className="border-bark-100 bg-surface rounded-md border px-3 py-2 text-sm"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>

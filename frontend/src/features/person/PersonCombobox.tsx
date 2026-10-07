@@ -83,7 +83,7 @@ export function PersonCombobox({
         <ul
           id={listId}
           role="listbox"
-          className="border-bark-100 absolute z-30 mt-1 max-h-80 w-full overflow-y-auto rounded-md border bg-white py-1 shadow-lg"
+          className="border-bark-100 bg-surface absolute z-30 mt-1 max-h-80 w-full overflow-y-auto rounded-md border py-1 shadow-lg"
         >
           {search.isFetching && results.length === 0 && (
             <li className="text-bark-700 px-3 py-2 text-sm">{t("canvas.searching")}</li>

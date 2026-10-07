@@ -315,7 +315,10 @@
     "notFound": "Person not found.",
     "backToTree": "Back to tree",
     "maiden": "née {{name}}",
-    "researchStatus": "Research"
+    "researchStatus": "Research",
+    "noBiography": "No biography has been written yet.",
+    "writeBiography": "Write a biography",
+    "suggestBiography": "Suggest a biography"
   },
   "gender": {
     "male": "Male",
@@ -902,5 +905,12 @@
       "deaths": "Deaths",
       "none": "No data yet."
     }
+  },
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "sepia": "Archive"
   }
 }

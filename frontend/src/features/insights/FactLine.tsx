@@ -65,7 +65,7 @@ export function CategoryFilter({
             type="button"
             aria-pressed={on}
             onClick={() => onChange(on ? value.filter((x) => x !== c) : [...value, c])}
-            className={`rounded-full border px-3 py-1 text-xs ${on ? `${CATEGORY_STYLE[c].badge} border-transparent font-semibold` : "border-bark-100 text-bark-700 bg-white"}`}
+            className={`rounded-full border px-3 py-1 text-xs ${on ? `${CATEGORY_STYLE[c].badge} border-transparent font-semibold` : "border-bark-100 text-bark-700 bg-surface"}`}
           >
             {t(`insights.categories.${c}`)}
           </button>

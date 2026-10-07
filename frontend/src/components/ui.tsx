@@ -17,9 +17,9 @@ import { useErrorMessage } from "@/lib/hooks";
 type Variant = "primary" | "secondary" | "danger" | "ghost";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-leaf-700 text-white hover:bg-leaf-600 disabled:bg-leaf-700/50",
-  secondary: "border border-bark-100 bg-white text-bark-900 hover:bg-bark-50",
-  danger: "bg-red-700 text-white hover:bg-red-600 disabled:bg-red-700/50",
+  primary: "bg-leaf-700 text-on-leaf hover:bg-leaf-600 disabled:bg-leaf-700/50",
+  secondary: "border border-bark-100 bg-surface text-bark-900 hover:bg-bark-50",
+  danger: "bg-red-700 text-surface hover:bg-red-800 disabled:bg-red-700/50",
   ghost: "text-bark-700 hover:bg-bark-100",
 };
 
@@ -73,7 +73,7 @@ export function Field({ label, hint, children }: FieldProps) {
 }
 
 const inputClass =
-  "block w-full rounded-md border border-bark-100 bg-white px-3 py-2 text-sm shadow-sm focus:border-leaf-600 focus:ring-1 focus:ring-leaf-600 focus:outline-none";
+  "block w-full rounded-md border border-bark-100 bg-surface px-3 py-2 text-sm shadow-sm focus:border-leaf-600 focus:ring-1 focus:ring-leaf-600 focus:outline-none";
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cx(inputClass, props.className)} />;
@@ -158,7 +158,7 @@ export function PageHeader({ title, actions }: { title: string; actions?: ReactN
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`border-bark-100 rounded-lg border bg-white p-4 shadow-sm ${className}`}>
+    <section className={`border-bark-100 bg-surface rounded-lg border p-4 shadow-sm ${className}`}>
       {children}
     </section>
   );

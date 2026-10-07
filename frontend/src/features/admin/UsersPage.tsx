@@ -76,7 +76,7 @@ export function UsersPage() {
       <ErrorAlert error={users.error} />
       {users.data && (
         <>
-          <div className="border-bark-100 overflow-x-auto rounded-lg border bg-white">
+          <div className="border-bark-100 bg-surface overflow-x-auto rounded-lg border">
             <table className="w-full text-left text-sm">
               <thead className="border-bark-100 bg-bark-50 text-bark-700 border-b">
                 <tr>

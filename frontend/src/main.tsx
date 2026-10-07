@@ -7,6 +7,10 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 
 import { App } from "./App";
+import { applyTheme } from "./lib/theme";
+
+// Before the first render, so the page never flashes in the wrong colours.
+applyTheme();
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },

@@ -78,7 +78,7 @@ export function StoryPage() {
         {s.can_edit && (
           <Link
             to={`/trees/${treeId}/stories/${s.id}/edit`}
-            className="border-bark-100 hover:bg-bark-50 rounded-md border bg-white px-3 py-1.5 text-sm"
+            className="border-bark-100 hover:bg-bark-50 bg-surface rounded-md border px-3 py-1.5 text-sm"
           >
             {t("builder.edit")}
           </Link>

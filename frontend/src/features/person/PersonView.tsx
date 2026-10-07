@@ -214,11 +214,38 @@ export function PersonView({
         </Section>
       )}
 
-      {person.biography && (
-        <Section title={t("person.biography")}>
+      <Section title={t("person.biography")}>
+        {person.biography ? (
           <Markdown>{person.biography}</Markdown>
-        </Section>
-      )}
+        ) : (
+          <p className="text-bark-700 text-sm">
+            {t("person.noBiography")}
+            {treeId && role && atLeast(role, "editor") && (
+              <>
+                {" "}
+                <Link
+                  to={`/trees/${treeId}/people/${person.id}/edit`}
+                  className="text-leaf-700 hover:underline print:hidden"
+                >
+                  {t("person.writeBiography")}
+                </Link>
+              </>
+            )}
+            {treeId && role === "contributor" && (
+              <>
+                {" "}
+                <button
+                  type="button"
+                  className="text-leaf-700 hover:underline print:hidden"
+                  onClick={() => setSuggesting(true)}
+                >
+                  {t("person.suggestBiography")}
+                </button>
+              </>
+            )}
+          </p>
+        )}
+      </Section>
 
       <MediaSections
         media={person.media}

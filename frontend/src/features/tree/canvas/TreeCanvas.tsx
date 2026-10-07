@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 
 import { Spinner } from "@/components/ui";
 import type { RelativeRelation, TreeGraph } from "@/lib/genealogy";
+import { useTheme } from "@/lib/theme";
 
 import {
   FAMILY_SIZE,
@@ -30,7 +31,7 @@ import {
   toElkGraph,
 } from "./familyGraph";
 import { computeLayout } from "./layout";
-import { BRANCH_COLOR, GROUND_HEIGHT, TRUNK_REACH, branchWidth } from "./treeStyle";
+import { BRANCH, BRANCH_COLOR, GROUND_HEIGHT, TRUNK_REACH, branchWidth } from "./treeStyle";
 import type { PersonFlowNode } from "./nodes";
 import { nodeTypes } from "./nodeTypes";
 
@@ -81,6 +82,7 @@ function CanvasInner({
   onMoved,
 }: Props) {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const rf = useReactFlow();
   const rel = useMemo(() => indexRelations(graph), [graph]);
   const families = useMemo(() => buildFamilies(graph, included), [graph, included]);
@@ -271,7 +273,7 @@ function CanvasInner({
     () =>
       families.flatMap((f) => {
         const rank = Math.min(...f.parents.map(rankOf));
-        const branch = { stroke: BRANCH_COLOR, strokeLinecap: "round" as const };
+        const branch = { stroke: BRANCH, strokeLinecap: "round" as const };
         return [
           ...f.parents.map((p) => ({
             id: `${p}->${f.id}`,
@@ -335,8 +337,9 @@ function CanvasInner({
 
   return (
     <ReactFlow
-      // Sky above, meadow towards the ground.
-      style={{ background: "linear-gradient(to bottom, #f1f6fa 0%, #f6f8f0 70%, #eef3e2 100%)" }}
+      // Sky above, meadow towards the ground (per theme).
+      style={{ background: "var(--k-canvas)" }}
+      colorMode={theme === "dark" ? "dark" : "light"}
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
@@ -359,9 +362,10 @@ function CanvasInner({
       fitView
       fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
     >
-      <Background gap={24} color="#e2e6dc" bgColor="transparent" />
+      <Background gap={24} color="var(--k-canvas-dots)" bgColor="transparent" />
       <Controls showInteractive={false} fitViewOptions={{ padding: 0.15, duration: 300 }} />
       <MiniMap
+        bgColor="var(--k-surface)"
         pannable
         zoomable
         ariaLabel={t("canvas.minimap")}

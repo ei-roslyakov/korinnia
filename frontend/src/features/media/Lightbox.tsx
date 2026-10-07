@@ -173,7 +173,7 @@ export function Lightbox({
         {comments && showComments && (
           <aside
             aria-label={t("media.comments")}
-            className="text-bark-900 w-full max-w-sm shrink-0 overflow-y-auto bg-white p-4 max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:max-h-[60%] max-sm:max-w-none"
+            className="text-bark-900 bg-surface w-full max-w-sm shrink-0 overflow-y-auto p-4 max-sm:absolute max-sm:inset-x-0 max-sm:bottom-0 max-sm:max-h-[60%] max-sm:max-w-none"
           >
             <CommentsThread
               treeId={comments.treeId}

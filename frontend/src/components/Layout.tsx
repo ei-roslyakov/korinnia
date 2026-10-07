@@ -5,6 +5,7 @@ import { Link, NavLink, Outlet, useMatch, useNavigate } from "react-router";
 import { useLogout, useMe } from "@/features/auth/api";
 
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export function Layout() {
   const { t, i18n } = useTranslation();
@@ -25,7 +26,7 @@ export function Layout() {
 
   return (
     <div className={fullBleed ? "flex h-dvh flex-col" : "flex min-h-full flex-col"}>
-      <header className="border-bark-100 border-b bg-white">
+      <header className="border-bark-100 bg-surface border-b">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3 print:hidden">
           <div className="flex items-center gap-6">
             <Link to="/" className="text-leaf-700 font-serif text-xl font-semibold">
@@ -44,7 +45,8 @@ export function Layout() {
               </nav>
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <ThemeSwitcher />
             <LanguageSwitcher />
             {me.data && (
               <>

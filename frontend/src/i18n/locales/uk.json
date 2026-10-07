@@ -315,7 +315,10 @@
     "notFound": "Людину не знайдено.",
     "backToTree": "До дерева",
     "maiden": "дівоче прізвище {{name}}",
-    "researchStatus": "Дослідження"
+    "researchStatus": "Дослідження",
+    "noBiography": "Біографію ще не написано.",
+    "writeBiography": "Написати біографію",
+    "suggestBiography": "Запропонувати біографію"
   },
   "gender": {
     "male": "Чоловік",
@@ -918,5 +921,12 @@
       "deaths": "Смерті",
       "none": "Даних поки немає."
     }
+  },
+  "theme": {
+    "label": "Тема",
+    "system": "Як у системі",
+    "light": "Світла",
+    "dark": "Темна",
+    "sepia": "Архівна"
   }
 }

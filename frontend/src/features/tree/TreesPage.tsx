@@ -48,7 +48,7 @@ export function TreesPage() {
           <li key={tree.id}>
             <Link
               to={`/trees/${tree.id}`}
-              className="border-bark-100 hover:border-leaf-600 block h-full rounded-lg border bg-white p-4 shadow-sm transition"
+              className="border-bark-100 hover:border-leaf-600 bg-surface block h-full rounded-lg border p-4 shadow-sm transition"
             >
               <div className="mb-2 flex items-start justify-between gap-2">
                 <h2 className="font-serif text-lg font-semibold">{tree.name}</h2>

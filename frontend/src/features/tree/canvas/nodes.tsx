@@ -7,7 +7,7 @@ import { lifeYears } from "@/lib/dates";
 import type { PersonSummary, RelativeRelation } from "@/lib/genealogy";
 
 import { FAMILY_SIZE, PERSON_HEIGHT, PERSON_WIDTH } from "./familyGraph";
-import { BRANCH_COLOR, GROUND_HEIGHT, TRUNK_REACH } from "./treeStyle";
+import { BRANCH, GROUND_HEIGHT, TRUNK_REACH } from "./treeStyle";
 
 export interface PersonNodeData extends Record<string, unknown> {
   person: PersonSummary;
@@ -29,7 +29,7 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
   return (
     <div
       style={{ width: PERSON_WIDTH, height: PERSON_HEIGHT }}
-      className={`border-bark-100 relative flex cursor-pointer items-center gap-3 rounded-lg border bg-white px-3 shadow-sm transition-shadow hover:shadow-md ${ring}`}
+      className={`border-bark-100 bg-surface relative flex cursor-pointer items-center gap-3 rounded-lg border px-3 shadow-sm transition-shadow hover:shadow-md ${ring}`}
       data-testid="person-card"
       title={person.display_name}
     >
@@ -88,7 +88,7 @@ function AddButtons({
           key={relation}
           type="button"
           // nodrag/nopan: React Flow must not treat clicks on the button as canvas drags.
-          className={`nodrag nopan border-leaf-600 text-leaf-700 hover:bg-leaf-700 absolute z-10 flex size-6 items-center justify-center rounded-full border bg-white text-sm leading-none shadow-sm hover:text-white ${ADD_POSITIONS[relation]}`}
+          className={`nodrag nopan border-leaf-600 text-leaf-700 hover:bg-leaf-700 bg-surface hover:text-on-leaf absolute z-10 flex size-6 items-center justify-center rounded-full border text-sm leading-none shadow-sm ${ADD_POSITIONS[relation]}`}
           aria-label={t(`builder.family.new.${relation}`)}
           title={t(`builder.family.new.${relation}`)}
           onClick={(e) => {
@@ -107,7 +107,7 @@ function AddButtons({
 export const FamilyNode = memo(function FamilyNode() {
   return (
     <div
-      style={{ width: FAMILY_SIZE, height: FAMILY_SIZE, background: BRANCH_COLOR }}
+      style={{ width: FAMILY_SIZE, height: FAMILY_SIZE, background: BRANCH }}
       className="rounded-full"
     >
       <Handle type="target" position={Position.Bottom} className={hidden} isConnectable={false} />
@@ -138,9 +138,9 @@ export const GroundNode = memo(function GroundNode({ data }: NodeProps<GroundFlo
     >
       <defs>
         <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#a3b86c" stopOpacity="0.55" />
-          <stop offset="0.25" stopColor="#8a6a48" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#8a6a48" stopOpacity="0" />
+          <stop offset="0" style={{ stopColor: "var(--k-grass)" }} stopOpacity="0.55" />
+          <stop offset="0.25" style={{ stopColor: "var(--k-soil)" }} stopOpacity="0.35" />
+          <stop offset="1" style={{ stopColor: "var(--k-soil)" }} stopOpacity="0" />
         </linearGradient>
         {/* Fade the soil out at both ends instead of cutting it off. */}
         <linearGradient id="soil-fade" x1="0" y1="0" x2="1" y2="0">
@@ -165,7 +165,7 @@ export const GroundNode = memo(function GroundNode({ data }: NodeProps<GroundFlo
         fill="url(#soil)"
       />
       {trunks.map((x) => (
-        <g key={x} fill={BRANCH_COLOR} stroke={BRANCH_COLOR} strokeLinecap="round">
+        <g key={x} style={{ fill: BRANCH, stroke: BRANCH }} strokeLinecap="round">
           {/* A trunk widening towards the ground… */}
           <path
             d={`M ${x - 5} ${-TRUNK_REACH} C ${x - 6} ${soil - 20}, ${x - 12} ${soil - 6}, ${x - 22} ${soil + 2}

@@ -4,7 +4,7 @@ import { NavLink, Outlet } from "react-router";
 export function AdminLayout() {
   const { t } = useTranslation();
   const tab = ({ isActive }: { isActive: boolean }) =>
-    `rounded-md px-3 py-1.5 text-sm ${isActive ? "bg-leaf-700 text-white" : "text-bark-700 hover:bg-bark-100"}`;
+    `rounded-md px-3 py-1.5 text-sm ${isActive ? "bg-leaf-700 text-on-leaf" : "text-bark-700 hover:bg-bark-100"}`;
   return (
     <div>
       <nav className="mb-6 flex flex-wrap gap-2" aria-label={t("nav.admin")}>

@@ -31,7 +31,7 @@ export function StoriesPage() {
           canWrite && (
             <Link
               to={`/trees/${treeId}/stories/new`}
-              className="bg-leaf-700 hover:bg-leaf-600 rounded-md px-3 py-1.5 text-sm font-medium text-white"
+              className="bg-leaf-700 hover:bg-leaf-600 text-on-leaf rounded-md px-3 py-1.5 text-sm font-medium"
             >
               + {t("collab.story.new")}
             </Link>
