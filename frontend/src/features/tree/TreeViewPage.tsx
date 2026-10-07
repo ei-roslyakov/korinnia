@@ -108,13 +108,13 @@ export function TreeViewPage() {
         {count > 0 && (
           <div className="flex items-center gap-2 text-sm">
             <div
-              className="border-bark-100 inline-flex overflow-hidden rounded-md border"
+              className="border-bark-100 inline-flex shrink-0 overflow-hidden rounded-md border"
               role="group"
             >
               <button
                 type="button"
                 aria-pressed={!focusId}
-                className={`px-2 py-1 ${!focusId ? "bg-leaf-700 text-white" : "bg-white"}`}
+                className={`px-2 py-1 whitespace-nowrap ${!focusId ? "bg-leaf-700 text-white" : "bg-white"}`}
                 onClick={() => update({ all: "1", focus: null })}
               >
                 {t("canvas.wholeTree")}
@@ -122,7 +122,7 @@ export function TreeViewPage() {
               <button
                 type="button"
                 aria-pressed={Boolean(focusId)}
-                className={`px-2 py-1 ${focusId ? "bg-leaf-700 text-white" : "bg-white"}`}
+                className={`px-2 py-1 whitespace-nowrap ${focusId ? "bg-leaf-700 text-white" : "bg-white"}`}
                 onClick={() =>
                   update({
                     all: null,
@@ -151,7 +151,7 @@ export function TreeViewPage() {
         )}
         {canEdit && (
           <div
-            className="border-bark-100 inline-flex overflow-hidden rounded-md border text-sm"
+            className="border-bark-100 inline-flex shrink-0 overflow-hidden rounded-md border text-sm"
             role="group"
           >
             {(["view", "edit"] as const).map((m) => (
@@ -159,7 +159,7 @@ export function TreeViewPage() {
                 key={m}
                 type="button"
                 aria-pressed={(m === "edit") === builder}
-                className={`px-2 py-1 ${(m === "edit") === builder ? "bg-leaf-700 text-white" : "bg-white"}`}
+                className={`px-2 py-1 whitespace-nowrap ${(m === "edit") === builder ? "bg-leaf-700 text-white" : "bg-white"}`}
                 onClick={() => update({ mode: m === "edit" ? "edit" : null })}
               >
                 {t(`builder.mode.${m}`)}

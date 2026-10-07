@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 
+import { cx } from "@/lib/cx";
 import { useErrorMessage } from "@/lib/hooks";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
@@ -75,15 +76,15 @@ const inputClass =
   "block w-full rounded-md border border-bark-100 bg-white px-3 py-2 text-sm shadow-sm focus:border-leaf-600 focus:ring-1 focus:ring-leaf-600 focus:outline-none";
 
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`${inputClass} ${props.className ?? ""}`} />;
+  return <input {...props} className={cx(inputClass, props.className)} />;
 }
 
 export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={`${inputClass} ${props.className ?? ""}`} />;
+  return <textarea {...props} className={cx(inputClass, props.className)} />;
 }
 
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`${inputClass} ${props.className ?? ""}`} />;
+  return <select {...props} className={cx(inputClass, props.className)} />;
 }
 
 export function Checkbox({
