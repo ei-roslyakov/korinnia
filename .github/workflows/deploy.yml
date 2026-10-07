@@ -147,17 +147,11 @@ jobs:
           helm package deploy/helm/korinnia --version "$VERSION" --app-version "$VERSION" -d dist
           helm push "dist/korinnia-$VERSION.tgz" "$CHART_REPO"
 
-      - name: Tag and create GitHub release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tag the release
         run: |
-          # REST API instead of the gh CLI, which the self-hosted runner image does not ship.
-          curl -fsS -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases" \
-            -d "{\"tag_name\":\"v$VERSION\",\"target_commitish\":\"$GITHUB_SHA\",\"name\":\"v$VERSION\",\"generate_release_notes\":true}" \
-            > /dev/null
+          # The tag drives versioning (next version = latest tag + bump), so it must exist.
+          git tag "v$VERSION" "$GITHUB_SHA"
+          git push origin "refs/tags/v$VERSION"
 
       - name: Write version into the Argo CD Application and push
         run: |
@@ -183,6 +177,23 @@ jobs:
             git reset --hard origin/main
           done
           echo "::error::could not push the version commit"; exit 1
+
+      # Release notes are nice to have: a failure here leaves a warning, not a failed deploy.
+      - name: GitHub release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # REST API instead of the gh CLI, which the self-hosted runner image does not ship.
+          status=$(curl -sS -o release.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/releases" \
+            -d "{\"tag_name\":\"v$VERSION\",\"name\":\"v$VERSION\",\"generate_release_notes\":true}")
+          if [ "$status" != 201 ]; then
+            echo "::warning::GitHub release for v$VERSION not created (HTTP $status): $(head -c 500 release.json)"
+            exit 1
+          fi
 
       - name: Summary
         if: always()
