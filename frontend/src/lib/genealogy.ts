@@ -35,6 +35,7 @@ export interface PersonSummary {
   death: PartialDate | null;
   birth_place: string | null;
   primary_photo_id: string | null;
+  avatar_url?: string | null;
 }
 
 export type ParentChildType = "biological" | "adoptive" | "step" | "foster" | "unknown";
@@ -134,6 +135,11 @@ export interface PersonDetail {
   notes_for_descendants: string | null;
   research_status: "complete" | "partial" | "unknown";
   primary_photo_id: string | null;
+  primary_photo_crop: Region | null;
+  avatar_url: string | null;
+  /** The cropped portrait is still being rendered (avatar_url is a temporary fallback). */
+  portrait_pending: boolean;
+  media: MediaItem[];
   names: PersonName[];
   birth: Vital | null;
   death: Vital | null;
@@ -229,3 +235,36 @@ export const END_REASONS = ["divorce", "death", "separation", "other"] as const;
 export const GENDERS: Gender[] = ["female", "male", "other", "unknown"];
 export const NAME_TYPES = ["birth", "married", "nickname", "alias", "religious", "other"] as const;
 export const SCRIPTS = ["cyrillic", "latin", "other"] as const;
+
+export type MediaKind = "photo" | "document_scan" | "audio" | "video" | "pdf" | "other";
+
+/** Rectangle as fractions (0..1) of the image size. */
+export interface Region {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface MediaItem {
+  id: string;
+  kind: MediaKind;
+  title: string | null;
+  description: string | null;
+  date: PartialDate | null;
+  place: PlaceSummary | null;
+  original_filename: string;
+  mime_type: string;
+  size: number;
+  sha256: string;
+  width: number | null;
+  height: number | null;
+  duration_seconds: number | null;
+  processing_status: "pending" | "ready" | "failed";
+  processing_error: string | null;
+  urls: { original: string; web: string; thumb: string | null };
+  people: { person_id: string; display_name: string; region: Region | null }[];
+  created_at: string;
+}
+
+export const isVisual = (m: MediaItem) => m.kind === "photo" || m.kind === "document_scan";

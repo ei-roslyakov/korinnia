@@ -229,7 +229,17 @@
     "not_in_trash": "Tego elementu nie ma w koszu.",
     "revision_not_found": "Nie znaleziono wersji.",
     "revision_not_restorable": "Tej wersji nie można przywrócić.",
-    "entity_deleted": "Najpierw przywróć element z kosza."
+    "entity_deleted": "Najpierw przywróć element z kosza.",
+    "file_too_large": "Plik jest za duży.",
+    "unsupported_media_type": "Ten typ pliku nie jest obsługiwany (obsługiwane są zdjęcia, skany, PDF, dźwięk, filmy i dokumenty tekstowe).",
+    "empty_file": "Plik jest pusty.",
+    "duplicate_media": "Dokładnie ten plik jest już w drzewie.",
+    "invalid_media_kind": "Ten rodzaj nie pasuje do pliku.",
+    "media_not_found": "Nie znaleziono pliku.",
+    "tag_not_found": "Ta osoba nie jest powiązana z plikiem.",
+    "media_not_linked": "Niektóre pliki nie są powiązane z tą osobą.",
+    "not_a_photo": "Portretem może być tylko zdjęcie lub skan.",
+    "file_not_found": "Nie znaleziono pliku."
   },
   "dates": {
     "approx": "ok. {{date}}",
@@ -547,14 +557,60 @@
         "place": "Miejsce",
         "event": "Wydarzenie",
         "parent_child": "Rodzic – dziecko",
-        "partnership": "Związek"
+        "partnership": "Związek",
+        "media": "Plik"
       }
     },
     "tabs": {
       "details": "Informacje",
       "events": "Wydarzenia",
       "family": "Rodzina",
-      "history": "Historia"
+      "history": "Historia",
+      "media": "Multimedia"
     }
+  },
+  "media": {
+    "photos": "Zdjęcia",
+    "documents": "Dokumenty",
+    "recordings": "Nagrania",
+    "videos": "Filmy",
+    "processing": "Przygotowywanie podglądu…",
+    "failed": "Nie udało się utworzyć podglądu",
+    "retry": "Spróbuj ponownie",
+    "showTags": "Pokaż imiona",
+    "downloadOriginal": "Pobierz oryginał",
+    "previous": "Poprzednie",
+    "next": "Następne",
+    "inPhoto": "Tutaj",
+    "kinds": {
+      "photo": "Zdjęcie",
+      "document_scan": "Skan dokumentu",
+      "audio": "Dźwięk",
+      "video": "Film",
+      "pdf": "PDF",
+      "other": "Plik"
+    },
+    "dropHint": "Przeciągnij tu zdjęcia, skany, PDF, nagrania lub filmy — albo",
+    "chooseFiles": "Wybierz pliki",
+    "asDocument": "To są skany dokumentów (nie zdjęcia)",
+    "originalsKept": "Oryginały są przechowywane bez zmian, z sumą kontrolną; podglądy powstają automatycznie.",
+    "uploading": "Przesyłanie",
+    "none": "Brak zdjęć i dokumentów.",
+    "linkExisting": "Powiąż istniejący plik",
+    "uploadAnyway": "Prześlij mimo to",
+    "peopleCount": "osób: {{count}}",
+    "portrait": "Portret",
+    "moveUp": "W górę",
+    "moveDown": "W dół",
+    "tagPeople": "Oznacz osoby",
+    "setPortrait": "Ustaw jako portret",
+    "confirmDelete": "Przenieść plik do kosza? Zniknie u wszystkich osób, z którymi jest powiązany.",
+    "kind": "Rodzaj",
+    "tagHint": "Zaznacz twarz prostokątem i wybierz, kto to jest. Albo po prostu dodaj osoby bez zaznaczania twarzy.",
+    "whoIsThis": "Kto jest w zaznaczonym obszarze?",
+    "addPerson": "Dodaj osobę do tego pliku…",
+    "done": "Gotowe",
+    "cropHint": "Zaznacz kwadratem twarz do portretu na drzewie.",
+    "cropNote": "Portret to osobna przycięta kopia; oryginalne zdjęcie nigdy nie jest zmieniane."
   }
 }

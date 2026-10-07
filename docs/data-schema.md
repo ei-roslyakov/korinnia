@@ -80,5 +80,15 @@ Dates in snapshots use the column names above without the prefix (`{"year": 1914
 |---|---|---|
 | `layout_offsets` | Manual nudges of cards on the canvas (not family data, not audited) | PK (`tree_id`, `person_id`), `dx`, `dy` (pixels relative to the automatic layout), `updated_at` |
 
+### Phase 6: media
+| Table | Purpose | Key columns |
+|---|---|---|
+| `media_files` | One uploaded file | `kind` (`photo`/`document_scan`/`audio`/`video`/`pdf`/`other`), `original_key` (path under the media root), `original_filename`, `mime_type`, `size`, `sha256`, `web_key`, `thumb_key` (derived, regenerable), `processing_status` (`pending`/`ready`/`failed`), `processing_error`, `width`, `height`, `duration_seconds`, `title`, `description`, `date_*` (partial date), `place_id`, soft delete |
+| `media_persons` | Person in / related to a file | `media_id`, `person_id` (unique together), `region` (`{x,y,w,h}` fractions of the image, or null), `sort_order` (position in the person's gallery) |
+
+New `persons` columns: `primary_photo_id` (FK `media_files`), `primary_photo_crop` (`{x,y,w,h}`), `avatar_key` (derived portrait).
+
+**Reading media without the app:** every original is a plain file at `<media root>/<original_key>`. Its original name, people and description are in `media_files` / `media_persons`, and its integrity can be checked against `sha256`.
+
 ### Planned
-Media (phase 6); sources, citations, stories, suggestions, comments and open questions (phase 7). Each section is documented here when it is implemented.
+Sources (phase 6); sources, citations, stories, suggestions, comments and open questions (phase 7). Each section is documented here when it is implemented.

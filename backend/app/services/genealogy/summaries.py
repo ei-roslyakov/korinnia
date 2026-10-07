@@ -13,6 +13,7 @@ from app.models import Person, PersonName
 from app.schemas.dates import PartialDateOut
 from app.schemas.persons import PersonSummary
 from app.services.genealogy.common import name_display, pick_primary
+from app.services.genealogy.media_urls import avatar_url, primary_media_map
 from app.services.genealogy.vitals import Vitals, load_vitals
 
 
@@ -33,7 +34,9 @@ async def load_names(
     return result
 
 
-def make_summary(person: Person, names: list[PersonName], vitals: Vitals) -> PersonSummary:
+def make_summary(
+    person: Person, names: list[PersonName], vitals: Vitals, avatar: str | None = None
+) -> PersonSummary:
     birth_place = vitals.birth.place.name if vitals.birth and vitals.birth.place else None
     return PersonSummary(
         id=person.id,
@@ -44,6 +47,7 @@ def make_summary(person: Person, names: list[PersonName], vitals: Vitals) -> Per
         death=PartialDateOut.from_domain(vitals.death_date),
         birth_place=birth_place,
         primary_photo_id=person.primary_photo_id,
+        avatar_url=avatar,
     )
 
 
@@ -53,7 +57,16 @@ async def summaries_for(
     ids = None if whole_tree else [p.id for p in persons]
     names = await load_names(session, ids, tree_id)
     vitals = await load_vitals(session, tree_id, ids)
-    return [make_summary(p, names.get(p.id, []), vitals.get(p.id, Vitals())) for p in persons]
+    photos = await primary_media_map(session, persons)
+    return [
+        make_summary(
+            p,
+            names.get(p.id, []),
+            vitals.get(p.id, Vitals()),
+            avatar_url(p, photos.get(p.primary_photo_id) if p.primary_photo_id else None),
+        )
+        for p in persons
+    ]
 
 
 async def summary_map(

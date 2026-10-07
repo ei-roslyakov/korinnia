@@ -229,7 +229,17 @@
     "not_in_trash": "This item is not in the trash.",
     "revision_not_found": "Version not found.",
     "revision_not_restorable": "This version cannot be restored.",
-    "entity_deleted": "Restore the item from the trash first."
+    "entity_deleted": "Restore the item from the trash first.",
+    "file_too_large": "The file is too large.",
+    "unsupported_media_type": "This file type is not supported (photos, scans, PDF, audio, video and text documents are).",
+    "empty_file": "The file is empty.",
+    "duplicate_media": "This exact file is already in the tree.",
+    "invalid_media_kind": "This type does not fit the file.",
+    "media_not_found": "File not found.",
+    "tag_not_found": "This person is not linked to the file.",
+    "media_not_linked": "Some files are not linked to this person.",
+    "not_a_photo": "Only a photo or scan can be a portrait.",
+    "file_not_found": "File not found."
   },
   "dates": {
     "approx": "about {{date}}",
@@ -547,14 +557,60 @@
         "place": "Place",
         "event": "Event",
         "parent_child": "Parent–child",
-        "partnership": "Partnership"
+        "partnership": "Partnership",
+        "media": "File"
       }
     },
     "tabs": {
       "details": "Details",
       "events": "Events",
       "family": "Family",
-      "history": "History"
+      "history": "History",
+      "media": "Media"
     }
+  },
+  "media": {
+    "photos": "Photos",
+    "documents": "Documents",
+    "recordings": "Recordings",
+    "videos": "Videos",
+    "processing": "Preparing preview…",
+    "failed": "Preview failed",
+    "retry": "Retry",
+    "showTags": "Show names",
+    "downloadOriginal": "Download original",
+    "previous": "Previous",
+    "next": "Next",
+    "inPhoto": "In this item",
+    "kinds": {
+      "photo": "Photo",
+      "document_scan": "Document scan",
+      "audio": "Audio",
+      "video": "Video",
+      "pdf": "PDF",
+      "other": "File"
+    },
+    "dropHint": "Drag photos, scans, PDFs, recordings or videos here — or",
+    "chooseFiles": "Choose files",
+    "asDocument": "These are document scans (not photos)",
+    "originalsKept": "Originals are stored unchanged, with a checksum; previews are made automatically.",
+    "uploading": "Uploads",
+    "none": "No photos or documents yet.",
+    "linkExisting": "Link the existing file",
+    "uploadAnyway": "Upload anyway",
+    "peopleCount": "{{count}} people",
+    "portrait": "Portrait",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "tagPeople": "Tag people",
+    "setPortrait": "Use as portrait",
+    "confirmDelete": "Move this file to the trash? It disappears for everyone it is linked to.",
+    "kind": "Type",
+    "tagHint": "Drag a rectangle around a face, then choose who it is. Or just add people without marking a face.",
+    "whoIsThis": "Who is in the marked area?",
+    "addPerson": "Add a person to this item…",
+    "done": "Done",
+    "cropHint": "Drag a square around the face for the portrait shown on the tree.",
+    "cropNote": "The portrait is a separate cropped copy; the original photo is never changed."
   }
 }

@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_e
 os.environ["ENVIRONMENT"] = "test"
 os.environ.setdefault("POSTGRES_DB", "korinnia_test")
 os.environ["COOKIE_SECURE"] = "false"  # the test client talks plain http://
+os.environ["MEDIA_X_ACCEL"] = "false"  # no nginx in tests: the backend serves files
 os.environ.setdefault("SECRET_KEY", "test-secret-key-test-secret-key-0123456789")
 
 from alembic import command
@@ -227,3 +228,15 @@ async def ctx(
     client = await make_client()
     await client.login("owner@example.com")
     return Ctx(tree=tree, editor=client, base=f"/api/v1/trees/{tree.id}")
+
+
+@pytest.fixture(autouse=True)
+def job_queue() -> Iterator[Any]:
+    """Jobs are recorded in memory instead of PostgreSQL (assert on `.jobs`)."""
+    from procrastinate import testing
+
+    from app.jobs.app import app as procrastinate_app
+
+    connector = testing.InMemoryConnector()
+    with procrastinate_app.replace_connector(connector):
+        yield connector

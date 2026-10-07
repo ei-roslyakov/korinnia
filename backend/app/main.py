@@ -14,11 +14,14 @@ from app.core.config import get_settings
 from app.core.db import get_engine
 from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging
+from app.jobs.app import app as procrastinate_app
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    yield
+    # The API only enqueues jobs (media processing); the worker runs them.
+    async with procrastinate_app.open_async():
+        yield
     await get_engine().dispose()
 
 

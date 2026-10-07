@@ -26,6 +26,7 @@ from app.models import (
 )
 from app.schemas.dates import PartialDateOut
 from app.schemas.events import EventOut, ParticipantOut
+from app.schemas.media import Region
 from app.schemas.persons import (
     NameIn,
     NameOut,
@@ -42,7 +43,9 @@ from app.schemas.persons import (
 from app.schemas.places import PlaceSummary
 from app.services import audit
 from app.services.context import Actor
+from app.services.genealogy import media as media_service
 from app.services.genealogy.common import get_live, name_display, pick_primary, to_partial
+from app.services.genealogy.media_urls import avatar_url, primary_media_map
 from app.services.genealogy.plausibility import person_warnings
 from app.services.genealogy.snapshots import make_names, person_snapshot
 from app.services.genealogy.summaries import load_names, summaries_for, summary_map
@@ -179,6 +182,13 @@ async def update_person(
         person.is_living = body.is_living
     elif "death" in fields and body.death is not None:
         person.is_living = False
+    if "primary_photo_id" in fields or "primary_photo_crop" in fields:
+        await media_service.set_primary_photo(
+            session,
+            person,
+            body.primary_photo_id if "primary_photo_id" in fields else person.primary_photo_id,
+            body.primary_photo_crop,
+        )
     if body.names is not None:
         await session.refresh(person, ["names"])
         person.names = make_names(person, _names_payload(body.names))
@@ -320,6 +330,11 @@ async def _relatives(
 
 async def person_detail(session: AsyncSession, person: Person) -> PersonDetail:
     names = (await load_names(session, [person.id], person.tree_id)).get(person.id, [])
+    media_items, _ = await media_service.list_media(
+        session, person.tree_id, person_id=person.id, kind=None, q=None, limit=10_000, offset=0
+    )
+    photos = await primary_media_map(session, [person])
+    primary = photos.get(person.primary_photo_id) if person.primary_photo_id else None
     vitals = await vitals_of(session, person)
     events = await person_events(session, person)
     parents, children, partners, sibling_links = await _relatives(session, person)
@@ -366,6 +381,12 @@ async def person_detail(session: AsyncSession, person: Person) -> PersonDetail:
         notes_for_descendants=person.notes_for_descendants,
         research_status=person.research_status,
         primary_photo_id=person.primary_photo_id,
+        primary_photo_crop=Region.model_validate(person.primary_photo_crop)
+        if person.primary_photo_crop
+        else None,
+        avatar_url=avatar_url(person, primary),
+        portrait_pending=person.primary_photo_id is not None and person.avatar_key is None,
+        media=await media_service.media_out_many(session, media_items),
         names=[_name_out(n) for n in sorted(names, key=lambda n: (not n.is_primary, n.sort_order))],
         birth=_vital_out(vitals.birth),
         death=_vital_out(vitals.death),

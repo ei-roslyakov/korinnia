@@ -17,6 +17,7 @@ from app.core.enums import (
 )
 from app.schemas.dates import PartialDateIn, PartialDateOut
 from app.schemas.events import EventOut
+from app.schemas.media import MediaOut, Region
 from app.schemas.places import PlaceSummary
 
 
@@ -68,6 +69,8 @@ class VitalOut(BaseModel):
 
 
 class PersonFields(BaseModel):
+    primary_photo_id: uuid.UUID | None = None
+    primary_photo_crop: Region | None = None
     gender: Gender | None = None
     is_living: bool | None = None
     short_summary: str | None = Field(default=None, max_length=500)
@@ -140,6 +143,7 @@ class PersonSummary(BaseModel):
     death: PartialDateOut | None
     birth_place: str | None = None
     primary_photo_id: uuid.UUID | None = None
+    avatar_url: str | None = None
 
 
 class ParentRef(BaseModel):
@@ -182,6 +186,11 @@ class PersonDetail(BaseModel):
     notes_for_descendants: str | None
     research_status: ResearchStatus
     primary_photo_id: uuid.UUID | None
+    primary_photo_crop: Region | None
+    avatar_url: str | None
+    # The cropped portrait is being rendered by the worker (avatar_url is a fallback).
+    portrait_pending: bool
+    media: list[MediaOut]
     names: list[NameOut]
     birth: VitalOut | None
     death: VitalOut | None

@@ -126,3 +126,21 @@ class PartnershipEndReason(StrEnum):
     death = "death"
     separation = "separation"
     other = "other"
+
+
+# --- Media --------------------------------------------------------------------------------
+
+
+class MediaKind(StrEnum):
+    photo = "photo"
+    document_scan = "document_scan"
+    audio = "audio"
+    video = "video"
+    pdf = "pdf"
+    other = "other"
+
+
+class ProcessingStatus(StrEnum):
+    pending = "pending"
+    ready = "ready"
+    failed = "failed"

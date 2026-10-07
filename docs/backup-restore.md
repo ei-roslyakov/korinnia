@@ -3,7 +3,7 @@
 Your family archive lives in two places, and **both** must be backed up:
 
 1. **PostgreSQL**: all structured data (people, names, events, relationships, stories, sources, history).
-2. **Media volume** (`/data/media`, Docker volume `korinnia_media` or a Kubernetes PVC): original photos, scans, documents, audio and video, plus derived thumbnails.
+2. **Media volume** (`/data/media`, Docker volume `korinnia_media` or a Kubernetes PVC): original photos, scans, documents, audio and video (`originals/`, irreplaceable), plus derived thumbnails / web versions / portraits (`derived/`, `avatars/`, regenerable from the originals).
 
 ## Current state (phase 1): manual backups
 

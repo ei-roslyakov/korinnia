@@ -8,17 +8,30 @@ const TONES: Record<Gender, string> = {
   unknown: "bg-bark-100 text-bark-700",
 };
 
-/** Placeholder portrait (photos arrive with media support). */
+/** Portrait (cropped primary photo) or initials when there is no photo yet. */
 export function Avatar({
   name,
   gender,
+  url,
   size = "md",
 }: {
   name: string;
   gender: Gender;
+  url?: string | null;
   size?: "sm" | "md" | "lg";
 }) {
   const sizes = { sm: "size-10 text-sm", md: "size-12 text-base", lg: "size-20 text-2xl" };
+  if (url) {
+    return (
+      <img
+        src={url}
+        alt=""
+        loading="lazy"
+        draggable={false}
+        className={`shrink-0 rounded-full object-cover ${sizes[size]}`}
+      />
+    );
+  }
   return (
     <div
       aria-hidden

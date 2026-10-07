@@ -27,10 +27,16 @@ from app.storage.base import (
     validate_key,
 )
 
+FILE_MODE = 0o644
+
 
 class LocalStorage(Storage):
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
+
+    def path(self, key: str) -> Path:
+        """Filesystem path of an object (for serving files without copying them)."""
+        return self._path(key)
 
     def _path(self, key: str) -> Path:
         path = (self.root / validate_key(key)).resolve()
@@ -50,6 +56,9 @@ class LocalStorage(Storage):
                 shutil.copyfileobj(fileobj, tmp, CHUNK_SIZE)
                 tmp.flush()
                 os.fsync(tmp.fileno())
+            # mkstemp creates 0600 files; nginx (another user) serves them via X-Accel-
+            # Redirect after the API checked permissions, so they must be readable.
+            os.chmod(tmp_name, FILE_MODE)
             os.replace(tmp_name, dest)
         except BaseException:
             Path(tmp_name).unlink(missing_ok=True)

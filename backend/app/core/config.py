@@ -56,8 +56,11 @@ class Settings(BaseSettings):
     superadmin_email: str | None = None
     superadmin_password: SecretStr | None = None
 
-    # --- Uploads ------------------------------------------------------------------
+    # --- Uploads / media ----------------------------------------------------------
     max_upload_size_mb: int = 2048
+    # Hand file downloads to nginx (X-Accel-Redirect to its internal /_media/ location).
+    # Disable when the backend is reached without nginx (tests, direct dev access).
+    media_x_accel: bool = True
 
     @computed_field  # type: ignore[prop-decorator]
     @property

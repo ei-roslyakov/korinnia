@@ -19,6 +19,10 @@ dependencies = [
     "pyotp>=2.10.0",
     "segno>=1.6.6",
     "email-validator>=2.3.0",
+    "pillow>=12.3.0",
+    "pillow-heif>=1.8.0",
+    "filetype>=1.2.0",
+    "python-multipart>=0.0.32",
 ]
 
 [dependency-groups]
@@ -59,7 +63,7 @@ plugins = ["pydantic.mypy"]
 exclude = ["alembic/versions/"]
 
 [[tool.mypy.overrides]]
-module = ["procrastinate.*"]
+module = ["procrastinate.*", "filetype.*", "pillow_heif.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

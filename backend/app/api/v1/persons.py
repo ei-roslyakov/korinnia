@@ -6,6 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, status
 
 from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer
+from app.jobs.queue import enqueue_avatar
 from app.schemas.common import Page
 from app.schemas.persons import (
     DeletePreview,
@@ -68,6 +69,11 @@ async def update_person(
 ) -> PersonDetail:
     person = await person_service.get_person(session, access.tree.id, person_id)
     person = await person_service.update_person(session, person, body, actor)
+    if {
+        "primary_photo_id",
+        "primary_photo_crop",
+    } & body.model_fields_set and person.primary_photo_id:
+        await enqueue_avatar(person.id)
     return await person_service.person_detail(session, person)
 
 

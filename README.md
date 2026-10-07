@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phases 1–5 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder / editing UI). Media (photos, documents, recordings) is next. See [Features](#features) for what works today.
+> **Status:** Phases 1–6 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media). Sources, stories and collaboration are next. See [Features](#features) for what works today.
 
 ---
 
@@ -22,7 +22,7 @@ Korinnia's mission is long-term preservation: to collect *everything* about ever
 | Content | react-markdown 10 + remark-gfm (biographies, notes; raw HTML never rendered) |
 | Maps | Leaflet 1.9 + OpenStreetMap tiles (place pins; map view planned) |
 | Web server | nginx 1.29 — static frontend, `/api` reverse proxy, gzip (incl. pre-compressed assets), caching & security headers. Plain HTTP: TLS is terminated by your ingress / load balancer |
-| Media processing (planned) | Pillow (thumbnails, EXIF orientation), ffmpeg (audio/video previews), PDF thumbnails |
+| Media processing | Pillow 12 (+ pillow-heif for iPhone HEIC; thumbnails, web versions, EXIF orientation, portrait crops), ffmpeg 5 (video posters, browser-friendly MP4 / MP3), poppler `pdftoppm` (PDF thumbnails), `filetype` (content-based type detection) |
 | Book / PDF (planned) | WeasyPrint |
 | Testing | pytest 9 + pytest-asyncio + pytest-cov + httpx (backend); Vitest 5 + Testing Library + Playwright 1.63 (frontend / E2E) |
 | Lint / format / types | ruff 0.16, mypy 2.4 (strict); ESLint 10 + typescript-eslint, Prettier 3.9; pre-commit |
@@ -104,9 +104,14 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - 📋 Data-quality panel (phase 7)
 
 ### Media
-- 📋 Drag & drop upload (photos, scans, PDFs, audio, video); originals kept untouched
-- 📋 Thumbnails and web versions in the background; avatar crop as a derived image
-- 📋 Face / person tagging in group photos; lightbox; audio / video players
+- ✅ Drag & drop upload with progress (photos incl. HEIC, document scans, PDFs, audio, video, text documents); large files streamed
+- ✅ Originals stored byte-for-byte with SHA-256; type detected from content (HTML/SVG/executables rejected); duplicates detected per tree (link the existing file instead)
+- ✅ Background processing: EXIF-rotated web versions and thumbnails, video posters + MP4, MP3 for non-browser audio, PDF first-page thumbnails; status, failure reasons, retry
+- ✅ Person gallery with lightbox (keyboard navigation, captions, date, place, people), documents list, audio and video players
+- ✅ Face / person tagging in group photos (draw a rectangle); names shown on the photo and linked
+- ✅ Portrait: choose a photo and crop a square (derived image, original untouched); shown on tree cards and person pages
+- ✅ Gallery order per person; title, description, partial date, place per item; history and trash
+- ✅ Files served only to tree members (API checks access, nginx streams via `X-Accel-Redirect`, range requests for video)
 
 ### Sources, stories & collaboration
 - 📋 Sources and citations on any fact

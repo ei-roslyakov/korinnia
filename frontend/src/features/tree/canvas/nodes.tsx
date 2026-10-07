@@ -33,7 +33,7 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
       title={person.display_name}
     >
       <Handle type="target" position={Position.Top} className={hidden} isConnectable={false} />
-      <Avatar name={person.display_name} gender={person.gender} size="sm" />
+      <Avatar name={person.display_name} gender={person.gender} url={person.avatar_url} size="sm" />
       <div className="min-w-0">
         <div className="line-clamp-2 text-sm leading-tight font-medium">{person.display_name}</div>
         <div className="text-bark-700 text-xs">

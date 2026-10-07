@@ -50,7 +50,7 @@ let csrfFetch: Promise<string> | null = null;
  * only the last Set-Cookie survives, so a token taken from a response body may no longer
  * match the cookie. Cookie-less clients share a single /auth/csrf request.
  */
-async function csrfToken(): Promise<string> {
+export async function csrfToken(): Promise<string> {
   const existing = readCookie(CSRF_COOKIE);
   if (existing) return existing;
   csrfFetch ??= fetch("/api/v1/auth/csrf", { credentials: "same-origin" })

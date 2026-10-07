@@ -45,6 +45,8 @@ PERSON_FIELDS = (
     "nationality",
     "notes_for_descendants",
     "research_status",
+    "primary_photo_id",
+    "primary_photo_crop",
 )
 NAME_FIELDS = (
     "type",
@@ -123,8 +125,11 @@ async def apply_person_snapshot(
     person.gender = Gender(snap["gender"])
     person.research_status = ResearchStatus(snap["research_status"])
     for f in PERSON_FIELDS:
-        if f not in ("gender", "research_status"):
+        if f not in ("gender", "research_status", "primary_photo_id"):
             setattr(person, f, snap.get(f))
+    photo = snap.get("primary_photo_id")
+    person.primary_photo_id = uuid.UUID(photo) if photo else None
+    person.avatar_key = None  # regenerated from the restored photo choice
     person.updated_by_id = user_id
     await session.refresh(person, ["names"])
     person.names = make_names(person, snap.get("names", []))

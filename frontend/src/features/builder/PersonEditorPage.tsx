@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 
 import { Alert, Button, ErrorAlert, PageHeader, Spinner } from "@/components/ui";
 import { usePerson } from "@/features/person/api";
+import { MediaTab } from "@/features/media/MediaTab";
 import { useTree } from "@/features/tree/api";
 import type { PersonDetail } from "@/lib/genealogy";
 import { atLeast } from "@/lib/types";
@@ -14,7 +15,7 @@ import { FamilyTab } from "./FamilyTab";
 import { HistoryTab } from "./HistoryTab";
 import { PersonForm } from "./PersonForm";
 
-const TABS = ["details", "events", "family", "history"] as const;
+const TABS = ["details", "media", "events", "family", "history"] as const;
 type Tab = (typeof TABS)[number];
 
 export function PersonEditorPage() {
@@ -88,6 +89,9 @@ export function PersonEditorPage() {
       {tab === "details" && (
         // Remount on external changes (e.g. a restored revision) to show fresh data.
         <PersonForm key={p.updated_at} treeId={treeId} person={p} onSaved={setSaved} />
+      )}
+      {tab === "media" && (
+        <MediaTab treeId={treeId} person={p} onChanged={() => void person.refetch()} />
       )}
       {tab === "events" && <EventsTab treeId={treeId} person={p} />}
       {tab === "family" && <FamilyTab treeId={treeId} person={p} />}

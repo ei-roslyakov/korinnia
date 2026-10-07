@@ -190,3 +190,33 @@ After a delete, the shared cache refreshed the deleted person (404). That replac
 
 ### D53. Known limitation: spouses are not always side by side
 ELK's layered algorithm keeps generations on rows, but its crossing minimisation sometimes separates partners (e.g. in the demo tree, Andrii and Oksana are several cards apart). Users can drag cards (D48). A layout that groups couples (compound nodes or a genealogy-specific ordering pass) is a candidate improvement for phase 10.
+
+## Phase 6: media
+
+### D54. Storage layout: originals vs. derived files
+- **Originals:** `originals/<tree>/<media>/<ascii-name.ext>`. The bytes are exactly as uploaded and never modified; the SHA-256 is stored in the database.
+- **Derived files:** `derived/<tree>/<media>/{web.webp, thumb.webp, web.mp4, web.mp3}`, and portraits at `avatars/<tree>/<person>/<hash>.webp`.
+
+Derived files can be deleted and regenerated at any time (`POST /media/{id}/reprocess`). Backups must contain the originals; the derived files are a convenience. The original file name (any script) is kept in the database. The storage name is a transliterated ASCII version, so the archive stays readable on any filesystem.
+
+### D55. Content-based type detection and an allow-list
+The type comes from the file's magic bytes (`filetype`), never from its name. Allowed: common image formats including HEIC/HEIF, PDF, common audio and video formats, DOCX/ODT/DOC/RTF, and UTF-8 text by extension. HTML, SVG, executables and unknown binaries are rejected with 415, so nothing uploaded can run script in a viewer's browser. Size limit: `MAX_UPLOAD_SIZE_MB`, enforced by both nginx and the API (413). Identical files in a tree are detected by SHA-256 (409 `duplicate_media`, with the existing id), and the UI offers to link the existing file.
+
+### D56. Processing in the worker, never in the request
+An upload stores the original, records the item as `pending` and enqueues `media.process` (procrastinate, PostgreSQL). The worker generates the derivatives:
+- **Photos and scans:** Pillow, EXIF-rotated; web version ≤ 2048 px and thumbnail ≤ 480 px, both WebP.
+- **Video:** a poster frame plus H.264/AAC MP4 (≤ 1280 px wide, faststart) via ffmpeg.
+- **Audio:** an MP3 only when browsers can't play the original.
+- **PDF:** a first-page thumbnail via poppler.
+
+Failures are stored on the item (`failed` plus the reason) instead of being retried endlessly, and can be retried from the UI. A sweep every 30 minutes re-queues items stuck in `pending`, for example when enqueueing failed. The API opens the job queue in its lifespan only to enqueue.
+
+### D57. Files are served by nginx after an API permission check
+`GET /api/v1/trees/{t}/media/{m}/file/{original|web|thumb}` checks tree membership, then answers with `X-Accel-Redirect: /_media/<key>`. nginx streams the file from its read-only mount of the media volume, with range requests for seeking in video and no Python in the data path. `/_media/` is `internal` and can't be requested directly. Without nginx (tests, `MEDIA_X_ACCEL=false`) the API serves files itself.
+**Bug found by E2E:** `mkstemp` creates files with mode 0600, so nginx, running as a different user, got 403 for every file. Stored files are now 0644 inside the volume; access control is entirely the API's job (D57).
+
+### D58. Face tags and portraits
+`media_persons` links a person to an item, with an optional region `{x, y, w, h}` given as fractions of the image, so it is independent of resolution. The person's gallery order is `sort_order` on the same row. The portrait is `persons.primary_photo_id` plus a square `primary_photo_crop`, and the worker renders `avatars/...webp` (400×400). Until it exists, the item thumbnail is used and `portrait_pending` tells the UI to poll briefly. The first photo uploaded for a person becomes their portrait automatically. Removing the person's tag from the portrait photo clears the portrait.
+
+### D59. Uploads use XMLHttpRequest
+`fetch` can't report upload progress, so uploads go through XHR, with the same CSRF header and cookies as every other request. Each file is uploaded and processed independently, so one failure (too large, unsupported, duplicate) doesn't block the rest.

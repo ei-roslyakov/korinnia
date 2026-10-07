@@ -1,4 +1,10 @@
-import type { PartialDate, PersonDetail, PersonSummary, TreeGraph } from "@/lib/genealogy";
+import type {
+  MediaItem,
+  PartialDate,
+  PersonDetail,
+  PersonSummary,
+  TreeGraph,
+} from "@/lib/genealogy";
 
 export const year = (y: number, precision: PartialDate["precision"] = "year"): PartialDate => ({
   year: y,
@@ -49,6 +55,32 @@ export function bigGraph(n: number): TreeGraph {
   return { persons, parent_child, partnerships: [] };
 }
 
+export const mediaItem = (
+  id: string,
+  kind: MediaItem["kind"],
+  extra: Partial<MediaItem> = {},
+): MediaItem => ({
+  id,
+  kind,
+  title: null,
+  description: null,
+  date: null,
+  place: null,
+  original_filename: `${id}.bin`,
+  mime_type: "application/octet-stream",
+  size: 2048,
+  sha256: "a".repeat(64),
+  width: 100,
+  height: 80,
+  duration_seconds: null,
+  processing_status: "ready",
+  processing_error: null,
+  urls: { original: `/f/${id}/original`, web: `/f/${id}/web`, thumb: `/f/${id}/thumb` },
+  people: [],
+  created_at: "2024-01-01T00:00:00Z",
+  ...extra,
+});
+
 export const halyna: PersonDetail = {
   id: "p2",
   tree_id: "t1",
@@ -63,7 +95,29 @@ export const halyna: PersonDetail = {
   nationality: null,
   notes_for_descendants: "Зберігайте листи.",
   research_status: "complete",
-  primary_photo_id: null,
+  primary_photo_id: "m1",
+  primary_photo_crop: null,
+  avatar_url: "/f/m1/thumb",
+  portrait_pending: false,
+  media: [
+    mediaItem("m1", "photo", {
+      title: "Весілля",
+      date: year(1946),
+      people: [
+        { person_id: "p2", display_name: "Галина", region: { x: 0.1, y: 0.1, w: 0.3, h: 0.3 } },
+        {
+          person_id: "p3",
+          display_name: "Олександр Коваленко",
+          region: { x: 0.5, y: 0.1, w: 0.3, h: 0.3 },
+        },
+      ],
+    }),
+    mediaItem("m2", "audio", {
+      title: "Розповідь про війну",
+      urls: { original: "/f/m2/original", web: "/f/m2/web", thumb: null },
+    }),
+    mediaItem("m3", "pdf", { original_filename: "довідка.pdf", size: 3 * 1024 * 1024 }),
+  ],
   names: [
     {
       id: "n1",

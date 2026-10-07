@@ -17,12 +17,24 @@ from sqlalchemy.orm import selectinload
 
 from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.security import utcnow
-from app.models import AuditLog, Event, EventParticipant, ParentChild, Partnership, Person, Place
+from app.models import (
+    AuditLog,
+    Event,
+    EventParticipant,
+    MediaFile,
+    MediaKind,
+    MediaPerson,
+    ParentChild,
+    Partnership,
+    Person,
+    Place,
+)
 from app.schemas.history import TrashEntityType, TrashItem
 from app.schemas.persons import DeletePreview
 from app.services import audit
 from app.services.context import Actor
-from app.services.genealogy.common import name_display, pick_primary
+from app.services.genealogy.common import date_from_dict, name_display, pick_primary, set_date
+from app.services.genealogy.media import snapshot as media_snapshot
 from app.services.genealogy.persons import snapshot_of
 from app.services.genealogy.snapshots import (
     apply_event_snapshot,
@@ -43,6 +55,7 @@ MODELS: dict[str, type[Any]] = {
     "event": Event,
     "parent_child": ParentChild,
     "partnership": Partnership,
+    "media": MediaFile,
 }
 GENEALOGY_ENTITY_TYPES = tuple(MODELS)
 
@@ -133,6 +146,8 @@ async def _label(session: AsyncSession, entity_type: str, obj: Any) -> str:
         return name_display(pick_primary(names))
     if isinstance(obj, Place):
         return str(obj.name)
+    if isinstance(obj, MediaFile):
+        return str(obj.title or obj.original_filename)
     if isinstance(obj, Event):
         return f"{obj.type.value} {obj.date.to_text()}".strip()
     if isinstance(obj, ParentChild):
@@ -257,6 +272,8 @@ async def _snapshot(session: AsyncSession, entity_type: str, obj: Any) -> dict[s
             return parent_child_snapshot(obj)
         case "partnership":
             return partnership_snapshot(obj)
+        case "media":
+            return media_snapshot(obj, await _media_tags(session, obj.id))
         case _:
             return place_snapshot(obj)
 
@@ -296,6 +313,8 @@ async def restore_revision(
             apply_partnership_snapshot(obj, snap)
         case "place":
             apply_place_snapshot(obj, snap)
+        case "media":
+            await _apply_media_snapshot(session, obj, snap)
     obj.updated_at = utcnow()
     await session.flush()
     after = await _snapshot(session, entry.entity_type, obj)
@@ -311,3 +330,25 @@ async def restore_revision(
     )
     await session.commit()
     return entry.entity_type, obj.id
+
+
+async def _media_tags(session: AsyncSession, media_id: uuid.UUID) -> list[MediaPerson]:
+    return list(await session.scalars(select(MediaPerson).where(MediaPerson.media_id == media_id)))
+
+
+async def _apply_media_snapshot(
+    session: AsyncSession, media: MediaFile, snap: dict[str, Any]
+) -> None:
+    media.kind = MediaKind(snap["kind"])
+    media.title = snap.get("title")
+    media.description = snap.get("description")
+    set_date(media, "date", "date_sort", date_from_dict(snap.get("date")))
+    media.place_id = uuid.UUID(snap["place_id"]) if snap.get("place_id") else None
+    wanted = {uuid.UUID(p["person_id"]): p.get("region") for p in snap.get("people", [])}
+    for tag in await _media_tags(session, media.id):
+        if tag.person_id in wanted:
+            tag.region = wanted.pop(tag.person_id)
+        else:
+            await session.delete(tag)
+    for person_id, region in wanted.items():
+        session.add(MediaPerson(media_id=media.id, person_id=person_id, region=region))

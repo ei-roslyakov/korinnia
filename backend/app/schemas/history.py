@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-TrashEntityType = Literal["person", "place", "event", "parent_child", "partnership"]
+TrashEntityType = Literal["person", "place", "event", "parent_child", "partnership", "media"]
 
 
 class TrashItem(BaseModel):

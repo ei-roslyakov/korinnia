@@ -34,7 +34,9 @@ async def test_put_and_read_roundtrip(local_storage: LocalStorage) -> None:
 async def test_files_are_plain_files_on_disk(local_storage: LocalStorage) -> None:
     """Archive must be readable without the app: key == relative path on disk."""
     await local_storage.put("originals/x/letter.pdf", io.BytesIO(b"%PDF"))
-    assert (local_storage.root / "originals/x/letter.pdf").read_bytes() == b"%PDF"
+    path = local_storage.root / "originals/x/letter.pdf"
+    assert path.read_bytes() == b"%PDF"
+    assert path.stat().st_mode & 0o777 == 0o644  # readable by nginx (different user)
     assert not list(local_storage.root.rglob(".upload-*"))
 
 

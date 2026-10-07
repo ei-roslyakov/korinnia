@@ -9,6 +9,7 @@ from fastapi import APIRouter, Query, status
 from pydantic import BaseModel
 
 from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer
+from app.jobs.queue import enqueue_avatar
 from app.models import TreeRole
 from app.schemas.audit import AuditEntryOut, AuditQuery
 from app.schemas.common import Page
@@ -18,7 +19,7 @@ from app.services.genealogy import trash as trash_service
 
 router = APIRouter(prefix="/trees/{tree_id}", tags=["history"])
 
-EntityType = Literal["person", "place", "event", "parent_child", "partnership"]
+EntityType = Literal["person", "place", "event", "parent_child", "partnership", "media"]
 
 
 class RestoredEntity(BaseModel):
@@ -53,6 +54,8 @@ async def restore_revision(
     entity_type, entity_id = await trash_service.restore_revision(
         session, access.tree.id, entry_id, actor
     )
+    if entity_type == "person":
+        await enqueue_avatar(entity_id)  # the restored photo choice needs a fresh portrait
     return RestoredEntity(entity_type=entity_type, entity_id=entity_id)
 
 

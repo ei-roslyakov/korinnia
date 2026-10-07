@@ -11,6 +11,7 @@ import type {
   PartnershipType,
   PersonDetail,
   Place,
+  Region,
   RelativeRelation,
   TrashItem,
   TreeGraph,
@@ -44,6 +45,8 @@ export interface VitalInput {
 }
 
 export interface PersonPayload {
+  primary_photo_id?: string | null;
+  primary_photo_crop?: Region | null;
   gender?: Gender;
   is_living?: boolean | null;
   short_summary?: string | null;

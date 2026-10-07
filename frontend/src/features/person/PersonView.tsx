@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui";
 import { formatPartialDate, lifeYears } from "@/lib/dates";
 import type { LifeEvent, PersonDetail, PersonSummary, PlaceSummary } from "@/lib/genealogy";
 
+import { MediaSections } from "@/features/media/MediaSections";
+
 import { Avatar } from "./Avatar";
 
 export type PersonLink = (personId: string) => string;
@@ -119,7 +121,12 @@ export function PersonView({
   return (
     <article className="space-y-6">
       <header className="flex items-start gap-4">
-        <Avatar name={person.display_name} gender={person.gender} size="lg" />
+        <Avatar
+          name={person.display_name}
+          gender={person.gender}
+          url={person.avatar_url}
+          size="lg"
+        />
         <div className="min-w-0 space-y-1">
           <h2 className="font-serif text-2xl leading-tight font-semibold">{person.display_name}</h2>
           <p className="text-bark-700">
@@ -169,6 +176,8 @@ export function PersonView({
           <Markdown>{person.biography}</Markdown>
         </Section>
       )}
+
+      <MediaSections media={person.media} personLink={personLink} Section={Section} />
 
       <Section title={t("person.timeline")}>
         {timeline.length === 0 ? (
