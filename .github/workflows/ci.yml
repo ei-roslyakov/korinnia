@@ -148,14 +148,3 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push images
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          sha="sha-${GITHUB_SHA::7}"
-          for img in backend nginx; do
-            for tag in "$sha" main; do
-              docker tag "korinnia/$img:latest" "$IMAGE_PREFIX/$img:$tag"
-              docker push "$IMAGE_PREFIX/$img:$tag"
-            done
-            echo "- \`$IMAGE_PREFIX/$img:$sha\`" >> "$GITHUB_STEP_SUMMARY"
-          done
