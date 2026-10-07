@@ -117,6 +117,8 @@ ingress:
   className: ""
   annotations: {}
   host: korinnia.example.com
+  # Additional hostnames serving the same app (config.publicBaseUrl stays the primary one).
+  extraHosts: []
   tls: []
   #  - secretName: korinnia-tls
   #    hosts: [korinnia.example.com]

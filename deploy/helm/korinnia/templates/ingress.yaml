@@ -18,14 +18,16 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   rules:
-    - host: {{ .Values.ingress.host | quote }}
+    {{- range prepend .Values.ingress.extraHosts .Values.ingress.host }}
+    - host: {{ . | quote }}
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ include "korinnia.fullname" . }}
+                name: {{ include "korinnia.fullname" $ }}
                 port:
                   name: http
+    {{- end }}
 {{- end }}
