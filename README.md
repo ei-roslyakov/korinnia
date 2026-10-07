@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phase 1 of 11 (scaffolding) is complete. See [Features](#features) for what works today.
+> **Status:** Phases 1–2 of 11 are complete (scaffolding; users, roles and administration). See [Features](#features) for what works today.
 
 ---
 
@@ -13,6 +13,7 @@ Korinnia's mission is long-term preservation: to collect *everything* about ever
 | Area | Technology |
 |---|---|
 | Backend | Python 3.12, FastAPI 0.142, Pydantic 2.13 + pydantic-settings, Uvicorn 0.54, uv (package manager) |
+| Auth & security | argon2id password hashing (argon2-cffi), JWT (PyJWT) in httpOnly cookies, CSRF double-submit cookie, TOTP 2FA (pyotp, QR codes via segno) |
 | Database | PostgreSQL 16, SQLAlchemy 2.1 (async, psycopg 3.3 driver), Alembic 1.20 migrations |
 | File storage | Local filesystem behind a `Storage` abstraction, on a Docker volume / Kubernetes PVC at `/data/media` |
 | Background jobs | procrastinate 3.10 — PostgreSQL-backed job queue (no Redis) |
@@ -43,11 +44,20 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Basic manual backup / restore scripts (database + media)
 
 ### Users & admin
-- 📋 Email + password login, JWT in httpOnly cookies, CSRF protection, optional TOTP 2FA for admins
-- 📋 Superadmin bootstrapped from environment variables
-- 📋 Per-tree roles: viewer, contributor, editor, admin
-- 📋 Admin panel: users, invitations, password resets, role assignment
-- 📋 Login rate limiting; read-only share links (revocable, expiring)
+- ✅ Email + password login (argon2id); no public self-registration
+- ✅ Sessions: short-lived access + rotating refresh JWTs in httpOnly cookies, refresh-token reuse detection, "sign out everywhere" on password change
+- ✅ CSRF protection (double-submit cookie + SameSite)
+- ✅ Optional TOTP two-step verification with one-time recovery codes (any user; recommended for admins)
+- ✅ Login throttling per email and per IP (PostgreSQL-backed)
+- ✅ First superadmin bootstrapped from environment variables; operator CLI for lock-out recovery
+- ✅ Multiple trees; per-tree roles: viewer, contributor, editor, admin (enforced on every endpoint, covered by tests)
+- ✅ Admin panel: create / deactivate / delete users, superadmin rights, password-reset links, reset 2FA
+- ✅ Invitations via one-time, expiring links (to a tree with a role, or as superadmin)
+- ✅ Tree member management by tree admins (add existing users, invite new ones, change roles, remove)
+- ✅ Audit log of every change (who, when, before/after) with filters — global and per tree
+- ✅ Profile: display name, interface language (synced across devices), password change
+- 📋 Read-only share links (revocable, expiring) — phase 10
+- 📋 Moderation queue for contributors' suggestions — phase 7
 
 ### People & relationships
 - 📋 People with multiple names (birth, married, nickname, religious…; Cyrillic + Latin)
@@ -120,7 +130,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 3. **Start:** `make up`. This builds the images and starts PostgreSQL, the backend (which applies migrations), the worker, the Vite dev server and nginx, then waits until they're healthy.
 4. **Open:** <http://localhost:8080>
 
-Seed data (`make seed`) arrives with the data model in phase 3. A dev superadmin, configured through `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`, arrives in phase 2.
+Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). Seed data (`make seed`) arrives with the data model in phase 3.
 
 ### URLs (development)
 
@@ -139,7 +149,9 @@ Seed data (`make seed`) arrives with the data model in phase 3. A dev superadmin
 | `ENVIRONMENT` | `development` or `production`. Production disables the API docs |
 | `SECRET_KEY` | Signs auth tokens. Generate with `openssl rand -hex 32` |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Database credentials |
-| `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` | First administrator, created on first start (phase 2) |
+| `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` | First administrator, created on first start if no superadmin exists (min. 10 characters). Changing them later has no effect |
+| `PUBLIC_BASE_URL` | Public URL of the app, used to build invitation and password-reset links |
+| `COOKIE_SECURE` | `true` (default) marks auth cookies HTTPS-only. Set `false` only for plain-HTTP local development |
 | `MAX_UPLOAD_SIZE_MB` | Maximum size of one upload; also sets nginx `client_max_body_size` |
 | `WORKER_CONCURRENCY` | Number of jobs the worker runs in parallel |
 | `HTTP_PORT` | Host port for nginx (8080 in dev) |
@@ -161,9 +173,19 @@ make down            # stop (volumes, i.e. your data, are kept)
 
 The pre-commit hooks are optional but recommended: `cd backend && uv run pre-commit install`.
 
+### Operator commands (lock-out recovery)
+
+There's no email sending: administrators copy invitation and password-reset links from the UI and pass them on. If the only administrator is locked out, use the CLI inside the backend container:
+
+```bash
+docker compose exec backend python -m app.cli reset-link admin@example.com     # one-time reset link
+docker compose exec backend python -m app.cli disable-2fa admin@example.com    # lost authenticator
+docker compose exec backend python -m app.cli create-superadmin you@example.com "Your Name"
+```
+
 ### Production
 
-`make up-prod` (or `docker compose -f docker-compose.yml up -d --build`) runs the stack without dev overrides: the frontend is built into the nginx image and the API docs are off. Before using it in production, set `ENVIRONMENT=production`, a strong `SECRET_KEY` and `POSTGRES_PASSWORD`, and `HTTP_PORT`. Put nginx behind your TLS-terminating ingress or load balancer, which should forward `X-Forwarded-Proto` and send HSTS.
+`make up-prod` (or `docker compose -f docker-compose.yml up -d --build`) runs the stack without dev overrides: the frontend is built into the nginx image and the API docs are off. Before using it in production, set `ENVIRONMENT=production`, a strong `SECRET_KEY` and `POSTGRES_PASSWORD`, `PUBLIC_BASE_URL`, `COOKIE_SECURE=true`, a superadmin password, and `HTTP_PORT`. Put nginx behind your TLS-terminating ingress or load balancer, which should forward `X-Forwarded-Proto` and send HSTS.
 
 ### Troubleshooting
 
@@ -171,6 +193,9 @@ The pre-commit hooks are optional but recommended: `cd backend && uv run pre-com
 - **`make up` waits forever / a service is unhealthy:** check `make ps` and `make logs s=backend`. The backend only becomes healthy after migrations succeed.
 - **Frontend dependencies changed:** `docker compose restart frontend`, which runs `npm ci` on start.
 - **Start from scratch (deletes all data):** `docker compose down -v`.
+- **"Too many failed attempts":** sign-in is throttled for 15 minutes after 5 failed attempts per email (20 per IP).
+- **Login works but you're logged out immediately:** with plain HTTP, `COOKIE_SECURE` must be `false`.
+- **`make test-e2e` data:** E2E tests create trees and users in the running (dev) database.
 - **Apple Silicon / Linux permission issues on the media volume:** containers run as uid 1000. Named volumes inherit the right ownership automatically, but a bind mount must be writable by uid 1000.
 
 ## Project structure

@@ -11,7 +11,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
+    # ../.env lets backend tools run from backend/ on the host with the repo-root .env.
+    model_config = SettingsConfigDict(
+        env_file=(".env", "../.env"), extra="ignore", case_sensitive=False
+    )
 
     environment: Literal["development", "test", "production"] = "development"
     log_level: str = "INFO"
@@ -34,6 +37,24 @@ class Settings(BaseSettings):
 
     # --- Security -----------------------------------------------------------------
     secret_key: SecretStr = SecretStr("change-me-in-production")
+    # Public URL of the app, used to build invitation / password-reset links.
+    public_base_url: str = "http://localhost:8080"
+    # Secure cookies need HTTPS (set false only for plain-HTTP local development).
+    cookie_secure: bool = True
+    access_token_ttl_minutes: int = 15
+    refresh_token_ttl_days: int = 30
+    mfa_token_ttl_minutes: int = 5
+    invitation_ttl_hours: int = 7 * 24
+    password_reset_ttl_hours: int = 24
+    password_min_length: int = 10
+    # Login throttling: max failed attempts in the window, per email and per client IP.
+    login_window_minutes: int = 15
+    login_max_failures_per_email: int = 5
+    login_max_failures_per_ip: int = 20
+
+    # --- Bootstrap ----------------------------------------------------------------
+    superadmin_email: str | None = None
+    superadmin_password: SecretStr | None = None
 
     # --- Uploads ------------------------------------------------------------------
     max_upload_size_mb: int = 2048

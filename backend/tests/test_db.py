@@ -59,7 +59,7 @@ def _tables() -> set[str]:
 def test_migrations_upgrade_downgrade_roundtrip() -> None:
     # Run in a thread-free sync context: alembic's env.py starts its own event loop.
     _alembic("upgrade", "head")
-    assert {"procrastinate_jobs", "alembic_version"} <= _tables()
+    assert {"procrastinate_jobs", "alembic_version", "users", "trees"} <= _tables()
     _alembic("downgrade", "base")
     assert "procrastinate_jobs" not in _tables()
     _alembic("upgrade", "head")

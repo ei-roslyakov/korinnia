@@ -6,7 +6,9 @@ services:
     ports:
       - "${POSTGRES_PORT_HOST:-5432}:5432"
 
+  # Dev images get their own tag so they never clash with production builds.
   backend:
+    image: korinnia/backend:dev
     build:
       target: dev
     command: ["api-dev"]
@@ -18,6 +20,7 @@ services:
       - "8000:8000"
 
   worker:
+    image: korinnia/backend:dev
     build:
       target: dev
     environment:
@@ -38,6 +41,7 @@ services:
       - "5173:5173"
 
   nginx:
+    image: korinnia/nginx:dev
     build:
       target: base
     ports: !override

@@ -27,5 +27,18 @@ Media files are stored as plain files under the media root (`/data/media`). The 
 | `alembic_version` | Current migration revision |
 | `procrastinate_jobs`, `procrastinate_events`, `procrastinate_periodic_defers`, `procrastinate_workers` | Background job queue (library-managed, see [D5](decisions.md#d5-procrastinate-for-background-jobs-schema-via-alembic)). Contains no family data |
 
+### Phase 2: users and access
+| Table | Purpose | Key columns |
+|---|---|---|
+| `users` | Accounts | `email` (unique, case-insensitive), `password_hash` (argon2id), `display_name`, `preferred_language` (`uk`/`en`/`pl`), `is_superadmin`, `is_active`, `last_login_at`, `sessions_valid_after`, `totp_secret`, `totp_enabled`, `totp_last_counter` |
+| `recovery_codes` | 2FA recovery codes | `user_id`, `code_hash` (SHA-256), `used_at` |
+| `refresh_tokens` | Server-side session records | `id` (= JWT `jti`), `user_id`, `family_id`, `expires_at`, `revoked_at`, `replaced_by_id`, `user_agent`, `ip_address` |
+| `login_attempts` | Sign-in throttling | `email`, `ip_address`, `success`, `created_at` |
+| `trees` | Family trees | `name`, `description`, `owner_id`, `deleted_at` (soft delete) |
+| `tree_memberships` | Per-tree roles | PK (`tree_id`, `user_id`), `role` (`viewer`/`contributor`/`editor`/`admin`) |
+| `invitations` | One-time invitation links | `token_hash`, `email`, `tree_id` + `role` or `is_superadmin`, `expires_at`, `accepted_at`, `accepted_user_id`, `revoked_at`, `created_by_id` |
+| `password_reset_tokens` | One-time reset links | `token_hash`, `user_id`, `expires_at`, `used_at`, `created_by_id` |
+| `audit_log` | Append-only change history | `created_at`, `user_id`, `user_label`, `action` (e.g. `tree.update`), `entity_type`, `entity_id`, `tree_id`, `before`/`after` (JSONB, changed fields only, never secrets), `ip_address` |
+
 ### Planned
-Users and access (phase 2); people, names, events, places and relationships (phase 3); media (phase 6); sources, citations, stories, suggestions, comments and open questions (phase 7). Each section is documented here when it is implemented.
+People, names, events, places and relationships (phase 3); media (phase 6); sources, citations, stories, suggestions, comments and open questions (phase 7). Each section is documented here when it is implemented.

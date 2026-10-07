@@ -60,3 +60,48 @@ The backend and worker run as `korinnia` (uid / gid 1000). `/data/media` is crea
 
 ### D17. PostgreSQL data checksums
 The database cluster is initialised with `--data-checksums` so silent on-disk corruption is detected. This fits the preservation mission, and the cost is negligible.
+
+## Phase 2: users, roles, administration
+
+### D18. Session design: short access JWT + rotating refresh JWT, both in httpOnly cookies
+- **Access token:** 15 minutes, cookie `korinnia_access`, `Path=/api`. Each request checks the user's `is_active` and `sessions_valid_after`, so deactivation works immediately rather than at expiry.
+- **Refresh token:** 30 days, cookie `korinnia_refresh`, `Path=/api/v1/auth`, so it is never sent to other endpoints. Each refresh token has a server-side row (`refresh_tokens`), and tokens from one login share a `family_id`. Every refresh **rotates** the token. Replaying a rotated-out token more than 30 s after rotation is treated as theft and revokes the whole family. The 30 s grace window covers parallel tabs refreshing at the same moment; the frontend also deduplicates concurrent refreshes.
+- **"Sign out everywhere":** `users.sessions_valid_after`. Tokens with an earlier `iat` are rejected, compared at second precision because JWT `iat` is whole seconds. Password change, password reset and deactivation set it, and the browser that changed the password gets a fresh session.
+- **Cookies:** `SameSite=Lax`, `Secure` unless `COOKIE_SECURE=false`, and `httpOnly`, so JavaScript never sees a token.
+- **Why not localStorage tokens:** they are readable by any injected script. httpOnly cookies plus CSRF protection are the safer combination for a browser-only app.
+
+### D19. CSRF: double-submit cookie in a pure ASGI middleware
+A readable `korinnia_csrf` cookie is set on the first response. Every non-GET request to `/api/` must echo it in `X-CSRF-Token`, which covers login too (login CSRF). It is implemented as a pure ASGI middleware, not `BaseHTTPMiddleware`, so large uploads stream through untouched.
+
+### D20. Login throttling in PostgreSQL
+Each attempt is stored in `login_attempts`. A login is refused with 429 and `Retry-After` when there are 5 failures per email or 20 per IP within 15 minutes, which also covers the 2FA step. A daily job deletes rows older than 30 days. Unknown emails still verify against a dummy hash, so response time doesn't reveal which emails exist.
+**Known limitation:** the client IP comes from the proxy chain (`X-Forwarded-For`), and Uvicorn currently trusts all proxies. Restricting trusted proxies is part of phase 10 hardening. Per-email throttling is unaffected.
+
+### D21. TOTP 2FA for every user, not only admins
+The spec says "optional TOTP 2FA for admins". It is available to every user at no extra cost, and the UI recommends it to admins. The QR code is an SVG generated server-side with segno (pure Python), so no external QR service is used. Codes accept ±1 time step, and `totp_last_counter` rejects replays. Ten one-time recovery codes are stored as SHA-256 hashes. A superadmin (or `python -m app.cli disable-2fa`) can reset 2FA for a user who lost their device.
+**Known limitation:** the TOTP secret is stored unencrypted in the database. Anyone with database access could generate codes, but they would still need the password. Revisit in phase 10 (encrypt with a key derived from `SECRET_KEY`).
+
+### D22. No email sending; links are copied by administrators
+Invitations (7 days) and password resets (24 h) are one-time links. The database stores only the SHA-256 of the token. Administrators copy the link from the UI and send it however the family communicates. This avoids SMTP configuration and a dependency on an email provider. There is no self-service "forgot password": the user asks an admin. An operator CLI (`python -m app.cli`) covers the case where the only admin is locked out.
+
+### D23. Role model and authorization
+- Roles are cumulative: viewer < contributor < editor < admin. A superadmin acts as admin in every tree.
+- All tree endpoints use one dependency, `tree_access(min_role)`. Non-members get **404** so a tree's existence isn't revealed; members with too low a role get **403**.
+- Only a superadmin creates or deletes trees. A tree admin manages members and can rename the tree.
+- Safety rails: a tree keeps at least one active admin, the installation keeps at least one active superadmin, and you cannot deactivate, demote or delete yourself.
+- "Add member" takes an email. An existing user is added directly; a new email creates an invitation. This gives tree admins one simple form, at the cost of revealing to a tree admin whether an email has an account. That is acceptable within a family.
+
+### D24. Enumerations stored as VARCHAR + CHECK, not native PostgreSQL enums
+Native enums are awkward to change in migrations, because values can't be removed or renamed inside a transaction. A text column with a named CHECK constraint is just as strict and readable by any tool. The helper is `app.models.base.text_enum()`.
+
+### D25. Audit log design
+`audit_log` is append-only and records `action`, `entity_type`, `entity_id`, `tree_id`, the user (with `user_label` preserved after the user is deleted) and the IP. `before`/`after` are JSONB containing only the changed fields. Secret fields (`password_hash`, `totp_secret`, token hashes) are never written. `tree_id` deliberately has no foreign key, so entries survive tree deletion. `created_at` defaults to `clock_timestamp()` rather than `now()`, which is fixed for the whole transaction, so entries written in one request keep their real order. Phase 3 builds full entity revisions with restore on top of this.
+
+### D26. Deleting users
+Deleting a user is a hard delete. Their memberships, sessions and recovery codes go with it, while audit entries and tree ownership are kept (`SET NULL`). The UI recommends deactivating instead. From phase 3, content authorship (`created_by`) is also `SET NULL`, so family data is never lost when an account is removed.
+
+### D27. Test database isolation
+Tests run against a real PostgreSQL. The schema is migrated once per session, and each test runs in an outer transaction with `join_transaction_mode="create_savepoint"`, so service-level `commit()` calls release savepoints and everything is rolled back afterwards. Coverage is measured with `concurrency = ["greenlet", "thread"]` because SQLAlchemy's async ORM runs inside greenlets; without it, coverage under-reports.
+
+### D28. Separate image tags for dev builds
+The dev override tags its images `korinnia/backend:dev` and `korinnia/nginx:dev`, so a production build (`:latest`, without test tools) can't overwrite the dev image or the other way round.

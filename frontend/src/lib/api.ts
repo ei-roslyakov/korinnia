@@ -1,4 +1,10 @@
-/** Minimal fetch wrapper for the Korinnia REST API (same-origin, cookies included). */
+/**
+ * Fetch wrapper for the Korinnia REST API.
+ *
+ * - Same-origin cookies carry the session (httpOnly access/refresh JWTs).
+ * - State-changing requests echo the CSRF cookie in the X-CSRF-Token header.
+ * - On 401 the client refreshes the session once (shared by concurrent requests) and retries.
+ */
 
 export class ApiError extends Error {
   constructor(
@@ -8,19 +14,117 @@ export class ApiError extends Error {
     super(`API request failed with status ${status}`);
     this.name = "ApiError";
   }
+
+  /** Stable machine-readable error code from the backend (translated in the UI). */
+  get code(): string {
+    if (this.body && typeof this.body === "object" && "code" in this.body) {
+      return String((this.body as { code: unknown }).code);
+    }
+    if (this.status === 422) return "validation_error";
+    return "generic";
+  }
 }
 
-export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const resp = await fetch(path, {
+const CSRF_COOKIE = "korinnia_csrf";
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const NO_REFRESH_PATHS = [
+  "/api/v1/auth/login",
+  "/api/v1/auth/refresh",
+  "/api/v1/auth/logout",
+  "/api/v1/auth/invitations/",
+  "/api/v1/auth/password-reset/",
+];
+
+export function readCookie(name: string): string | undefined {
+  return document.cookie
+    .split("; ")
+    .find((c) => c.startsWith(`${name}=`))
+    ?.slice(name.length + 1);
+}
+
+async function csrfToken(): Promise<string> {
+  const existing = readCookie(CSRF_COOKIE);
+  if (existing) return existing;
+  const resp = await fetch("/api/v1/auth/csrf", { credentials: "same-origin" });
+  const body = (await resp.json()) as { csrf_token: string };
+  return body.csrf_token;
+}
+
+let refreshing: Promise<boolean> | null = null;
+
+/** Refresh the session; concurrent callers share one request. */
+export function refreshSession(): Promise<boolean> {
+  refreshing ??= (async () => {
+    try {
+      const resp = await fetch("/api/v1/auth/refresh", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "X-CSRF-Token": await csrfToken() },
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    } finally {
+      // Callers already awaiting hold this promise; later 401s start a fresh refresh.
+      refreshing = null;
+    }
+  })();
+  return refreshing;
+}
+
+export interface RequestOptions extends Omit<RequestInit, "body"> {
+  json?: unknown;
+  body?: BodyInit;
+}
+
+async function send(path: string, opts: RequestOptions): Promise<Response> {
+  const { json, headers, ...init } = opts;
+  const method = (init.method ?? "GET").toUpperCase();
+  const finalHeaders: Record<string, string> = {
+    Accept: "application/json",
+    ...(headers as Record<string, string> | undefined),
+  };
+  if (json !== undefined) finalHeaders["Content-Type"] = "application/json";
+  if (!SAFE_METHODS.has(method)) finalHeaders["X-CSRF-Token"] = await csrfToken();
+  return fetch(path, {
     credentials: "same-origin",
     ...init,
-    headers: { Accept: "application/json", ...init.headers },
+    method,
+    headers: finalHeaders,
+    body: json !== undefined ? JSON.stringify(json) : init.body,
   });
+}
+
+export async function apiFetch<T>(path: string, opts: RequestOptions = {}): Promise<T> {
+  let resp = await send(path, opts);
+  if (resp.status === 401 && !NO_REFRESH_PATHS.some((p) => path.startsWith(p))) {
+    if (await refreshSession()) resp = await send(path, opts);
+  }
+  if (resp.status === 204) return undefined as T;
   const isJson = resp.headers.get("content-type")?.includes("application/json");
   const body: unknown = isJson ? await resp.json() : await resp.text();
   if (!resp.ok) throw new ApiError(resp.status, body);
   return body as T;
 }
+
+export const api = {
+  get: <T>(path: string) => apiFetch<T>(path),
+  post: <T>(path: string, json?: unknown) => apiFetch<T>(path, { method: "POST", json }),
+  patch: <T>(path: string, json?: unknown) => apiFetch<T>(path, { method: "PATCH", json }),
+  delete: <T = void>(path: string) => apiFetch<T>(path, { method: "DELETE" }),
+};
+
+/** Build a query string, skipping empty values. */
+export function qs(params: Record<string, string | number | boolean | null | undefined>): string {
+  const search = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== "") search.set(k, String(v));
+  }
+  const s = search.toString();
+  return s ? `?${s}` : "";
+}
+
+// --- System -------------------------------------------------------------------------------
 
 export interface MetaInfo {
   name: string;
@@ -35,12 +139,12 @@ export interface ReadinessStatus {
   checks: Record<string, CheckStatus>;
 }
 
-export const getMeta = () => apiFetch<MetaInfo>("/api/v1/meta");
+export const getMeta = () => api.get<MetaInfo>("/api/v1/meta");
 
 /** Readiness returns 503 with a JSON body when a dependency is down — still a valid answer. */
 export async function getReadiness(): Promise<ReadinessStatus> {
   try {
-    return await apiFetch<ReadinessStatus>("/api/readyz");
+    return await api.get<ReadinessStatus>("/api/readyz");
   } catch (err) {
     if (err instanceof ApiError && err.status === 503 && typeof err.body === "object") {
       return err.body as ReadinessStatus;

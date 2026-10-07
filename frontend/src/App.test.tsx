@@ -4,50 +4,175 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
 import i18n from "./i18n";
+import { safeNext } from "./lib/nav";
+import { json, ME, mockApi } from "./test/mockApi";
 import { renderWithProviders } from "./test/render";
 
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json" },
-  });
-}
+beforeEach(async () => {
+  await i18n.changeLanguage("uk");
+  document.cookie = "korinnia_csrf=csrf-123; path=/";
+});
+afterEach(() => vi.unstubAllGlobals());
+
+const loggedOut = {
+  "GET /api/v1/auth/me": () => json({ code: "not_authenticated" }, 401),
+  "POST /api/v1/auth/refresh": () => json({ code: "not_authenticated" }, 401),
+};
 
 describe("App", () => {
-  beforeEach(async () => {
-    await i18n.changeLanguage("uk");
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((url: string) =>
-        Promise.resolve(
-          url.endsWith("/api/v1/meta")
-            ? jsonResponse({ name: "Korinnia", version: "0.1.0", environment: "test" })
-            : jsonResponse({ status: "error", checks: { database: "ok", storage: "error" } }, 503),
-        ),
-      ),
+  it("redirects anonymous users to the login page", async () => {
+    mockApi(loggedOut);
+    renderWithProviders(<App />, { route: "/trees/t1" });
+    expect(await screen.findByRole("button", { name: "Увійти" })).toBeInTheDocument();
+  });
+
+  it("logs in and shows the user's trees", async () => {
+    let loggedIn = false;
+    mockApi({
+      "GET /api/v1/auth/me": () => (loggedIn ? json(ME) : json({}, 401)),
+      "POST /api/v1/auth/refresh": () => json({}, 401),
+      "POST /api/v1/auth/login": () => {
+        loggedIn = true;
+        return json({ status: "ok", user: ME });
+      },
+      "GET /api/v1/trees": () =>
+        json([{ id: "t1", name: "Родина", description: null, my_role: "viewer" }]),
+    });
+    renderWithProviders(<App />, { route: "/login" });
+    await userEvent.type(await screen.findByLabelText("Електронна пошта"), "halyna@example.com");
+    await userEvent.type(screen.getByLabelText("Пароль"), "correct-horse-battery");
+    await userEvent.click(screen.getByRole("button", { name: "Увійти" }));
+    expect(await screen.findByRole("heading", { name: "Родина" })).toBeInTheDocument();
+    expect(screen.getByText("Глядач")).toBeInTheDocument();
+    expect(screen.queryByText("Адміністрування")).not.toBeInTheDocument();
+  });
+
+  it("asks for a second factor when 2FA is enabled", async () => {
+    const fetch = mockApi({
+      ...loggedOut,
+      "POST /api/v1/auth/login": () => json({ status: "mfa_required", user: null }),
+      "POST /api/v1/auth/login/mfa": () => json({ code: "invalid_code" }, 401),
+    });
+    renderWithProviders(<App />, { route: "/login" });
+    await userEvent.type(await screen.findByLabelText("Електронна пошта"), "a@b.cz");
+    await userEvent.type(screen.getByLabelText("Пароль"), "x");
+    await userEvent.click(screen.getByRole("button", { name: "Увійти" }));
+    await userEvent.type(await screen.findByLabelText("Код"), "123456");
+    await userEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
+    expect(await screen.findByText("Код недійсний.")).toBeInTheDocument();
+    const mfaCall = fetch.mock.calls.find((c) => c[0] === "/api/v1/auth/login/mfa");
+    expect((mfaCall?.[1] as RequestInit).body).toBe('{"code":"123456"}');
+  });
+
+  it("shows a translated error for wrong credentials", async () => {
+    mockApi({
+      ...loggedOut,
+      "POST /api/v1/auth/login": () => json({ code: "invalid_credentials" }, 401),
+    });
+    renderWithProviders(<App />, { route: "/login" });
+    await userEvent.type(await screen.findByLabelText("Електронна пошта"), "a@b.cz");
+    await userEvent.type(screen.getByLabelText("Пароль"), "x");
+    await userEvent.click(screen.getByRole("button", { name: "Увійти" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Неправильна пошта або пароль.");
+  });
+
+  it("shows admin navigation and member management to a superadmin", async () => {
+    mockApi({
+      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true }),
+      "GET /api/v1/trees/t1": () =>
+        json({ id: "t1", name: "Родина", description: "Полтава", my_role: "admin" }),
+    });
+    renderWithProviders(<App />, { route: "/trees/t1" });
+    expect(await screen.findByRole("heading", { name: "Родина" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Адміністрування" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Учасники" })).toBeInTheDocument();
+  });
+
+  it("hides member management from viewers", async () => {
+    mockApi({
+      "GET /api/v1/auth/me": () => json(ME),
+      "GET /api/v1/trees/t1": () =>
+        json({ id: "t1", name: "Родина", description: null, my_role: "viewer" }),
+    });
+    renderWithProviders(<App />, { route: "/trees/t1" });
+    expect(await screen.findByRole("heading", { name: "Родина" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Учасники" })).not.toBeInTheDocument();
+  });
+
+  it("keeps non-superadmins out of the admin area", async () => {
+    mockApi({ "GET /api/v1/auth/me": () => json(ME), "GET /api/v1/trees": () => json([]) });
+    renderWithProviders(<App />, { route: "/admin/users" });
+    expect(await screen.findByRole("heading", { name: "Родоводи" })).toBeInTheDocument();
+  });
+
+  it("applies the user's preferred language", async () => {
+    mockApi({
+      "GET /api/v1/auth/me": () => json({ ...ME, preferred_language: "pl" }),
+      "GET /api/v1/trees": () => json([]),
+    });
+    renderWithProviders(<App />);
+    await waitFor(() => expect(i18n.language).toBe("pl"));
+    expect(await screen.findByRole("heading", { name: "Drzewa rodzinne" })).toBeInTheDocument();
+  });
+
+  it("accepts an invitation", async () => {
+    let accepted: unknown;
+    mockApi({
+      ...loggedOut,
+      "GET /api/v1/auth/invitations/tok": () =>
+        json({
+          email: "new@example.com",
+          tree_name: "Родина",
+          role: "editor",
+          is_superadmin: false,
+          expires_at: "2030-01-01T00:00:00Z",
+        }),
+      "POST /api/v1/auth/invitations/tok/accept": (init) => {
+        accepted = JSON.parse(String(init.body));
+        return json({ status: "ok", user: ME });
+      },
+      "GET /api/v1/trees": () => json([]),
+    });
+    renderWithProviders(<App />, { route: "/invite/tok" });
+    expect(await screen.findByText(/«Родина» з роллю «Редактор»/)).toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText("Ім’я для відображення"), "Нова людина");
+    await userEvent.type(screen.getByLabelText("Новий пароль"), "long-password-1");
+    await userEvent.type(screen.getByLabelText("Повторіть пароль"), "long-password-2");
+    expect(screen.getByText("Паролі не збігаються.")).toBeInTheDocument();
+    await userEvent.clear(screen.getByLabelText("Повторіть пароль"));
+    await userEvent.type(screen.getByLabelText("Повторіть пароль"), "long-password-1");
+    await userEvent.click(screen.getByRole("button", { name: "Створити обліковий запис" }));
+    await waitFor(() =>
+      expect(accepted).toEqual({
+        display_name: "Нова людина",
+        password: "long-password-1",
+        preferred_language: "uk",
+      }),
     );
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
+  it("shows an error for an invalid invitation link", async () => {
+    mockApi({
+      ...loggedOut,
+      "GET /api/v1/auth/invitations/bad": () => json({ code: "link_invalid" }, 404),
+    });
+    renderWithProviders(<App />, { route: "/invite/bad" });
+    expect(await screen.findByRole("alert")).toHaveTextContent("Посилання недійсне");
   });
 
-  it("renders in Ukrainian by default and shows system status", async () => {
-    renderWithProviders(<App />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Коріння");
-    await waitFor(() => expect(screen.getByText("Версія 0.1.0")).toBeInTheDocument());
-    expect(screen.getAllByText("Працює")).toHaveLength(2); // api + database
-    expect(screen.getByText("Помилка")).toBeInTheDocument(); // storage (503 body)
-  });
-
-  it("switches language", async () => {
-    renderWithProviders(<App />);
-    await userEvent.selectOptions(screen.getByRole("combobox"), "en");
-    expect(screen.getByText("System status")).toBeInTheDocument();
-  });
-
-  it("shows not-found page for unknown routes", () => {
+  it("shows not-found page for unknown routes", async () => {
+    mockApi(loggedOut);
     renderWithProviders(<App />, { route: "/does-not-exist" });
-    expect(screen.getByText("Сторінку не знайдено")).toBeInTheDocument();
+    expect(await screen.findByText("Сторінку не знайдено")).toBeInTheDocument();
+  });
+});
+
+describe("safeNext", () => {
+  it("only allows relative same-site paths", () => {
+    expect(safeNext("/trees/1")).toBe("/trees/1");
+    expect(safeNext("//evil.example")).toBe("/");
+    expect(safeNext("https://evil.example")).toBe("/");
+    expect(safeNext("/\\evil.example")).toBe("/");
+    expect(safeNext(null)).toBe("/");
   });
 });

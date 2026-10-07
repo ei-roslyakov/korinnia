@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from enum import StrEnum
 
-from sqlalchemy import DateTime, MetaData, func
+from sqlalchemy import DateTime, Enum, MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 NAMING_CONVENTION = {
@@ -25,6 +26,23 @@ NAMING_CONVENTION = {
 
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
+
+
+def text_enum(enum_cls: type[StrEnum], name: str) -> Enum:
+    """Enum column stored as VARCHAR with a CHECK constraint, persisting the enum *values*."""
+    return Enum(
+        enum_cls,
+        name=name,
+        native_enum=False,
+        create_constraint=True,
+        length=32,
+        values_callable=lambda e: [m.value for m in e],
+        validate_strings=True,
+    )
+
+
+def utcnow_column() -> Mapped[datetime]:
+    return mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
 class UUIDPrimaryKeyMixin:

@@ -7,10 +7,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.csrf import CSRFMiddleware
 from app.api.health import router as health_router
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.db import get_engine
+from app.core.errors import install_error_handlers
 from app.core.logging import configure_logging
 
 
@@ -37,6 +39,8 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(health_router, prefix="/api", include_in_schema=False)
     app.include_router(api_router, prefix="/api/v1")
+    install_error_handlers(app)
+    app.add_middleware(CSRFMiddleware)
     return app
 
 
