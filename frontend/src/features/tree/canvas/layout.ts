@@ -1,8 +1,9 @@
-import type { ELK as ElkApi, ElkNode } from "elkjs/lib/elk-api";
+import type { ELK as ElkApi } from "elkjs/lib/elk-api";
 
 import { resolveElkConstructor } from "./elk";
+import { expandLayout, type LayoutGraph, type Positions } from "./familyGraph";
 
-export type Positions = Record<string, { x: number; y: number }>;
+export type { Positions };
 
 let elkPromise: Promise<ElkApi> | null = null;
 
@@ -27,11 +28,8 @@ function getElk(): Promise<ElkApi> {
   return elkPromise;
 }
 
-/** Compute node positions (top-left corners) with ELK's layered algorithm. */
-export async function computeLayout(graph: ElkNode): Promise<Positions> {
+/** Person and family positions (top-left corners), one row per generation. */
+export async function computeLayout(graph: LayoutGraph): Promise<Positions> {
   const elk = await getElk();
-  const result = await elk.layout(graph);
-  return Object.fromEntries(
-    (result.children ?? []).map((c) => [c.id, { x: c.x ?? 0, y: c.y ?? 0 }]),
-  );
+  return expandLayout(await elk.layout(graph.elk), graph);
 }

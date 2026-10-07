@@ -112,15 +112,16 @@ function CanvasInner({
   const [dragging, setDragging] = useState<Record<string, XY>>({});
   const offsets = graph.layout_offsets;
 
-  /** Final person positions: automatic layout + saved offsets + live drag. */
+  /** Final person positions: automatic layout + saved offsets + live drag. Cards only move
+   * sideways, so every generation stays on its row (a stored vertical offset is ignored). */
   const personPos = useMemo<Record<string, XY>>(() => {
     const pos = layout.data;
     if (!pos) return {};
     const out: Record<string, XY> = {};
     for (const id of personIds) {
       const base = pos[id] ?? { x: 0, y: 0 };
-      const off = offsets?.[id];
-      out[id] = dragging[id] ?? (off ? { x: base.x + off.dx, y: base.y + off.dy } : base);
+      const x = dragging[id]?.x ?? base.x + (offsets?.[id]?.dx ?? 0);
+      out[id] = { x, y: base.y };
     }
     return out;
   }, [layout.data, personIds, offsets, dragging]);
@@ -218,11 +219,7 @@ function CanvasInner({
   const onNodeDragStop = (_: unknown, node: Node) => {
     const base = layout.data?.[node.id];
     if (node.type === "person" && base) {
-      onMoved?.(
-        node.id,
-        Math.round(node.position.x - base.x),
-        Math.round(node.position.y - base.y),
-      );
+      onMoved?.(node.id, Math.round(node.position.x - base.x), 0);
     }
     setDragging((d) => {
       const rest = { ...d };
@@ -238,14 +235,14 @@ function CanvasInner({
           id: `${p}->${f.id}`,
           source: p,
           target: f.id,
-          type: "smoothstep",
+          type: "default",
           style: { stroke: "#a8a29e" },
         })),
         ...f.children.map((c) => ({
           id: `${f.id}->${c.id}`,
           source: f.id,
           target: c.id,
-          type: "smoothstep",
+          type: "default",
           style: {
             stroke: "#78716c",
             strokeDasharray: c.type === "biological" ? undefined : "6 4",

@@ -188,7 +188,7 @@ On a fresh page, several requests without a CSRF cookie each received a differen
 ### D52. Deleting from the editor must not depend on the dialog
 After a delete, the shared cache refreshed the deleted person (404). That replaced the editor with an error and unmounted the dialog before its "navigate back" callback ran. The deleted person's queries are now removed instead of refetched, and navigation uses `mutateAsync`.
 
-### D53. Known limitation: spouses are not always side by side
+### D53. Known limitation: spouses are not always side by side (resolved by D74)
 ELK's layered algorithm keeps generations on rows, but its crossing minimisation sometimes separates partners (e.g. in the demo tree, Andrii and Oksana are several cards apart). Users can drag cards (D48). A layout that groups couples (compound nodes or a genealogy-specific ordering pass) is a candidate improvement for phase 10.
 
 ## Phase 6: media
@@ -284,3 +284,14 @@ Surnames and first names are grouped by their KMU 2010 transliteration (the same
 
 ### D73. Locale parity is tested
 A unit test checks that `uk`, `en` and `pl` have the same keys (plural suffixes folded) and that every pluralised key has all the plural forms its language needs (`one`/`few`/`many`/`other` for Ukrainian and Polish).
+
+### D74. Generation rows and couple units (replaces D53)
+ELK's own layering put people on rows by longest path, so in-laws without recorded parents drifted up to the top, and crossing minimisation separated partners. The layout now works in three steps:
+1. **Generation per person.** It is propagated breadth-first through each connected group: a child is one row below a parent, and partners share a row. Afterwards every child is pushed below all of its parents, so links always point down even in unusual data (e.g. a marriage into an older generation).
+2. **Couple units.** Partners on the same row are merged into one *unit*, a block ELK cannot split. A person with several partners stands between them where possible. Each unit has fixed ports: one on top of every member, and one at the bottom per family it heads (between the partners). ELK uses interactive layering with the generation as the row, orders units to minimise crossings, and centres children under the parents' port.
+3. **Placement.** Units are expanded back into cards, and each family junction is placed under its port, halfway to the next row.
+
+Connectors are drawn as Bézier curves (parent → junction → child) instead of right-angled steps.
+
+### D75. Cards move sideways only
+Manual nudges change only the horizontal position, so dragging can never break the generation rows. The vertical part of offsets saved before this change is ignored rather than deleted; "Reset layout" removes offsets completely.

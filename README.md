@@ -78,7 +78,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 
 ### Tree view
 - ✅ Infinite canvas: drag to pan, wheel / pinch to zoom, fit to screen, zoom buttons, minimap
-- ✅ Generational layout (ELK, layered) with family junctions; adoptive/step/foster links dashed; layout runs in a Web Worker
+- ✅ Structured layout: one row per generation, partners always side by side, smooth curved connectors through family junctions; adoptive/step/foster links dashed; layout (ELK) runs in a Web Worker
 - ✅ Person cards: portrait placeholder (photos in phase 6), primary name, life years with uncertainty markers (~1850, <1944)
 - ✅ Click a card → side panel; full person page with shareable link: all names, birth / death / burial (with map link), facts, rendered Markdown biography, life timeline, relatives as links, notes for descendants, data notes (editors)
 - ✅ Search by any name variant (Cyrillic ↔ Latin), place (incl. historical names) or year; the result is centred and opened
@@ -104,7 +104,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Family editor: change link types, unlink, link existing people, edit partnership dates and end reason
 - ✅ Person history with "restore this version"
 - ✅ Delete with impact preview; trash bin page with restore
-- ✅ Drag cards to adjust the layout (saved per tree as offsets from the automatic layout); reset layout
+- ✅ Drag cards sideways to adjust the layout (generations stay on their rows; saved per tree as offsets from the automatic layout); reset layout
 - ✅ Unsaved-changes warning; server validation errors and date warnings shown in place
 - ✅ Sources tab: cite a source for any fact (a name, birth, an event, a parent link, a partnership…)
 

@@ -3,9 +3,15 @@ import { describe, expect, it } from "vitest";
 import type { TreeGraph } from "@/lib/genealogy";
 
 import {
+  FAMILY_SIZE,
+  PARTNER_GAP,
+  PERSON_HEIGHT,
+  PERSON_WIDTH,
   buildFamilies,
+  buildUnits,
   defaultFocus,
   focusSet,
+  generations,
   hiddenRelatives,
   indexRelations,
   toElkGraph,
@@ -124,16 +130,46 @@ describe("family graph", () => {
     ).toBeNull();
   });
 
-  it("lays out generations top to bottom", async () => {
+  it("assigns generations: partners share a row, children sit below every parent", () => {
     const families = buildFamilies(graph, all);
-    const elk = toElkGraph([...all], families);
-    expect(elk.edges).toHaveLength(
-      families.reduce((n, f) => n + f.parents.length + f.children.length, 0),
-    );
-    const pos = await computeLayout(elk);
-    const y = (id: string) => pos[id]?.y ?? NaN;
+    const gen = generations([...all], families);
+    expect(["gp1", "gp2", "gp3"].map((id) => gen.get(id))).toEqual([0, 0, 0]);
+    expect(["dad", "mom", "other"].map((id) => gen.get(id))).toEqual([1, 1, 1]);
+    expect(["kid1", "kid2", "half"].map((id) => gen.get(id))).toEqual([2, 2, 2]);
+    expect(gen.get("grandkid")).toBe(3);
+  });
+
+  it("puts partners in one unit, a person with two partners between them", () => {
+    const families = buildFamilies(graph, all);
+    const units = buildUnits([...all], families, generations([...all], families));
+    const unitOf = (id: string) => units.find((u) => u.members.includes(id))!.members;
+    expect(unitOf("gp1")).toEqual(expect.arrayContaining(["gp1", "gp2"]));
+    expect(unitOf("dad")).toHaveLength(3);
+    expect(unitOf("dad")[1]).toBe("dad"); // mom and `other` on either side
+    // kid2 ⚭ gp3 spans generations, so they are not merged.
+    expect(unitOf("kid2")).toEqual(["kid2"]);
+    expect(units.flatMap((u) => u.members).sort()).toEqual([...all].sort());
+  });
+
+  it("lays out one row per generation with partners side by side", async () => {
+    const families = buildFamilies(graph, all);
+    const pos = await computeLayout(toElkGraph([...all], families));
+    const y = (id: string) => pos[id]!.y;
+    const x = (id: string) => pos[id]!.x;
+    expect(new Set(["gp1", "gp2", "gp3"].map(y)).size).toBe(1);
+    expect(new Set(["dad", "mom", "other"].map(y)).size).toBe(1);
+    expect(y("kid1")).toBe(y("half"));
     expect(y("gp1")).toBeLessThan(y("dad"));
     expect(y("dad")).toBeLessThan(y("kid1"));
     expect(y("kid1")).toBeLessThan(y("grandkid"));
+    // Partners are adjacent: exactly one card width plus the partner gap apart.
+    expect(Math.abs(x("gp1") - x("gp2"))).toBe(PERSON_WIDTH + PARTNER_GAP);
+    expect(Math.abs(x("dad") - x("mom"))).toBe(PERSON_WIDTH + PARTNER_GAP);
+    // The dad+mom junction hangs between them, halfway down to their children.
+    const fam = families.find((f) => f.parents.includes("dad") && f.parents.includes("mom"))!;
+    const j = pos[fam.id]!;
+    expect(j.x + FAMILY_SIZE / 2).toBe((x("dad") + x("mom")) / 2 + PERSON_WIDTH / 2);
+    expect(j.y).toBeGreaterThan(y("dad") + PERSON_HEIGHT);
+    expect(j.y + FAMILY_SIZE).toBeLessThan(y("kid1"));
   });
 });

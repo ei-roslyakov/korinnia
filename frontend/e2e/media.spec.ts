@@ -33,15 +33,26 @@ test("upload a photo, previews are generated, it becomes the portrait", async ({
   await page.getByRole("button", { name: "Увійти" }).click();
   await page.getByRole("link", { name: /Родина Коваленків \(демо\)/ }).click();
 
-  // Open Emily's editor (search → panel → edit).
+  // Unique per run and repeat, so parallel copies of this test never see each other's rows.
+  const tag = `${testInfo.project.name}-${testInfo.repeatEachIndex}-${Date.now() % 100000}`;
+  // Each run gets its own person: parallel runs would otherwise race to set one portrait.
+  const surname = `Портрет${testInfo.repeatEachIndex}${testInfo.project.name.length}${Date.now() % 1000000}`;
+  const trees = await (await page.request.get("/api/v1/trees")).json();
+  const treeId = trees.find((t: { name: string }) => t.name.includes("демо")).id;
+  const csrf = (await page.context().cookies()).find((c) => c.name === "korinnia_csrf")!.value;
+  const created = await page.request.post(`/api/v1/trees/${treeId}/persons`, {
+    data: { names: [{ first_name: "Emily", last_name: surname, is_primary: true }] },
+    headers: { "X-CSRF-Token": csrf },
+  });
+  expect(created.status()).toBe(201);
+
+  // Open the editor (search → panel → edit).
   await page.getByRole("button", { name: "Редагування" }).click();
-  await page.getByRole("combobox", { name: /Знайти людину/ }).fill("Emily");
-  await page.getByRole("option", { name: /Emily Tkachuk/ }).click();
+  await page.getByRole("combobox", { name: /Знайти людину/ }).fill(surname);
+  await page.getByRole("option", { name: new RegExp(`Emily ${surname}`) }).click();
   await page.getByRole("complementary").getByRole("link", { name: "Редагувати" }).click();
   await page.getByRole("tab", { name: "Медіа" }).click();
 
-  // Unique per run and repeat, so parallel copies of this test never see each other's rows.
-  const tag = `${testInfo.project.name}-${testInfo.repeatEachIndex}-${Date.now() % 100000}`;
   const jpeg = await makeJpeg(page, tag);
   await page.getByLabel("Вибрати файли").setInputFiles({
     name: `Emily ${tag}.jpg`,

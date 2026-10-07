@@ -12,7 +12,9 @@ async function openDemoTree(page: Page) {
   await page.getByRole("link", { name: new RegExp(DEMO_TREE.replace(/[()]/g, "\\$&")) }).click();
   await expect(page.getByRole("heading", { name: DEMO_TREE })).toBeVisible();
   // Other tests may add people to the shared demo tree in parallel.
-  await expect(page.getByText(/Людей: (2[5-9]|3\d)/)).toBeVisible();
+  const count = page.getByText(/^Людей: \d+$/);
+  await expect(count).toBeVisible();
+  expect(Number((await count.innerText()).replace(/\D/g, ""))).toBeGreaterThanOrEqual(25);
 }
 
 test("tree canvas: cards, pan, person panel and page", async ({ page }) => {

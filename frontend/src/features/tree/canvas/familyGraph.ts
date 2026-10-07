@@ -3,10 +3,9 @@
  * a layered layout graph for ELK, and computing "focus" subsets.
  *
  * A family tree is a graph, not a tree. We insert a small *family* node per couple (or per
- * set of co-parents): parent → family → child. ELK's layered algorithm then places each
- * generation on its own row with families in between.
+ * set of co-parents): parent → family → child, drawn as smooth curves.
  */
-import type { ElkNode } from "elkjs/lib/elk-api";
+import type { ElkExtendedEdge, ElkNode } from "elkjs/lib/elk-api";
 
 import type { GraphEdge, ParentChildType, TreeGraph } from "@/lib/genealogy";
 
@@ -163,29 +162,243 @@ export function defaultFocus(graph: TreeGraph, rel: Relations): string | null {
   return best ?? graph.persons[0]?.id ?? null;
 }
 
-export function toElkGraph(personIds: string[], families: Family[]): ElkNode {
-  return {
+// --- Layout --------------------------------------------------------------------------------
+//
+// Every person gets a generation number, and each generation is one row (ELK's interactive
+// layering with the row as a hint). Partners are merged into one *unit* — a block ELK cannot
+// split — so couples always stand side by side. Each unit has fixed connection points
+// (ports): one on top of every member, and one at the bottom for each family it heads (between
+// the partners for a couple). ELK orders the units to minimise crossings and centres children
+// under their parents; family junctions are then placed halfway between the rows.
+
+export const PARTNER_GAP = 24;
+export const UNIT_GAP = 40;
+export const ROW_GAP = 80;
+
+/**
+ * Generation (row) of every person: children one below their parents, partners on the same
+ * row. Propagated breadth-first from each connected group, so in-laws without recorded parents
+ * land next to their partner; afterwards every child is pushed below all of its parents.
+ */
+export function generations(personIds: string[], families: Family[]): Map<string, number> {
+  const neighbours = new Map<string, [string, number][]>(personIds.map((id) => [id, []]));
+  const link = (a: string, b: string, d: number) => neighbours.get(a)?.push([b, d]);
+  for (const f of families) {
+    for (const a of f.parents) {
+      for (const b of f.parents) if (a !== b) link(a, b, 0);
+      for (const c of f.children) {
+        link(a, c.id, 1);
+        link(c.id, a, -1);
+      }
+    }
+  }
+  const gen = new Map<string, number>();
+  for (const start of personIds) {
+    if (gen.has(start)) continue;
+    gen.set(start, 0);
+    const group = [start];
+    for (let i = 0; i < group.length; i++) {
+      const id = group[i]!;
+      for (const [other, d] of neighbours.get(id) ?? []) {
+        if (!gen.has(other)) {
+          gen.set(other, gen.get(id)! + d);
+          group.push(other);
+        }
+      }
+    }
+    const top = Math.min(...group.map((id) => gen.get(id)!));
+    for (const id of group) gen.set(id, gen.get(id)! - top);
+  }
+  // Unusual data (e.g. marrying into an older generation) can leave a child level with or
+  // above a parent; push such children down so every link points downwards.
+  for (let changed = true, rounds = 0; changed && rounds < personIds.length; rounds++) {
+    changed = false;
+    for (const f of families) {
+      const below = Math.max(...f.parents.map((p) => gen.get(p) ?? 0)) + 1;
+      for (const c of f.children) {
+        if ((gen.get(c.id) ?? 0) < below) {
+          gen.set(c.id, below);
+          changed = true;
+        }
+      }
+    }
+  }
+  return gen;
+}
+
+export interface LayoutUnit {
+  id: string;
+  members: string[]; // left to right
+}
+
+/** Partners on the same row form one unit; a person with several partners stands between
+ * them where possible (members are ordered along the chain of partnerships). */
+export function buildUnits(
+  personIds: string[],
+  families: Family[],
+  gen: Map<string, number>,
+): LayoutUnit[] {
+  const partners = new Map<string, string[]>(personIds.map((id) => [id, []]));
+  for (const f of families) {
+    if (f.parents.length !== 2) continue;
+    const [a, b] = f.parents as [string, string];
+    if (gen.get(a) !== gen.get(b) || partners.get(a)?.includes(b)) continue;
+    partners.get(a)?.push(b);
+    partners.get(b)?.push(a);
+  }
+  const seen = new Set<string>();
+  const units: LayoutUnit[] = [];
+  for (const id of personIds) {
+    if (seen.has(id)) continue;
+    // Collect the group, then walk it from an end (someone with a single partner).
+    const group: string[] = [];
+    const stack = [id];
+    const inGroup = new Set([id]);
+    while (stack.length) {
+      const cur = stack.pop()!;
+      group.push(cur);
+      for (const p of partners.get(cur) ?? []) {
+        if (!inGroup.has(p)) {
+          inGroup.add(p);
+          stack.push(p);
+        }
+      }
+    }
+    const startAt = group.find((m) => (partners.get(m)?.length ?? 0) <= 1) ?? id;
+    const members: string[] = [];
+    const walk = (m: string) => {
+      if (seen.has(m)) return;
+      seen.add(m);
+      members.push(m);
+      for (const p of partners.get(m) ?? []) walk(p);
+    };
+    walk(startAt);
+    units.push({ id: `unit:${members[0]}`, members });
+  }
+  return units;
+}
+
+const memberX = (index: number) => index * (PERSON_WIDTH + PARTNER_GAP);
+const unitWidth = (u: LayoutUnit) => memberX(u.members.length) - PARTNER_GAP;
+
+export interface LayoutGraph {
+  elk: ElkNode;
+  units: LayoutUnit[];
+  /** Per family: the unit and x offset (within it) its junction hangs from. */
+  anchors: Map<string, { unitId: string; x: number }>;
+  families: Family[];
+}
+
+export function toElkGraph(personIds: string[], families: Family[]): LayoutGraph {
+  const gen = generations(personIds, families);
+  const units = buildUnits(personIds, families, gen);
+  const unitOf = new Map<string, { unit: LayoutUnit; index: number }>();
+  for (const unit of units) unit.members.forEach((m, index) => unitOf.set(m, { unit, index }));
+  const centre = (id: string) => memberX(unitOf.get(id)!.index) + PERSON_WIDTH / 2;
+
+  const ports = new Map<string, { id: string; x: number; y: number; side: string }[]>(
+    units.map((u) => [
+      u.id,
+      u.members.map((m, i) => ({
+        id: `${u.id}:in:${m}`,
+        x: memberX(i) + PERSON_WIDTH / 2,
+        y: 0,
+        side: "NORTH",
+      })),
+    ]),
+  );
+  const anchors = new Map<string, { unitId: string; x: number }>();
+  const edges: ElkExtendedEdge[] = [];
+  for (const f of families) {
+    // Parents grouped by unit; a couple in one unit shares one port between them.
+    const byUnit = new Map<string, string[]>();
+    for (const p of f.parents) {
+      const u = unitOf.get(p)!.unit.id;
+      byUnit.set(u, [...(byUnit.get(u) ?? []), p]);
+    }
+    const outPorts: string[] = [];
+    let lowest: { unitId: string; x: number; gen: number } | null = null;
+    for (const [unitId, members] of byUnit) {
+      const xs = members.map(centre);
+      const x = (Math.min(...xs) + Math.max(...xs)) / 2;
+      const portId = `${unitId}:out:${f.id}`;
+      ports.get(unitId)!.push({ id: portId, x, y: PERSON_HEIGHT, side: "SOUTH" });
+      outPorts.push(portId);
+      const g = gen.get(members[0]!) ?? 0;
+      if (!lowest || g > lowest.gen || (g === lowest.gen && members.length > 1))
+        lowest = { unitId, x, gen: g };
+    }
+    if (lowest) anchors.set(f.id, { unitId: lowest.unitId, x: lowest.x });
+    for (const c of f.children) {
+      const target = `${unitOf.get(c.id)!.unit.id}:in:${c.id}`;
+      for (const source of outPorts)
+        edges.push({ id: `${source}->${c.id}`, sources: [source], targets: [target] });
+    }
+  }
+
+  const elk: ElkNode = {
     id: "root",
     layoutOptions: {
       "elk.algorithm": "layered",
       "elk.direction": "DOWN",
-      "elk.spacing.nodeNode": "28",
-      "elk.layered.spacing.nodeNodeBetweenLayers": "36",
+      // Rows come from the generations (input y), not from ELK's own layering.
+      "elk.layered.layering.strategy": "INTERACTIVE",
+      "elk.spacing.nodeNode": String(UNIT_GAP),
+      "elk.layered.spacing.nodeNodeBetweenLayers": String(ROW_GAP),
       "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
       "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",
-      "elk.layered.crossingMinimization.forceNodeModelOrder": "false",
+      "elk.edgeRouting": "POLYLINE",
       "elk.separateConnectedComponents": "true",
       "elk.spacing.componentComponent": "80",
     },
-    children: [
-      ...personIds.map((id) => ({ id, width: PERSON_WIDTH, height: PERSON_HEIGHT })),
-      ...families.map((f) => ({ id: f.id, width: FAMILY_SIZE, height: FAMILY_SIZE })),
-    ],
-    edges: families.flatMap((f) => [
-      ...f.parents.map((p) => ({ id: `${p}->${f.id}`, sources: [p], targets: [f.id] })),
-      ...f.children.map((c) => ({ id: `${f.id}->${c.id}`, sources: [f.id], targets: [c.id] })),
-    ]),
+    children: units.map((u) => ({
+      id: u.id,
+      x: 0,
+      y: (gen.get(u.members[0]!) ?? 0) * (PERSON_HEIGHT + ROW_GAP),
+      width: unitWidth(u),
+      height: PERSON_HEIGHT,
+      layoutOptions: { "elk.portConstraints": "FIXED_POS" },
+      ports: ports.get(u.id)!.map((p) => ({
+        id: p.id,
+        x: p.x,
+        y: p.y,
+        width: 0,
+        height: 0,
+        layoutOptions: { "elk.port.side": p.side },
+      })),
+    })),
+    edges,
   };
+  return { elk, units, anchors, families };
+}
+
+export type Positions = Record<string, { x: number; y: number }>;
+
+/** Person and family-junction positions (top-left corners) from the laid-out units. */
+export function expandLayout(result: ElkNode, graph: LayoutGraph): Positions {
+  const placed = new Map((result.children ?? []).map((c) => [c.id, c]));
+  const out: Positions = {};
+  for (const unit of graph.units) {
+    const box = placed.get(unit.id);
+    if (!box) continue;
+    unit.members.forEach((m, i) => {
+      out[m] = { x: (box.x ?? 0) + memberX(i), y: box.y ?? 0 };
+    });
+  }
+  for (const f of graph.families) {
+    const anchor = graph.anchors.get(f.id);
+    const box = anchor && placed.get(anchor.unitId);
+    if (!anchor || !box) continue;
+    const rowBottom = (box.y ?? 0) + PERSON_HEIGHT;
+    const childTop = Math.min(...f.children.map((c) => out[c.id]?.y ?? Infinity));
+    // Halfway to the next row; just below a childless couple.
+    const mid = Number.isFinite(childTop) ? (rowBottom + childTop) / 2 : rowBottom + 24;
+    out[f.id] = {
+      x: (box.x ?? 0) + anchor.x - FAMILY_SIZE / 2,
+      y: Math.min(mid, rowBottom + ROW_GAP / 2) - FAMILY_SIZE / 2,
+    };
+  }
+  return out;
 }
 
 /** For focus mode: does this person have relatives that are not currently shown? */

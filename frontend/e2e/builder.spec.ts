@@ -118,6 +118,9 @@ test("builder: dragged card position is remembered", async ({ page }, testInfo) 
     )
     .toBeGreaterThan(50);
   const moved = await position();
+  // Cards move sideways only, so the generation stays on its row.
+  const y = (t?: string) => /,\s*([-\d.]+)px\)/.exec(t ?? "")?.[1];
+  expect(y(moved)).toBe(y(before));
 
   // ...the card is still there after a reload...
   await page.reload();
