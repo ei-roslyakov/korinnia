@@ -12,7 +12,7 @@ concurrency:
 jobs:
   backend:
     name: Backend — lint, types, tests
-    runs-on: ubuntu-latest
+    runs-on: korinnia-runners
     defaults:
       run:
         working-directory: backend
@@ -44,7 +44,7 @@ jobs:
 
   frontend:
     name: Frontend — lint, types, tests, build
-    runs-on: ubuntu-latest
+    runs-on: korinnia-runners
     defaults:
       run:
         working-directory: frontend
@@ -64,11 +64,13 @@ jobs:
 
   images-e2e:
     name: Docker images + end-to-end tests
-    runs-on: ubuntu-latest
+    runs-on: korinnia-runners
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v4
+      # Self-hosted ARC runner image ships the docker CLI + buildx but not the compose plugin
+      - uses: docker/setup-compose-action@v1
       - name: Build backend image
         uses: docker/build-push-action@v7
         with:
