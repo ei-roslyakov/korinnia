@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/features/person/Avatar";
 import { lifeYears } from "@/lib/dates";
-import type { PersonSummary } from "@/lib/genealogy";
+import type { PersonSummary, RelativeRelation } from "@/lib/genealogy";
 
 import { FAMILY_SIZE, PERSON_HEIGHT, PERSON_WIDTH } from "./familyGraph";
 
@@ -13,6 +13,8 @@ export interface PersonNodeData extends Record<string, unknown> {
   highlighted: boolean;
   hiddenUp: boolean;
   hiddenDown: boolean;
+  /** Builder mode: show "+" buttons to add relatives. */
+  onAdd?: (personId: string, relation: RelativeRelation) => void;
 }
 export type PersonFlowNode = Node<PersonNodeData, "person">;
 export type FamilyFlowNode = Node<Record<string, never>, "family">;
@@ -21,7 +23,7 @@ const hidden = "!h-1 !w-1 !min-h-0 !min-w-0 !border-0 !bg-transparent";
 
 export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
   const { t } = useTranslation();
-  const { person, highlighted, hiddenUp, hiddenDown } = data;
+  const { person, highlighted, hiddenUp, hiddenDown, onAdd } = data;
   const ring = highlighted || selected ? "ring-2 ring-leaf-600" : "";
   return (
     <div
@@ -38,7 +40,8 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
           {lifeYears(person.birth, person.death, person.is_living)}
         </div>
       </div>
-      {hiddenUp && (
+      {onAdd && <AddButtons personId={person.id} onAdd={onAdd} />}
+      {!onAdd && hiddenUp && (
         <span
           className="bg-bark-100 text-bark-700 absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-1.5 text-[10px] leading-4"
           title={t("canvas.moreAbove")}
@@ -46,7 +49,7 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
           ▲
         </span>
       )}
-      {hiddenDown && (
+      {!onAdd && hiddenDown && (
         <span
           className="bg-bark-100 text-bark-700 absolute -bottom-2 left-1/2 -translate-x-1/2 rounded-full px-1.5 text-[10px] leading-4"
           title={t("canvas.moreBelow")}
@@ -58,6 +61,43 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
     </div>
   );
 });
+
+const ADD_POSITIONS: Record<RelativeRelation, string> = {
+  parent: "-top-3 left-1/2 -translate-x-1/2",
+  child: "-bottom-3 left-1/2 -translate-x-1/2",
+  partner: "top-1/2 -right-3 -translate-y-1/2",
+  sibling: "top-1/2 -left-3 -translate-y-1/2",
+};
+
+function AddButtons({
+  personId,
+  onAdd,
+}: {
+  personId: string;
+  onAdd: (personId: string, relation: RelativeRelation) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <>
+      {(Object.keys(ADD_POSITIONS) as RelativeRelation[]).map((relation) => (
+        <button
+          key={relation}
+          type="button"
+          // nodrag/nopan: React Flow must not treat clicks on the button as canvas drags.
+          className={`nodrag nopan border-leaf-600 text-leaf-700 hover:bg-leaf-700 absolute z-10 flex size-6 items-center justify-center rounded-full border bg-white text-sm leading-none shadow-sm hover:text-white ${ADD_POSITIONS[relation]}`}
+          aria-label={t(`builder.family.new.${relation}`)}
+          title={t(`builder.family.new.${relation}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd(personId, relation);
+          }}
+        >
+          +
+        </button>
+      ))}
+    </>
+  );
+}
 
 export const FamilyNode = memo(function FamilyNode() {
   return (

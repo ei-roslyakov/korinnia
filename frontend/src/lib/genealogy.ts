@@ -60,6 +60,8 @@ export interface TreeGraph {
   persons: PersonSummary[];
   parent_child: GraphEdge[];
   partnerships: GraphPartnership[];
+  /** Manual card nudges relative to the automatic layout (builder mode). */
+  layout_offsets?: Record<string, { dx: number; dy: number }>;
 }
 
 export interface PersonName {
@@ -144,3 +146,86 @@ export interface PersonDetail {
   created_at: string;
   updated_at: string;
 }
+
+export interface HistoricalName {
+  name: string;
+  from_year?: number | null;
+  until_year?: number | null;
+  note?: string | null;
+}
+
+export interface Place extends PlaceSummary {
+  historical_names: HistoricalName[];
+  notes: string | null;
+}
+
+/** Request shape of a partial date (backend PartialDateIn). */
+export interface PartialDateInput {
+  year?: number | null;
+  month?: number | null;
+  day?: number | null;
+  precision?: DatePrecision | null;
+  end_year?: number | null;
+  end_month?: number | null;
+  end_day?: number | null;
+  phrase?: string | null;
+}
+
+export type RelativeRelation = "parent" | "child" | "partner" | "sibling";
+
+export interface DeletePreview {
+  person: PersonSummary;
+  parent_links: number;
+  child_links: number;
+  partnerships: number;
+  events: number;
+  shared_events: number;
+}
+
+export interface TrashItem {
+  entity_type: "person" | "place" | "event" | "parent_child" | "partnership";
+  entity_id: string;
+  label: string;
+  deleted_at: string;
+  deleted_by: string | null;
+  batch_size: number;
+}
+
+export const EVENT_TYPES = [
+  "birth",
+  "baptism",
+  "death",
+  "burial",
+  "marriage",
+  "divorce",
+  "education",
+  "graduation",
+  "military_service",
+  "occupation",
+  "residence",
+  "emigration",
+  "immigration",
+  "award",
+  "illness",
+  "custom",
+] as const;
+export const PARTICIPANT_ROLES = [
+  "principal",
+  "spouse",
+  "witness",
+  "godparent",
+  "officiant",
+  "other",
+] as const;
+export const PARENT_CHILD_TYPES: ParentChildType[] = [
+  "biological",
+  "adoptive",
+  "step",
+  "foster",
+  "unknown",
+];
+export const PARTNERSHIP_TYPES: PartnershipType[] = ["marriage", "civil_union", "partnership"];
+export const END_REASONS = ["divorce", "death", "separation", "other"] as const;
+export const GENDERS: Gender[] = ["female", "male", "other", "unknown"];
+export const NAME_TYPES = ["birth", "married", "nickname", "alias", "religious", "other"] as const;
+export const SCRIPTS = ["cyrillic", "latin", "other"] as const;

@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router";
 
 import { Button, ErrorAlert, Select, Spinner } from "@/components/ui";
+import { AddRelativeDialog } from "@/features/builder/AddRelativeDialog";
+import { useResetLayout, useSaveLayoutOffset } from "@/features/builder/api";
 import { useGraph, usePerson } from "@/features/person/api";
+import type { RelativeRelation } from "@/lib/genealogy";
 import { PersonView } from "@/features/person/PersonView";
 import { atLeast } from "@/lib/types";
 
@@ -23,6 +26,12 @@ export function TreeViewPage() {
   const tree = useTree(treeId);
   const graph = useGraph(treeId);
   const [center, setCenter] = useState<CenterRequest | null>(null);
+  const [adding, setAdding] = useState<{
+    relativeId: string | null;
+    relation: RelativeRelation | null;
+  } | null>(null);
+  const saveOffset = useSaveLayoutOffset(treeId);
+  const resetLayout = useResetLayout(treeId);
 
   const personId = params.get("person");
   const generations = Number(params.get("gen") ?? 3) || 3;
@@ -80,6 +89,8 @@ export function TreeViewPage() {
     );
   }
   const isAdmin = atLeast(tree.data.my_role, "admin");
+  const canEdit = atLeast(tree.data.my_role, "editor");
+  const builder = canEdit && params.get("mode") === "edit";
   const count = graph.data.persons.length;
 
   return (
@@ -132,6 +143,45 @@ export function TreeViewPage() {
             )}
           </div>
         )}
+        {canEdit && (
+          <div
+            className="border-bark-100 inline-flex overflow-hidden rounded-md border text-sm"
+            role="group"
+          >
+            {(["view", "edit"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                aria-pressed={(m === "edit") === builder}
+                className={`px-2 py-1 ${(m === "edit") === builder ? "bg-leaf-700 text-white" : "bg-white"}`}
+                onClick={() => update({ mode: m === "edit" ? "edit" : null })}
+              >
+                {t(`builder.mode.${m}`)}
+              </button>
+            ))}
+          </div>
+        )}
+        {builder && (
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <Button onClick={() => setAdding({ relativeId: null, relation: null })}>
+              + {t("builder.addPerson")}
+            </Button>
+            <Link to={`/trees/${treeId}/trash`} className="text-leaf-700 hover:underline">
+              {t("builder.trash.title")}
+            </Link>
+            {Object.keys(graph.data.layout_offsets ?? {}).length > 0 && (
+              <Button
+                variant="ghost"
+                busy={resetLayout.isPending}
+                onClick={() =>
+                  window.confirm(t("builder.resetLayoutConfirm")) && resetLayout.mutate()
+                }
+              >
+                {t("builder.resetLayout")}
+              </Button>
+            )}
+          </div>
+        )}
         {isAdmin && (
           <div className="ml-auto flex gap-3 text-sm">
             <Link to={`/trees/${treeId}/members`} className="text-leaf-700 hover:underline">
@@ -154,24 +204,42 @@ export function TreeViewPage() {
           <TreeCanvas
             treeId={treeId}
             graph={graph.data}
-            graphVersion={graph.dataUpdatedAt}
             included={included}
             focusMode={Boolean(focusId)}
             selectedId={personId}
             center={center}
             onSelectPerson={(id) => update({ person: id })}
+            builder={builder}
+            onAddRelative={(relativeId, relation) => setAdding({ relativeId, relation })}
+            onMoved={(personId, dx, dy) => saveOffset.mutate({ personId, dx, dy })}
           />
         )}
         {personId && (
           <PersonPanel
             treeId={treeId}
             personId={personId}
-            showWarnings={atLeast(tree.data.my_role, "editor")}
+            showWarnings={canEdit}
+            editLink={canEdit ? `/trees/${treeId}/people/${personId}/edit` : null}
             personLink={personLink}
             onClose={() => update({ person: null })}
             onFocus={() => {
               update({ focus: personId, all: null });
               setCenter({ personId, nonce: Date.now() });
+            }}
+          />
+        )}
+        {adding && (
+          <AddRelativeDialog
+            treeId={treeId}
+            relativeId={adding.relativeId}
+            relation={adding.relation}
+            onClose={() => setAdding(null)}
+            onCreated={(person) => {
+              setAdding(null);
+              const changes: Record<string, string | null> = { person: person.id };
+              if (focusId) changes.focus = person.id;
+              update(changes);
+              setCenter({ personId: person.id, nonce: Date.now() });
             }}
           />
         )}
@@ -184,6 +252,7 @@ function PersonPanel({
   treeId,
   personId,
   showWarnings,
+  editLink,
   personLink,
   onClose,
   onFocus,
@@ -191,6 +260,7 @@ function PersonPanel({
   treeId: string;
   personId: string;
   showWarnings: boolean;
+  editLink: string | null;
   personLink: (id: string) => string;
   onClose: () => void;
   onFocus: () => void;
@@ -213,6 +283,14 @@ function PersonPanel({
           >
             {t("canvas.openPage")}
           </Link>
+          {editLink && (
+            <Link
+              to={editLink}
+              className="bg-leaf-700 hover:bg-leaf-600 inline-flex items-center rounded-md px-3 py-1.5 text-sm text-white"
+            >
+              {t("builder.edit")}
+            </Link>
+          )}
         </div>
         <Button variant="ghost" onClick={onClose} aria-label={t("canvas.close")}>
           ✕

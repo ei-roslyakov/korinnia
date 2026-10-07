@@ -81,7 +81,15 @@ class GraphPartnership(BaseModel):
     end_date: PartialDateOut | None
 
 
+class LayoutOffset(BaseModel):
+    """Manual nudge of a card relative to the automatic layout (pixels)."""
+
+    dx: float = Field(ge=-100_000, le=100_000)
+    dy: float = Field(ge=-100_000, le=100_000)
+
+
 class TreeGraph(BaseModel):
     persons: list[PersonSummary]
     parent_child: list[GraphEdge]
     partnerships: list[GraphPartnership]
+    layout_offsets: dict[uuid.UUID, LayoutOffset] = Field(default_factory=dict)

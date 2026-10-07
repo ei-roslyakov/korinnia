@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import ParentChild, Partnership, Person
 from app.schemas.dates import PartialDateOut
 from app.schemas.relationships import GraphEdge, GraphPartnership, TreeGraph
+from app.services.genealogy.builder import layout_offsets
 from app.services.genealogy.summaries import summaries_for
 
 
@@ -27,7 +28,9 @@ async def tree_graph(session: AsyncSession, tree_id: uuid.UUID) -> TreeGraph:
     partnerships = await session.scalars(
         select(Partnership).where(Partnership.tree_id == tree_id, Partnership.deleted_at.is_(None))
     )
+    offsets = await layout_offsets(session, tree_id)
     return TreeGraph(
+        layout_offsets={pid: o for pid, o in offsets.items() if pid in live},
         persons=summaries,
         parent_child=[
             GraphEdge(id=e.id, parent_id=e.parent_id, child_id=e.child_id, type=e.type)

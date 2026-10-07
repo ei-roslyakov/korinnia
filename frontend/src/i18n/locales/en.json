@@ -210,7 +210,26 @@
     "totp_already_enabled": "Two-step verification is already on.",
     "totp_not_set_up": "Start the setup first.",
     "totp_not_enabled": "Two-step verification is not on.",
-    "invitation_already_accepted": "This invitation has already been accepted."
+    "invitation_already_accepted": "This invitation has already been accepted.",
+    "sibling_needs_parents": "To add a sibling, first add at least one parent.",
+    "invalid_other_parent": "The chosen person is not a parent of this person.",
+    "vital_exists": "This person already has this record (birth or death).",
+    "vital_needs_one_principal": "Birth and death need exactly one main person.",
+    "duplicate_participant": "A person is listed twice.",
+    "relationship_exists": "This relationship already exists.",
+    "relationship_cycle": "This would make a person their own ancestor.",
+    "too_many_biological_parents": "A person can have at most two biological parents.",
+    "self_relation": "A person cannot be related to themselves.",
+    "person_not_found": "Person not found.",
+    "invalid_place": "The place does not exist in this tree.",
+    "place_in_use": "The place is still used by events.",
+    "place_not_found": "Place not found.",
+    "event_not_found": "Event not found.",
+    "relationship_not_found": "Relationship not found.",
+    "not_in_trash": "This item is not in the trash.",
+    "revision_not_found": "Version not found.",
+    "revision_not_restorable": "This version cannot be restored.",
+    "entity_deleted": "Restore the item from the trash first."
   },
   "dates": {
     "approx": "about {{date}}",
@@ -344,5 +363,198 @@
     "born_after_parent_death": "A child is born after the parent's death.",
     "event_before_birth": "An event is dated before birth.",
     "event_after_death": "An event is dated after death."
+  },
+  "builder": {
+    "mode": {
+      "view": "View",
+      "edit": "Builder"
+    },
+    "addPerson": "Add person",
+    "addFirstPerson": "Add the first person",
+    "resetLayout": "Reset layout",
+    "resetLayoutConfirm": "Forget all manually moved card positions in this tree?",
+    "edit": "Edit",
+    "viewPage": "View page",
+    "unsaved": "Unsaved changes",
+    "gender": "Gender",
+    "birthPlace": "Place of birth",
+    "deathPlace": "Place of death",
+    "deathDescription": "Death details (cause, circumstances)",
+    "deceased": "Deceased",
+    "shortSummary": "Short summary",
+    "date": {
+      "year": "Year",
+      "month": "Month",
+      "day": "Day",
+      "precision": "precision",
+      "and": "and",
+      "end": "end",
+      "phrase": "Original wording (optional), e.g. “Easter 1888”"
+    },
+    "precision": {
+      "unknown": "Unknown",
+      "exact": "Exact date",
+      "month": "Month and year",
+      "year": "Year only",
+      "approx": "About",
+      "before": "Before",
+      "after": "After",
+      "between": "Between"
+    },
+    "map": {
+      "hint": "Click on the map to set the location."
+    },
+    "place": {
+      "clear": "Clear place",
+      "search": "Search places…",
+      "create": "Create a new place",
+      "createNamed": "Create “{{name}}”",
+      "newTitle": "New place",
+      "name": "Name (current)",
+      "region": "Region",
+      "country": "Country",
+      "historical": "Historical names",
+      "historicalName": "Former name",
+      "until": "Until year",
+      "addHistorical": "Add former name"
+    },
+    "names": {
+      "name": "Name {{n}}",
+      "first_name": "First name",
+      "middle_name": "Middle name",
+      "patronymic": "Patronymic",
+      "last_name": "Surname",
+      "maiden_name": "Maiden name",
+      "type": "Name type",
+      "script": "Script",
+      "primary": "Main name",
+      "add": "Add name"
+    },
+    "markdown": {
+      "write": "Write",
+      "preview": "Preview",
+      "draftFound": "An unsaved draft from {{date}} was found in this browser.",
+      "restoreDraft": "Restore draft",
+      "discardDraft": "Discard",
+      "empty": "Nothing to preview yet.",
+      "hint": "Formatting: # Heading, **bold**, *italic*, - list, [link](https://…). Drafts are kept in this browser until saved."
+    },
+    "add": {
+      "title": {
+        "parent": "Add a parent of {{name}}",
+        "child": "Add a child of {{name}}",
+        "partner": "Add a partner of {{name}}",
+        "sibling": "Add a sibling of {{name}}",
+        "person": "Add a person"
+      },
+      "linkType": "Relationship",
+      "partnershipType": "Type of union",
+      "otherParent": "Other parent",
+      "partnerOf": "Partner of",
+      "none": "— none —"
+    },
+    "pcType": {
+      "biological": "Biological",
+      "adoptive": "Adoptive",
+      "step": "Step",
+      "foster": "Foster",
+      "unknown": "Unclear"
+    },
+    "events": {
+      "add": "Add event",
+      "edit": "Edit event",
+      "type": "Type",
+      "title": "Title",
+      "date": "Date",
+      "place": "Place",
+      "gps": "Exact location (GPS)",
+      "clearGps": "Remove GPS location",
+      "description": "Description",
+      "participants": "Participants",
+      "role": "Role",
+      "addParticipant": "Add a participant…",
+      "confirmDelete": "Move this event to the trash?"
+    },
+    "roles": {
+      "principal": "Main person",
+      "spouse": "Spouse",
+      "witness": "Witness",
+      "godparent": "Godparent",
+      "officiant": "Officiant",
+      "other": "Other"
+    },
+    "family": {
+      "unlink": "Unlink",
+      "confirmUnlink": "Remove this relationship? (It can be restored from the trash.)",
+      "linkExisting": "Link an existing person…",
+      "new": {
+        "parent": "Add parent",
+        "child": "Add child",
+        "partner": "Add partner",
+        "sibling": "Add sibling"
+      },
+      "start": "Start (marriage date)",
+      "end": "End",
+      "endReason": "Ended by"
+    },
+    "history": {
+      "hint": "Every change is kept. Restoring an older version creates a new version, so it can be undone too.",
+      "restore": "Restore this version",
+      "confirm": "Restore the person to this version?",
+      "changed": "Changed",
+      "actions": {
+        "create": "Created",
+        "update": "Edited",
+        "delete": "Deleted",
+        "restore": "Restored from trash",
+        "restore_revision": "Earlier version restored"
+      },
+      "fields": {
+        "gender": "gender",
+        "is_living": "living",
+        "short_summary": "summary",
+        "biography": "biography",
+        "occupation": "occupation",
+        "education": "education",
+        "religion": "religion",
+        "nationality": "nationality",
+        "notes_for_descendants": "notes for descendants",
+        "research_status": "research status",
+        "names": "names",
+        "birth": "birth",
+        "death": "death"
+      }
+    },
+    "delete": {
+      "title": "Delete person",
+      "question": "Move {{name}} to the trash? Together with them:",
+      "parentLinks": "Links to parents: {{count}}",
+      "childLinks": "Links to children: {{count}}",
+      "partnerships": "Partnerships: {{count}}",
+      "events": "Own events: {{count}}",
+      "sharedEvents": "Shared events (kept, without this person): {{count}}",
+      "trashNote": "Nothing is destroyed — everything can be restored from the trash.",
+      "confirm": "Move to trash"
+    },
+    "trash": {
+      "title": "Trash",
+      "hint": "Deleted items stay here and can be restored at any time. A person is restored together with the relationships and events deleted with them.",
+      "empty": "The trash is empty.",
+      "restore": "Restore",
+      "batch": "with {{count}} related items",
+      "types": {
+        "person": "Person",
+        "place": "Place",
+        "event": "Event",
+        "parent_child": "Parent–child",
+        "partnership": "Partnership"
+      }
+    },
+    "tabs": {
+      "details": "Details",
+      "events": "Events",
+      "family": "Family",
+      "history": "History"
+    }
   }
 }

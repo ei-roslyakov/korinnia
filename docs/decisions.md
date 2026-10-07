@@ -167,3 +167,26 @@ Each query term must match a name variant (with transliteration), or the current
 
 ### D46. Person view is one component in two places
 The same `PersonView` renders inside the canvas side panel (full width on phones) and on the stand-alone page `/trees/:id/people/:personId`, which can be linked to and printed. Markdown is rendered with react-markdown + GFM. Raw HTML is never rendered, and links open in a new tab with `rel="noopener noreferrer nofollow"`. Data-quality warnings are shown to editors and above only.
+
+## Phase 5: builder (editing UI)
+
+### D47. Adding a relative is one atomic request
+`POST /persons` accepts an optional `relative` (`parent` / `child` / `partner` / `sibling`, with link type, union type and an optional second parent). The person and all links are created inside one savepoint (`session.begin_nested()`), so a validation error, such as a third biological parent or a cycle, leaves nothing behind. Sibling = same parents as the relative; it requires at least one parent.
+
+### D48. Manual layout = offsets, not coordinates
+Dragging a card stores `(dx, dy)` relative to the automatically computed position (`layout_offsets` table, one row per person). Offsets keep making sense in focus mode and after the family grows; absolute coordinates would not. Family junctions are re-centred between moved parents and children. Offsets are presentation, not family data, so they're not written to the audit log. "Reset layout" deletes the tree's offsets.
+
+### D49. Layout keyed by structure; never unmount the canvas on refresh
+The ELK result is cached under a key derived only from who is shown and how they are linked. Edits to names or dates, drags, and saved offsets therefore never trigger a re-layout. When the structure does change, the previous layout stays on screen (`keepPreviousData`) until the new one is ready, and the view is only re-fitted on first load or when entering/leaving focus mode. Before this, a background refresh (another editor's change) unmounted the canvas and re-fitted the view under the user's cursor.
+
+### D50. Biography drafts live in the browser
+Unsaved Markdown (biography, notes for descendants) is written to `localStorage` per person and field, 0.8 s after typing stops. If a newer draft exists when the editor opens, it is offered for restore. Drafts are a per-user convenience: they never reach the server, other users, or the archive. Saving clears them.
+
+### D51. CSRF token race on first load (bug fix)
+On a fresh page, several requests without a CSRF cookie each received a different server-minted token; only the last `Set-Cookie` survived, so the login could send a stale token and fail with "session expired". The client now (a) makes every request wait for one shared `/auth/csrf` fetch when the cookie is missing, and (b) always sends the current cookie value. Covered by a unit test.
+
+### D52. Deleting from the editor must not depend on the dialog
+After a delete, the shared cache refreshed the deleted person (404). That replaced the editor with an error and unmounted the dialog before its "navigate back" callback ran. The deleted person's queries are now removed instead of refetched, and navigation uses `mutateAsync`.
+
+### D53. Known limitation: spouses are not always side by side
+ELK's layered algorithm keeps generations on rows, but its crossing minimisation sometimes separates partners (e.g. in the demo tree, Andrii and Oksana are several cards apart). Users can drag cards (D48). A layout that groups couples (compound nodes or a genealogy-specific ordering pass) is a candidate improvement for phase 10.

@@ -74,6 +74,27 @@ describe("api client", () => {
     await expect(getReadiness()).rejects.toBeInstanceOf(ApiError);
   });
 
+  it("uses the cookie value, not a stale body token, and fetches the token once", async () => {
+    document.cookie = "korinnia_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+    let csrfCalls = 0;
+    const fetch = mockApi({
+      "GET /api/v1/auth/csrf": () => {
+        csrfCalls++;
+        // Meanwhile another response set the cookie to a different token.
+        document.cookie = "korinnia_csrf=from-cookie; path=/";
+        return json({ csrf_token: "from-body" });
+      },
+      "POST /api/a": () => json({}),
+      "POST /api/b": () => json({}),
+    });
+    await Promise.all([api.post("/api/a"), api.post("/api/b")]);
+    expect(csrfCalls).toBe(1);
+    const headers = fetch.mock.calls
+      .filter((c) => String(c[0]).startsWith("/api/a") || String(c[0]).startsWith("/api/b"))
+      .map((c) => ((c[1] as RequestInit).headers as Record<string, string>)["X-CSRF-Token"]);
+    expect(headers).toEqual(["from-cookie", "from-cookie"]);
+  });
+
   it("qs skips empty values", () => {
     expect(qs({ a: 1, b: "", c: undefined, d: false })).toBe("?a=1&d=false");
     expect(qs({})).toBe("");

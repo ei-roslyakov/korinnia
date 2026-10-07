@@ -179,7 +179,11 @@ export function Dialog({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (open && !el.open) el.showModal?.();
+    if (open && !el.open) {
+      // Fallback for environments without the modal API (older browsers, jsdom).
+      if (typeof el.showModal === "function") el.showModal();
+      else el.setAttribute("open", "");
+    }
     if (!open && el.open) el.close?.();
   }, [open]);
   if (!open) return null;

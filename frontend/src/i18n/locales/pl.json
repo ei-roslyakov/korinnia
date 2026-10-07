@@ -210,7 +210,26 @@
     "totp_already_enabled": "Weryfikacja dwuetapowa jest już włączona.",
     "totp_not_set_up": "Najpierw rozpocznij konfigurację.",
     "totp_not_enabled": "Weryfikacja dwuetapowa nie jest włączona.",
-    "invitation_already_accepted": "To zaproszenie zostało już przyjęte."
+    "invitation_already_accepted": "To zaproszenie zostało już przyjęte.",
+    "sibling_needs_parents": "Aby dodać rodzeństwo, najpierw dodaj co najmniej jednego rodzica.",
+    "invalid_other_parent": "Wybrana osoba nie jest rodzicem tej osoby.",
+    "vital_exists": "Ta osoba ma już taki wpis (urodzenie lub śmierć).",
+    "vital_needs_one_principal": "Urodzenie i śmierć mają dokładnie jedną osobę główną.",
+    "duplicate_participant": "Osoba jest podana dwukrotnie.",
+    "relationship_exists": "To powiązanie już istnieje.",
+    "relationship_cycle": "Osoba stałaby się własnym przodkiem.",
+    "too_many_biological_parents": "Osoba może mieć najwyżej dwoje rodziców biologicznych.",
+    "self_relation": "Osoba nie może być powiązana sama ze sobą.",
+    "person_not_found": "Nie znaleziono osoby.",
+    "invalid_place": "Tego miejsca nie ma w tym drzewie.",
+    "place_in_use": "Miejsce jest nadal używane w wydarzeniach.",
+    "place_not_found": "Nie znaleziono miejsca.",
+    "event_not_found": "Nie znaleziono wydarzenia.",
+    "relationship_not_found": "Nie znaleziono powiązania.",
+    "not_in_trash": "Tego elementu nie ma w koszu.",
+    "revision_not_found": "Nie znaleziono wersji.",
+    "revision_not_restorable": "Tej wersji nie można przywrócić.",
+    "entity_deleted": "Najpierw przywróć element z kosza."
   },
   "dates": {
     "approx": "ok. {{date}}",
@@ -344,5 +363,198 @@
     "born_after_parent_death": "Dziecko urodziło się po śmierci jednego z rodziców.",
     "event_before_birth": "Wydarzenie jest datowane przed urodzeniem.",
     "event_after_death": "Wydarzenie jest datowane po śmierci."
+  },
+  "builder": {
+    "mode": {
+      "view": "Podgląd",
+      "edit": "Edycja"
+    },
+    "addPerson": "Dodaj osobę",
+    "addFirstPerson": "Dodaj pierwszą osobę",
+    "resetLayout": "Przywróć układ",
+    "resetLayoutConfirm": "Zapomnieć wszystkie ręcznie przesunięte karty w tym drzewie?",
+    "edit": "Edytuj",
+    "viewPage": "Zobacz stronę",
+    "unsaved": "Niezapisane zmiany",
+    "gender": "Płeć",
+    "birthPlace": "Miejsce urodzenia",
+    "deathPlace": "Miejsce śmierci",
+    "deathDescription": "Okoliczności śmierci (przyczyna itp.)",
+    "deceased": "Nie żyje",
+    "shortSummary": "Krótki opis",
+    "date": {
+      "year": "Rok",
+      "month": "Miesiąc",
+      "day": "Dzień",
+      "precision": "dokładność",
+      "and": "i",
+      "end": "koniec",
+      "phrase": "Dosłownie ze źródła (opcjonalnie), np. „Wielkanoc 1888”"
+    },
+    "precision": {
+      "unknown": "Nieznana",
+      "exact": "Dokładna data",
+      "month": "Miesiąc i rok",
+      "year": "Tylko rok",
+      "approx": "Około",
+      "before": "Przed",
+      "after": "Po",
+      "between": "Między"
+    },
+    "map": {
+      "hint": "Kliknij na mapie, aby zaznaczyć miejsce."
+    },
+    "place": {
+      "clear": "Usuń miejsce",
+      "search": "Szukaj miejsca…",
+      "create": "Utwórz nowe miejsce",
+      "createNamed": "Utwórz „{{name}}”",
+      "newTitle": "Nowe miejsce",
+      "name": "Nazwa (obecna)",
+      "region": "Region",
+      "country": "Kraj",
+      "historical": "Nazwy historyczne",
+      "historicalName": "Dawna nazwa",
+      "until": "Do roku",
+      "addHistorical": "Dodaj dawną nazwę"
+    },
+    "names": {
+      "name": "Imię i nazwisko {{n}}",
+      "first_name": "Imię",
+      "middle_name": "Drugie imię",
+      "patronymic": "Imię odojcowskie",
+      "last_name": "Nazwisko",
+      "maiden_name": "Nazwisko panieńskie",
+      "type": "Rodzaj",
+      "script": "Pismo",
+      "primary": "Główne",
+      "add": "Dodaj imię i nazwisko"
+    },
+    "markdown": {
+      "write": "Tekst",
+      "preview": "Podgląd",
+      "draftFound": "W tej przeglądarce znaleziono niezapisany szkic z {{date}}.",
+      "restoreDraft": "Przywróć szkic",
+      "discardDraft": "Odrzuć",
+      "empty": "Na razie nic do pokazania.",
+      "hint": "Formatowanie: # Nagłówek, **pogrubienie**, *kursywa*, - lista, [link](https://…). Szkic jest przechowywany w tej przeglądarce do zapisania."
+    },
+    "add": {
+      "title": {
+        "parent": "Dodaj rodzica: {{name}}",
+        "child": "Dodaj dziecko: {{name}}",
+        "partner": "Dodaj partnera: {{name}}",
+        "sibling": "Dodaj rodzeństwo: {{name}}",
+        "person": "Dodaj osobę"
+      },
+      "linkType": "Pokrewieństwo",
+      "partnershipType": "Rodzaj związku",
+      "otherParent": "Drugi rodzic",
+      "partnerOf": "Partner osoby",
+      "none": "— brak —"
+    },
+    "pcType": {
+      "biological": "Biologiczne",
+      "adoptive": "Adopcja",
+      "step": "Przybrane",
+      "foster": "Rodzina zastępcza",
+      "unknown": "Niejasne"
+    },
+    "events": {
+      "add": "Dodaj wydarzenie",
+      "edit": "Edytuj wydarzenie",
+      "type": "Rodzaj",
+      "title": "Tytuł",
+      "date": "Data",
+      "place": "Miejsce",
+      "gps": "Dokładne położenie (GPS)",
+      "clearGps": "Usuń GPS",
+      "description": "Opis",
+      "participants": "Uczestnicy",
+      "role": "Rola",
+      "addParticipant": "Dodaj uczestnika…",
+      "confirmDelete": "Przenieść wydarzenie do kosza?"
+    },
+    "roles": {
+      "principal": "Osoba główna",
+      "spouse": "Małżonek",
+      "witness": "Świadek",
+      "godparent": "Chrzestny / chrzestna",
+      "officiant": "Duchowny / urzędnik",
+      "other": "Inna"
+    },
+    "family": {
+      "unlink": "Odłącz",
+      "confirmUnlink": "Usunąć to powiązanie? (Można je przywrócić z kosza.)",
+      "linkExisting": "Powiąż z istniejącą osobą…",
+      "new": {
+        "parent": "Dodaj rodzica",
+        "child": "Dodaj dziecko",
+        "partner": "Dodaj partnera",
+        "sibling": "Dodaj rodzeństwo"
+      },
+      "start": "Początek (data ślubu)",
+      "end": "Koniec",
+      "endReason": "Powód zakończenia"
+    },
+    "history": {
+      "hint": "Każda zmiana jest zachowana. Przywrócenie starszej wersji tworzy nową wersję, więc też można je cofnąć.",
+      "restore": "Przywróć tę wersję",
+      "confirm": "Przywrócić osobę do tej wersji?",
+      "changed": "Zmieniono",
+      "actions": {
+        "create": "Utworzono",
+        "update": "Zmieniono",
+        "delete": "Usunięto",
+        "restore": "Przywrócono z kosza",
+        "restore_revision": "Przywrócono wcześniejszą wersję"
+      },
+      "fields": {
+        "gender": "płeć",
+        "is_living": "żyje",
+        "short_summary": "krótki opis",
+        "biography": "biografia",
+        "occupation": "zajęcie",
+        "education": "wykształcenie",
+        "religion": "wyznanie",
+        "nationality": "narodowość",
+        "notes_for_descendants": "dla potomnych",
+        "research_status": "stan badań",
+        "names": "imiona",
+        "birth": "urodzenie",
+        "death": "śmierć"
+      }
+    },
+    "delete": {
+      "title": "Usuń osobę",
+      "question": "Przenieść {{name}} do kosza? Razem z nią:",
+      "parentLinks": "Powiązania z rodzicami: {{count}}",
+      "childLinks": "Powiązania z dziećmi: {{count}}",
+      "partnerships": "Związki: {{count}}",
+      "events": "Własne wydarzenia: {{count}}",
+      "sharedEvents": "Wspólne wydarzenia (zostaną, bez tej osoby): {{count}}",
+      "trashNote": "Nic nie zostaje zniszczone — wszystko można przywrócić z kosza.",
+      "confirm": "Przenieś do kosza"
+    },
+    "trash": {
+      "title": "Kosz",
+      "hint": "Usunięte elementy są tutaj i można je w każdej chwili przywrócić. Osoba wraca razem z powiązaniami i wydarzeniami usuniętymi wraz z nią.",
+      "empty": "Kosz jest pusty.",
+      "restore": "Przywróć",
+      "batch": "powiązanych elementów: {{count}}",
+      "types": {
+        "person": "Osoba",
+        "place": "Miejsce",
+        "event": "Wydarzenie",
+        "parent_child": "Rodzic – dziecko",
+        "partnership": "Związek"
+      }
+    },
+    "tabs": {
+      "details": "Informacje",
+      "events": "Wydarzenia",
+      "family": "Rodzina",
+      "history": "Historia"
+    }
   }
 }

@@ -11,7 +11,8 @@ async function openDemoTree(page: Page) {
   await page.getByRole("button", { name: "Увійти" }).click();
   await page.getByRole("link", { name: new RegExp(DEMO_TREE.replace(/[()]/g, "\\$&")) }).click();
   await expect(page.getByRole("heading", { name: DEMO_TREE })).toBeVisible();
-  await expect(page.getByText("Людей: 25")).toBeVisible();
+  // Other tests may add people to the shared demo tree in parallel.
+  await expect(page.getByText(/Людей: (2[5-9]|3\d)/)).toBeVisible();
 }
 
 test("tree canvas: cards, pan, person panel and page", async ({ page }) => {

@@ -18,6 +18,7 @@ from app.models.audit import AuditLog
 from app.models.base import Base
 from app.models.event import Event, EventParticipant
 from app.models.invitation import Invitation, PasswordResetToken
+from app.models.layout import LayoutOffset
 from app.models.person import Person, PersonName
 from app.models.place import Place
 from app.models.relationship import ParentChild, Partnership
@@ -34,6 +35,7 @@ __all__ = [
     "Gender",
     "Invitation",
     "Language",
+    "LayoutOffset",
     "LoginAttempt",
     "NameType",
     "ParentChild",

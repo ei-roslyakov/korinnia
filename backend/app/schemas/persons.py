@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -87,8 +87,26 @@ def _check_names(names: list[NameIn] | None) -> None:
         raise ValueError("only one name can be primary")
 
 
+class RelativeLink(BaseModel):
+    """Link the new person to an existing one in the same request (atomically).
+
+    - parent:  new person becomes a parent of `person_id`; with `other_parent_id` (an
+      existing parent of `person_id`) the two parents also become partners.
+    - child:   new person becomes a child of `person_id` (and of `other_parent_id`).
+    - partner: new partnership between `person_id` and the new person.
+    - sibling: new person gets the same parents as `person_id`.
+    """
+
+    person_id: uuid.UUID
+    relation: Literal["parent", "child", "partner", "sibling"]
+    parent_child_type: ParentChildType = ParentChildType.biological
+    partnership_type: PartnershipType = PartnershipType.marriage
+    other_parent_id: uuid.UUID | None = None
+
+
 class PersonCreate(PersonFields):
     names: list[NameIn] = Field(default_factory=list, max_length=50)
+    relative: RelativeLink | None = None
 
     @model_validator(mode="after")
     def _names(self) -> PersonCreate:

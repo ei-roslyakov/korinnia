@@ -34,6 +34,7 @@ from app.services import trees as tree_service
 from app.services import users as user_service
 from app.services.context import Actor
 from app.storage import LocalStorage, get_storage
+from tests.helpers import Ctx
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 PASSWORD = "correct-horse-battery"
@@ -213,3 +214,16 @@ def add_member(session: AsyncSession) -> Callable[..., Awaitable[TreeMembership]
         return membership
 
     return _add
+
+
+@pytest.fixture
+async def ctx(
+    make_user: Callable[..., Awaitable[User]],
+    make_tree: Callable[..., Awaitable[Tree]],
+    make_client: Callable[[], Awaitable[ApiClient]],
+) -> Ctx:
+    owner = await make_user("owner@example.com")
+    tree = await make_tree(owner)
+    client = await make_client()
+    await client.login("owner@example.com")
+    return Ctx(tree=tree, editor=client, base=f"/api/v1/trees/{tree.id}")

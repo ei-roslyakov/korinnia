@@ -14,7 +14,8 @@ from app.schemas.persons import (
     PersonSummary,
     PersonUpdate,
 )
-from app.schemas.relationships import TreeGraph
+from app.schemas.relationships import LayoutOffset, TreeGraph
+from app.services.genealogy import builder as builder_service
 from app.services.genealogy import persons as person_service
 from app.services.genealogy import trash as trash_service
 from app.services.genealogy.graph import tree_graph
@@ -46,7 +47,8 @@ async def list_persons(
 async def create_person(
     body: PersonCreate, access: TreeEditor, session: SessionDep, actor: ActorDep
 ) -> PersonDetail:
-    person = await person_service.create_person(session, access.tree.id, body, actor)
+    """Create a person; with `relative` also link them to an existing person atomically."""
+    person = await builder_service.create_person_with_relative(session, access.tree.id, body, actor)
     return await person_service.person_detail(session, person)
 
 
@@ -84,3 +86,18 @@ async def delete_person(
 ) -> None:
     person = await person_service.get_person(session, access.tree.id, person_id)
     await trash_service.delete_person(session, person, actor)
+
+
+@router.put("/layout-offsets/{person_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def set_layout_offset(
+    person_id: uuid.UUID, body: LayoutOffset, access: TreeEditor, session: SessionDep
+) -> None:
+    """Save a manual nudge of a card on the canvas (0,0 removes it). Not audited:
+    presentation only, not family data."""
+    await builder_service.set_layout_offset(session, access.tree.id, person_id, body)
+
+
+@router.delete("/layout-offsets", status_code=status.HTTP_204_NO_CONTENT)
+async def reset_layout(access: TreeEditor, session: SessionDep) -> None:
+    """Forget all manual card positions of the tree."""
+    await builder_service.reset_layout(session, access.tree.id)

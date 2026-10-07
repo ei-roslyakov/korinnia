@@ -59,7 +59,12 @@ async def _person(session: AsyncSession, tree_id: uuid.UUID, pid: uuid.UUID) -> 
 
 
 async def create_parent_child(
-    session: AsyncSession, tree_id: uuid.UUID, body: ParentChildCreate, actor: Actor
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    body: ParentChildCreate,
+    actor: Actor,
+    *,
+    commit: bool = True,
 ) -> tuple[ParentChild, list[Warning]]:
     if body.parent_id == body.child_id:
         raise AppError("self_relation")
@@ -104,7 +109,8 @@ async def create_parent_child(
         after=parent_child_snapshot(link),
     )
     warnings = await link_warnings(session, tree_id, parent, body.child_id)
-    await session.commit()
+    if commit:
+        await session.commit()
     return link, warnings
 
 
@@ -167,7 +173,12 @@ async def delete_parent_child(session: AsyncSession, link: ParentChild, actor: A
 
 
 async def create_partnership(
-    session: AsyncSession, tree_id: uuid.UUID, body: PartnershipCreate, actor: Actor
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    body: PartnershipCreate,
+    actor: Actor,
+    *,
+    commit: bool = True,
 ) -> Partnership:
     if body.person_a_id == body.person_b_id:
         raise AppError("self_relation")
@@ -201,8 +212,9 @@ async def create_partnership(
         tree_id=tree_id,
         after=partnership_snapshot(p),
     )
-    await session.commit()
-    await session.refresh(p)
+    if commit:
+        await session.commit()
+        await session.refresh(p)
     return p
 
 

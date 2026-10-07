@@ -75,5 +75,10 @@ Example: "between 1914 and 1918" → `year=1914, precision=between, end_year=191
 
 Dates in snapshots use the column names above without the prefix (`{"year": 1914, "precision": "between", "end_year": 1918, …}`).
 
+### Phase 5: presentation
+| Table | Purpose | Key columns |
+|---|---|---|
+| `layout_offsets` | Manual nudges of cards on the canvas (not family data, not audited) | PK (`tree_id`, `person_id`), `dx`, `dy` (pixels relative to the automatic layout), `updated_at` |
+
 ### Planned
 Media (phase 6); sources, citations, stories, suggestions, comments and open questions (phase 7). Each section is documented here when it is implemented.

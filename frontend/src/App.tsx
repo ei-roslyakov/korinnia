@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from "react-router";
 
 import { Layout } from "@/components/Layout";
 import { AdminLayout } from "@/features/admin/AdminLayout";
+import { PersonEditorPage } from "@/features/builder/PersonEditorPage";
+import { TrashPage } from "@/features/builder/TrashPage";
 import { AuditLogPage } from "@/features/admin/AuditLogPage";
 import { InvitationsPage } from "@/features/admin/InvitationsPage";
 import { SystemPage } from "@/features/admin/SystemPage";
@@ -56,6 +58,22 @@ export function App() {
           element={
             <RequireAuth>
               <PersonPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/people/:personId/edit"
+          element={
+            <RequireAuth>
+              <PersonEditorPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="trees/:treeId/trash"
+          element={
+            <RequireAuth>
+              <TrashPage />
             </RequireAuth>
           }
         />

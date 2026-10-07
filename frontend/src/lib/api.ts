@@ -42,12 +42,25 @@ export function readCookie(name: string): string | undefined {
     ?.slice(name.length + 1);
 }
 
+let csrfFetch: Promise<string> | null = null;
+
+/**
+ * The CSRF token to send. Always the *current cookie value* when there is one: concurrent
+ * first requests without a cookie each get a different token minted by the server, and
+ * only the last Set-Cookie survives, so a token taken from a response body may no longer
+ * match the cookie. Cookie-less clients share a single /auth/csrf request.
+ */
 async function csrfToken(): Promise<string> {
   const existing = readCookie(CSRF_COOKIE);
   if (existing) return existing;
-  const resp = await fetch("/api/v1/auth/csrf", { credentials: "same-origin" });
-  const body = (await resp.json()) as { csrf_token: string };
-  return body.csrf_token;
+  csrfFetch ??= fetch("/api/v1/auth/csrf", { credentials: "same-origin" })
+    .then((resp) => resp.json() as Promise<{ csrf_token: string }>)
+    .then((body) => body.csrf_token)
+    .finally(() => {
+      csrfFetch = null;
+    });
+  const fromBody = await csrfFetch;
+  return readCookie(CSRF_COOKIE) ?? fromBody;
 }
 
 let refreshing: Promise<boolean> | null = null;
@@ -85,7 +98,10 @@ async function send(path: string, opts: RequestOptions): Promise<Response> {
     ...(headers as Record<string, string> | undefined),
   };
   if (json !== undefined) finalHeaders["Content-Type"] = "application/json";
-  if (!SAFE_METHODS.has(method)) finalHeaders["X-CSRF-Token"] = await csrfToken();
+  // Every request waits for the CSRF cookie when it is missing (one shared fetch), so
+  // the server never mints competing tokens for parallel cookie-less requests.
+  const token = await csrfToken();
+  if (!SAFE_METHODS.has(method)) finalHeaders["X-CSRF-Token"] = token;
   return fetch(path, {
     credentials: "same-origin",
     ...init,
@@ -111,6 +127,7 @@ export const api = {
   get: <T>(path: string) => apiFetch<T>(path),
   post: <T>(path: string, json?: unknown) => apiFetch<T>(path, { method: "POST", json }),
   patch: <T>(path: string, json?: unknown) => apiFetch<T>(path, { method: "PATCH", json }),
+  put: <T>(path: string, json?: unknown) => apiFetch<T>(path, { method: "PUT", json }),
   delete: <T = void>(path: string) => apiFetch<T>(path, { method: "DELETE" }),
 };
 

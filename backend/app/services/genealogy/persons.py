@@ -102,7 +102,12 @@ def _names_payload(names: Sequence[NameIn]) -> list[dict[str, Any]]:
 
 
 async def create_person(
-    session: AsyncSession, tree_id: uuid.UUID, body: PersonCreate, actor: Actor
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    body: PersonCreate,
+    actor: Actor,
+    *,
+    commit: bool = True,
 ) -> Person:
     birth = to_partial(body.birth.date) if body.birth else None
     person = Person(
@@ -142,7 +147,8 @@ async def create_person(
         tree_id=tree_id,
         after=await snapshot_of(session, person),
     )
-    await session.commit()
+    if commit:
+        await session.commit()
     return person
 
 

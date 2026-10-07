@@ -4,57 +4,13 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
 from typing import Any
 
 import pytest
 
 from app.models import Tree, TreeRole, User
 from tests.conftest import ApiClient
-
-
-@dataclass
-class Ctx:
-    tree: Tree
-    editor: ApiClient
-    base: str
-
-    async def person(self, first: str, last: str = "Коваленко", **extra: Any) -> dict[str, Any]:
-        body = {"names": [{"first_name": first, "last_name": last}], **extra}
-        resp = await self.editor.post(f"{self.base}/persons", json=body)
-        assert resp.status_code == 201, resp.text
-        return resp.json()  # type: ignore[no-any-return]
-
-    async def link(self, parent: str, child: str, type_: str = "biological") -> dict[str, Any]:
-        resp = await self.editor.post(
-            f"{self.base}/parent-child",
-            json={"parent_id": parent, "child_id": child, "type": type_},
-        )
-        assert resp.status_code == 201, resp.text
-        return resp.json()  # type: ignore[no-any-return]
-
-    async def place(self, name: str, **extra: Any) -> dict[str, Any]:
-        resp = await self.editor.post(f"{self.base}/places", json={"name": name, **extra})
-        assert resp.status_code == 201, resp.text
-        return resp.json()  # type: ignore[no-any-return]
-
-
-@pytest.fixture
-async def ctx(
-    make_user: Callable[..., Awaitable[User]],
-    make_tree: Callable[..., Awaitable[Tree]],
-    make_client: Callable[[], Awaitable[ApiClient]],
-) -> Ctx:
-    owner = await make_user("owner@example.com")
-    tree = await make_tree(owner)
-    client = await make_client()
-    await client.login("owner@example.com")
-    return Ctx(tree=tree, editor=client, base=f"/api/v1/trees/{tree.id}")
-
-
-def y(year: int, **kw: Any) -> dict[str, Any]:
-    return {"year": year, **kw}
-
+from tests.helpers import Ctx, y
 
 # --- Places -----------------------------------------------------------------------------
 

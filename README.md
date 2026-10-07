@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phases 1–4 of 11 are complete (scaffolding; users and roles; core family data; tree canvas and person pages). The builder (editing UI) is next. See [Features](#features) for what works today.
+> **Status:** Phases 1–5 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder / editing UI). Media (photos, documents, recordings) is next. See [Features](#features) for what works today.
 
 ---
 
@@ -20,7 +20,7 @@ Korinnia's mission is long-term preservation: to collect *everything* about ever
 | Frontend | React 19, TypeScript 6, Vite 8, Tailwind CSS 4, TanStack Query 5, React Router 8, react-i18next 17 (uk / en / pl) |
 | Tree canvas | React Flow 12 (`@xyflow/react`: pan / zoom / minimap, viewport culling), elkjs 0.12 (layered genealogical layout in a Web Worker) |
 | Content | react-markdown 10 + remark-gfm (biographies, notes; raw HTML never rendered) |
-| Frontend (planned) | Leaflet + OpenStreetMap (maps) |
+| Maps | Leaflet 1.9 + OpenStreetMap tiles (place pins; map view planned) |
 | Web server | nginx 1.29 — static frontend, `/api` reverse proxy, gzip (incl. pre-compressed assets), caching & security headers. Plain HTTP: TLS is terminated by your ingress / load balancer |
 | Media processing (planned) | Pillow (thumbnails, EXIF orientation), ffmpeg (audio/video previews), PDF thumbnails |
 | Book / PDF (planned) | WeasyPrint |
@@ -88,11 +88,20 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - 📋 Gallery, documents, audio/video on the person page (phase 6); stories & sources (phase 7)
 - 📋 Relationship calculator, map view, family timeline, "On this day", statistics (phase 8)
 
-### Builder mode
-- 📋 Add parents / children / partners / siblings from a person card
-- 📋 Full person editor with Markdown biography and autosaved drafts
-- 📋 Events editor with place autocomplete and map pin
-- 📋 Persisted manual node positions; data-quality panel
+### Builder mode (editors and admins)
+- ✅ View / Builder toggle on the tree
+- ✅ "+" buttons on every card: add a parent, child (with the other parent), partner or sibling — created and linked atomically
+- ✅ Add an unlinked person; first person of an empty tree
+- ✅ Full person editor: all names (any script, type, main name), gender, living, research status, birth / death with partial dates and places, occupation, education, religion, nationality
+- ✅ Markdown editor with live preview for biography and notes for descendants; drafts autosaved in the browser and offered for restore
+- ✅ Life events editor: type, title, partial date, place, description, participants with roles, burial cemetery / plot / GPS pin
+- ✅ Place autocomplete (current and historical names, any script) and "create place" with historical names and a map pin (OpenStreetMap)
+- ✅ Family editor: change link types, unlink, link existing people, edit partnership dates and end reason
+- ✅ Person history with "restore this version"
+- ✅ Delete with impact preview; trash bin page with restore
+- ✅ Drag cards to adjust the layout (saved per tree as offsets from the automatic layout); reset layout
+- ✅ Unsaved-changes warning; server validation errors and date warnings shown in place
+- 📋 Data-quality panel (phase 7)
 
 ### Media
 - 📋 Drag & drop upload (photos, scans, PDFs, audio, video); originals kept untouched
