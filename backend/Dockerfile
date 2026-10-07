@@ -35,6 +35,9 @@ RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-proj
 COPY --chown=korinnia:korinnia app ./app
 COPY --chown=korinnia:korinnia alembic ./alembic
 COPY --chown=korinnia:korinnia alembic.ini docker-entrypoint.sh ./
+# Release version (set by the Deploy workflow); late in the file so it never busts the cache.
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
 USER korinnia
 VOLUME ["/data/media"]
 EXPOSE 8000

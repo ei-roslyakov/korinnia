@@ -1,0 +1,21 @@
+Korinnia
+Copyright (c) 2026 Yevhenii Rosliakov. All rights reserved.
+
+This software and its source code, documentation, designs and other accompanying
+materials (the "Software") are proprietary. No licence or other right to use, copy,
+modify, merge, publish, distribute, sublicense, sell or create derivative works of the
+Software is granted, except with the prior written permission of the copyright holder.
+
+Third-party components included with or used by the Software remain the property of
+their respective owners and are licensed under their own terms; see
+frontend/public/third-party-notices.txt and the licence files of the installed packages.
+
+Content added to an installation of the Software by its users (such as names, family
+data, photographs, documents, recordings and stories) belongs to its respective authors
+and rights holders and is not covered by this notice.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR ITS USE.

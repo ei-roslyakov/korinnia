@@ -21,7 +21,8 @@ class Settings(BaseSettings):
 
     environment: Literal["development", "test", "production"] = "development"
     log_level: str = "INFO"
-    app_version: str = "0.1.0"
+    # Release version, baked into the image by the Deploy workflow ("dev" for local builds).
+    app_version: str = "dev"
 
     # --- Database -----------------------------------------------------------------
     postgres_host: str = "localhost"

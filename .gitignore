@@ -36,3 +36,4 @@ frontend/blob-report/
 .vscode/
 *.swp
 backend/.cache/
+backend/.local/

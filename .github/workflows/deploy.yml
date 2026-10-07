@@ -113,6 +113,8 @@ jobs:
           file: ${{ matrix.file }}
           target: prod
           push: true
+          # Shown in the app (footer, /api/v1/meta).
+          build-args: APP_VERSION=${{ needs.version.outputs.version }}
           tags: |
             ${{ env.IMAGE_PREFIX }}/${{ matrix.image }}:${{ needs.version.outputs.version }}
             ${{ env.IMAGE_PREFIX }}/${{ matrix.image }}:${{ steps.sha.outputs.tag }}

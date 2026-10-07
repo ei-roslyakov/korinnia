@@ -10,6 +10,11 @@ import { getMeta } from "@/lib/api";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { Logo } from "./Logo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { versionLabel } from "@/lib/version";
+
+const FIRST_YEAR = 2026;
+const THIS_YEAR = new Date().getFullYear();
+const COPYRIGHT_YEARS = THIS_YEAR > FIRST_YEAR ? `${FIRST_YEAR}–${THIS_YEAR}` : `${FIRST_YEAR}`;
 
 export function Layout() {
   const { t, i18n } = useTranslation();
@@ -97,6 +102,23 @@ export function Layout() {
       >
         <Outlet />
       </main>
+      {!fullBleed && (
+        <footer className="border-bark-100 text-bark-700 border-t print:hidden">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs">
+            <span>
+              © {COPYRIGHT_YEARS} Yevhenii Rosliakov · {t("app.name")} · {t("footer.rights")}
+            </span>
+            <span className="flex items-center gap-3">
+              <span title={t("footer.version")} className="tabular-nums">
+                {versionLabel()}
+              </span>
+              <a href="/third-party-notices.txt" className="hover:text-bark-900 underline">
+                {t("footer.thirdParty")}
+              </a>
+            </span>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
