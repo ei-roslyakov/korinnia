@@ -1,7 +1,7 @@
 name: Release
 
-# Cuts a version: promotes the images CI built and tested for the current main commit
-# (sha-<commit>) to X.Y.Z, publishes the Helm chart as an OCI artifact with the same version,
+# Cuts a version: promotes the images CI built and tested (sha-<commit>; the newest commit
+# with images, as long as nothing after it changed the app code) to X.Y.Z, publishes the Helm chart as an OCI artifact with the same version,
 # and tags the commit vX.Y.Z with a GitHub release. Argo CD (sandbox repo) deploys the chart
 # version pinned in its Application; Renovate opens a PR there when a new chart is published.
 
@@ -65,18 +65,39 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Commits that don't touch the image sources (workflows, chart, docs) reuse the images
+      # of the newest tested commit before them, so they can be released without waiting for
+      # CI. A commit that changes app code must have its own images first.
+      - name: Find tested images
+        id: images
+        run: |
+          image_paths=(backend frontend deploy/nginx)
+          has_images() {
+            for img in backend nginx; do
+              docker buildx imagetools inspect "$IMAGE_PREFIX/$img:sha-${1::7}" >/dev/null 2>&1 || return 1
+            done
+          }
+          for commit in $(git rev-list --max-count=50 "$GITHUB_SHA"); do
+            if has_images "$commit"; then
+              echo "Using images of ${commit::7}"
+              echo "sha=sha-${commit::7}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ -n "$(git diff-tree --no-commit-id --name-only -r "$commit" -- "${image_paths[@]}")" ]; then
+              echo "::error::${commit::7} changes ${image_paths[*]} but has no images yet — wait for CI on it to pass"
+              exit 1
+            fi
+            echo "${commit::7} does not change the images, looking further back"
+          done
+          echo "::error::No tested images found in the last 50 commits"
+          exit 1
+
       - name: Promote tested images
         env:
           VERSION: ${{ steps.version.outputs.version }}
           MINOR: ${{ steps.version.outputs.minor }}
+          sha: ${{ steps.images.outputs.sha }}
         run: |
-          sha="sha-${GITHUB_SHA::7}"
-          for img in backend nginx; do
-            if ! docker buildx imagetools inspect "$IMAGE_PREFIX/$img:$sha" >/dev/null 2>&1; then
-              echo "::error::$IMAGE_PREFIX/$img:$sha not found — wait for CI on this commit to pass"
-              exit 1
-            fi
-          done
           for img in backend nginx; do
             docker buildx imagetools create \
               -t "$IMAGE_PREFIX/$img:$VERSION" \
@@ -98,6 +119,7 @@ jobs:
       - name: Tag and create GitHub release
         env:
           VERSION: ${{ steps.version.outputs.version }}
+          IMAGES_FROM: ${{ steps.images.outputs.sha }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # REST API instead of the gh CLI, which the self-hosted runner image does not ship.
@@ -117,4 +139,5 @@ jobs:
             echo "| nginx image | \`$IMAGE_PREFIX/nginx:$VERSION\` |"
             echo "| Helm chart | \`$CHART_REPO/korinnia --version $VERSION\` |"
             echo "| Commit | \`$GITHUB_SHA\` |"
+            echo "| Images built from | \`$IMAGES_FROM\` |"
           } >> "$GITHUB_STEP_SUMMARY"
