@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -22,8 +22,14 @@ TREE_AUDIT_FIELDS = ("name", "description", "owner_id", "deleted_at")
 async def list_trees_for_user(session: AsyncSession, user: User) -> list[tuple[Tree, TreeRole]]:
     """Trees the user can open, with their effective role (superadmins: admin everywhere)."""
     if user.is_superadmin:
+        # Every tree, except other people's personal copies of the demo family.
         trees = await session.scalars(
-            select(Tree).where(Tree.deleted_at.is_(None)).order_by(func.lower(Tree.name))
+            select(Tree)
+            .where(
+                Tree.deleted_at.is_(None),
+                or_(Tree.is_demo.is_(False), Tree.owner_id == user.id),
+            )
+            .order_by(func.lower(Tree.name))
         )
         return [(t, TreeRole.admin) for t in trees]
     rows = await session.execute(
@@ -54,8 +60,9 @@ async def create_tree(
     description: str | None,
     owner: User,
     actor: Actor,
+    is_demo: bool = False,
 ) -> Tree:
-    tree = Tree(name=name.strip(), description=description, owner_id=owner.id)
+    tree = Tree(name=name.strip(), description=description, owner_id=owner.id, is_demo=is_demo)
     session.add(tree)
     await session.flush()
     session.add(TreeMembership(tree_id=tree.id, user_id=owner.id, role=TreeRole.admin))

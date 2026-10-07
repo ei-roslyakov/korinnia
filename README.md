@@ -75,7 +75,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Full revision history of every change (complete snapshots) and restore of any earlier version
 - ✅ Soft delete with impact preview; trash bin with restore (a person comes back together with their relationships and events)
 - ✅ Living-person flag inferred when not set (privacy-first default)
-- ✅ Demo seed family: 25 people, 5 generations (`make seed`)
+- ✅ Demo family for every user: each account gets its own editable copy of a fictional family (25 people, 5 generations), every person with a biography and an illustrated portrait; marked "Demo" in the tree list and deletable (`DEMO_TREE_FOR_NEW_USERS`, `make seed` for existing users)
 
 ### Tree view
 - ✅ Infinite canvas: drag to pan, wheel / pinch to zoom, fit to screen, zoom buttons, minimap
@@ -172,7 +172,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 3. **Start:** `make up`. This builds the images and starts PostgreSQL, the backend (which applies migrations), the worker, the Vite dev server and nginx, then waits until they're healthy.
 4. **Open:** <http://localhost:8080>
 
-Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). To load the demo family (25 people, 5 generations), run `make seed`.
+Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). Every new account automatically gets its own copy of the demo family (25 people, 5 generations, with biographies and illustrated portraits); `make seed` gives one to existing users and fills in anything missing in older copies.
 
 ### URLs (development)
 
@@ -195,6 +195,7 @@ Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** 
 | `PUBLIC_BASE_URL` | Public URL of the app, used to build invitation and password-reset links |
 | `COOKIE_SECURE` | `true` (default) marks auth cookies HTTPS-only. Set `false` only for plain-HTTP local development |
 | `MAX_UPLOAD_SIZE_MB` | Maximum size of one upload; also sets nginx `client_max_body_size` |
+| `DEMO_TREE_FOR_NEW_USERS` | Give each new account its own copy of the demo family (default `true`; set `false` for a production archive) |
 | `WORKER_CONCURRENCY` | Number of jobs the worker runs in parallel |
 | `HTTP_PORT` | Host port for nginx (8080 in dev) |
 
@@ -209,7 +210,7 @@ make lint            # ruff, mypy, eslint, prettier, tsc
 make fmt             # auto-format everything
 make migrate         # apply migrations manually
 make revision m="add person table"   # autogenerate a migration
-make seed            # load the demo family (once)
+make seed            # demo family for every user who has none (safe to re-run)
 make psql            # database shell
 make down            # stop (volumes, i.e. your data, are kept)
 ```

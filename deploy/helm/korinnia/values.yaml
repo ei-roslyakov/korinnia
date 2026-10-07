@@ -27,6 +27,9 @@ config:
   cookieSecure: true
   maxUploadSizeMb: 2048
   workerConcurrency: 2
+  # Give every new account its own copy of the fictional demo family (25 people). Turn off
+  # once the real family archive is in use, if new members should not get it.
+  demoTreeForNewUsers: true
   # Extra plain environment variables for backend and worker.
   extraEnv: {}
 

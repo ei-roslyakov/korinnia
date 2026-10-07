@@ -104,7 +104,8 @@
     "yourRole": "Twoja rola:",
     "settings": "Ustawienia drzewa",
     "delete": "Usuń drzewo",
-    "confirmDelete": "Usunąć drzewo „{{name}}”? Zostanie ukryte dla wszystkich (dane są zachowane i można je przywrócić)."
+    "confirmDelete": "Usunąć drzewo „{{name}}”? Zostanie ukryte dla wszystkich (dane są zachowane i można je przywrócić).",
+    "demo": "Demo"
   },
   "members": {
     "title": "Członkowie",

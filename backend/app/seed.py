@@ -2,36 +2,45 @@
 
 Creates the tree "Родина Коваленків (демо)" — 25 fictional people across 5 generations
 (1860s–1980s) with Cyrillic and Latin names, places with historical names, life events,
-burial details and an emigration to Canada. Uses the regular services, so everything is
-validated and recorded in the history like a manual edit. Running it again does nothing
-while the demo tree exists. Photos, sources and stories are added in later phases.
+burial details, an emigration to Canada, a biography and an illustrated portrait for every
+person. Uses the regular services, so everything is validated and recorded in the history
+like a manual edit.
+
+Every user gets their own copy (new accounts automatically, through a background job; see
+DEMO_TREE_FOR_NEW_USERS). Running it again does nothing for owners who already have one.
 """
 
 from __future__ import annotations
 
 import argparse
 import asyncio
+import io
 import sys
 from dataclasses import dataclass, field
 from typing import Any
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.core.dates import PartialDate
 from app.core.db import get_engine, get_sessionmaker
 from app.core.logging import configure_logging
-from app.models import Tree, User
+from app.models import Person, Tree, User
 from app.schemas.events import EventCreate
 from app.schemas.persons import PersonCreate
 from app.schemas.places import PlaceCreate
 from app.schemas.relationships import ParentChildCreate, PartnershipCreate
 from app.services import trees as tree_service
 from app.services.context import Actor
+from app.services.demo_portraits import HEAD_CROP, render_portrait
 from app.services.genealogy import events as event_service
+from app.services.genealogy import media as media_service
 from app.services.genealogy import persons as person_service
 from app.services.genealogy import places as place_service
 from app.services.genealogy import relationships as rel_service
+from app.storage import Storage, get_storage
 
 TREE_NAME = "Родина Коваленків (демо)"
 
@@ -374,7 +383,6 @@ PEOPLE: list[P] = [
     ),
 ]
 
-# (parents..., child)
 # Short biographies (fictional) so the demo person pages are not empty.
 BIOGRAPHIES: dict[str, str] = {
     "stepan": (
@@ -418,8 +426,63 @@ BIOGRAPHIES: dict[str, str] = {
         "Народився в Торонто. Вивчив українську від бабусі Ольги й 1992 року вперше "
         "приїхав в Україну знайомитися з родиною."
     ),
+    "hanna": (
+        "Родом із Полтави. Познайомилася з Іваном на Сорочинському ярмарку 1916 року. "
+        "Овдовівши у війну, сама виростила сина Олександра і дочекалася онуків."
+    ),
+    "fedir": (
+        "Полтавський столяр. Його меблі — комод і скриня з різьбленими квітами — досі "
+        "стоять у домі онуків."
+    ),
+    "kateryna": (
+        "Учителька початкової школи в Станиславові. Навчила грамоти половину вулиці "
+        "й берегла родинну Біблію з записами народжень."
+    ),
+    "petro": (
+        "Молодший брат Олександра. Мріяв стати агрономом, але 1941 року пішов на фронт "
+        "і не повернувся. Його фронтові листи родина зберігає досі."
+    ),
+    "mykhailo": (
+        "Львів'янин, пройшов табори для переміщених осіб у Німеччині, де познайомився з Ольгою. "
+        "У Торонто став пекарем, і його маківники знала вся українська громада."
+    ),
+    "mykola": (
+        "Син Марії та Федора. Усе життя пропрацював на Полтавському тепловозоремонтному "
+        "заводі; пам'ятав кожну історію свого діда-коваля."
+    ),
+    "liudmyla": (
+        "Харків'янка, лікарка-педіатр. Познайомилася з Володимиром на будові в Києві, "
+        "куди приїхала на практику."
+    ),
+    "tetiana": (
+        "Донька Олександра й Галини. Філологиня, перекладала з польської та англійської; "
+        "саме вона листувалася з канадськими родичами."
+    ),
+    "andrii_b": (
+        "Чоловік Тетяни, фотограф. Багато світлин у цьому родоводі зроблено його камерою."
+    ),
+    "oksana": (
+        "Дружина Андрія, архітекторка. Разом вони відреставрували дідівську хату "
+        "у Великих Сорочинцях."
+    ),
+    "nataliia": (
+        "Сестра Андрія, історикиня. Знайшла в архіві метричну книгу з записом "
+        "про народження прадіда Івана."
+    ),
+    "iryna": (
+        "Донька Тетяни та Андрія Бондарів, музикантка. Записала колискові, "
+        "які співала прабабуся Галина."
+    ),
+    "oleh": (
+        "Син Тетяни та Андрія Бондарів, програміст. Допомагає родині зберігати цифровий архів."
+    ),
+    "emily": (
+        "Народилася в Торонто. Вивчає історію української еміграції до Канади "
+        "й записала спогади бабусі Ольги."
+    ),
 }
 
+# (parents..., children)
 FAMILIES: list[tuple[tuple[str, ...], list[str]]] = [
     (("stepan", "paraska"), ["ivan", "mariia"]),
     (("ivan", "hanna"), ["oleksandr", "petro"]),
@@ -483,8 +546,154 @@ def _names(p: P) -> list[dict[str, Any]]:
     return names
 
 
-async def seed(session: AsyncSession, owner: User) -> Tree | None:
-    if await session.scalar(select(Tree).where(Tree.name == TREE_NAME, Tree.deleted_at.is_(None))):
+async def demo_tree_of(session: AsyncSession, owner: User) -> Tree | None:
+    return await session.scalar(
+        select(Tree).where(
+            Tree.is_demo.is_(True), Tree.owner_id == owner.id, Tree.deleted_at.is_(None)
+        )
+    )
+
+
+def _years(p: P) -> str:
+    born = PartialDate(**p.born).to_text() if p.born else ""
+    died = PartialDate(**p.died).to_text() if p.died else ""
+    short = [x.replace("abt ", "~").split("-")[0] for x in (born, died)]
+    return " – ".join(x for x in short if x) if died else short[0]
+
+
+# Bump when the portrait drawing changes: `make seed` then redraws generated portraits that
+# are still in use (a photo a user uploaded or chose instead is never touched).
+PORTRAIT_VERSION = 2
+
+
+def _portrait_file(p: P) -> str:
+    return f"portrait-v{PORTRAIT_VERSION}-{p.key}.jpg"
+
+
+def _is_generated_portrait(filename: str, p: P) -> bool:
+    return filename in (
+        f"portrait-{p.key}.jpg",
+        *(f"portrait-v{v}-{p.key}.jpg" for v in range(2, 10)),
+    )
+
+
+def _portrait_age(p: P) -> int:
+    """Age to draw: mid-life, or the person's current age if they are young."""
+    born = (p.born or {}).get("year") or 1900
+    end = (p.died or {}).get("year") or 2026
+    return max(20, min(int((end - born) * 0.6), 55 if p.died else 48))
+
+
+async def _store_portrait(
+    session: AsyncSession,
+    storage: Storage,
+    tree: Tree,
+    person: Person,
+    index: int,
+    p: P,
+    actor: Actor,
+) -> Any:
+    """Draw, store (like an upload) and set as the person's portrait; returns the media id."""
+    name = f"{p.first} {p.last}" if not p.latin_primary else " ".join(p.latin or ())
+    data = render_portrait(
+        name=name,
+        years=_years(p),
+        gender=p.gender,
+        birth_year=(p.born or {}).get("year"),
+        seed=index,
+        age=_portrait_age(p),
+    )
+    media = await media_service.upload_media(
+        session,
+        storage,
+        tree.id,
+        media_service.Upload(file=io.BytesIO(data), filename=_portrait_file(p), size=len(data)),
+        actor=actor,
+        title="Портрет (ілюстрація)",
+        person_id=person.id,
+        allow_duplicate=True,
+    )
+    person.primary_photo_id = media.id
+    person.primary_photo_crop = dict(HEAD_CROP)
+    person.avatar_key = None  # redrawn by the worker
+    await session.commit()
+    return media.id
+
+
+async def _portraits(
+    session: AsyncSession, storage: Storage, tree: Tree, ids: dict[str, Any], actor: Actor
+) -> list[tuple[Any, Any]]:
+    """An illustrated portrait per person."""
+    stored = []
+    for i, p in enumerate(PEOPLE):
+        person = await session.get(Person, ids[p.key])
+        if person is not None:
+            stored.append(
+                (await _store_portrait(session, storage, tree, person, i, p, actor), person.id)
+            )
+    return stored
+
+
+async def complete_demo(
+    session: AsyncSession, tree: Tree, owner: User, *, storage: Storage | None = None
+) -> int:
+    """Bring an older demo copy up to date: missing biographies, missing portraits, and
+    generated portraits from an older drawing version. Never touches what the user wrote or
+    a photo they chose. Returns the number of people updated."""
+    from app.jobs.queue import enqueue_avatar, enqueue_media_processing
+    from app.models import MediaFile, PersonName
+
+    actor = Actor(owner, ip="seed")
+    store = storage or get_storage()
+    by_name: dict[tuple[str | None, str | None], Person] = {}
+    rows = await session.execute(
+        select(PersonName.first_name, PersonName.last_name, Person)
+        .join(Person, Person.id == PersonName.person_id)
+        .where(Person.tree_id == tree.id, Person.deleted_at.is_(None))
+    )
+    for first, last, row in rows:
+        by_name.setdefault((first, last), row)
+    updated = 0
+    for i, p in enumerate(PEOPLE):
+        person = by_name.get((p.first, p.last))
+        if person is None:
+            continue
+        changed = False
+        if not person.biography and p.key in BIOGRAPHIES:
+            person.biography = BIOGRAPHIES[p.key]
+            await session.commit()
+            changed = True
+        current = (
+            await session.get(MediaFile, person.primary_photo_id)
+            if person.primary_photo_id
+            else None
+        )
+        outdated = (
+            current is not None
+            and current.deleted_at is None
+            and _is_generated_portrait(current.original_filename, p)
+            and current.original_filename != _portrait_file(p)
+        )
+        if person.primary_photo_id is None or outdated:
+            media_id = await _store_portrait(session, store, tree, person, i, p, actor)
+            if outdated and current is not None:
+                await media_service.delete_media(session, current, actor)  # to the trash
+            await enqueue_media_processing(media_id)
+            await enqueue_avatar(person.id)
+            changed = True
+        updated += changed
+    return updated
+
+
+async def seed(
+    session: AsyncSession,
+    owner: User,
+    *,
+    storage: Storage | None = None,
+    portraits: bool = True,
+) -> Tree | None:
+    """Create `owner`'s copy of the demo family (None if they already have one)."""
+    if await demo_tree_of(session, owner):
         return None
     actor = Actor(owner, ip="seed")
     tree = await tree_service.create_tree(
@@ -493,6 +702,7 @@ async def seed(session: AsyncSession, owner: User) -> Tree | None:
         description="Вигадана демонстраційна родина: п'ять поколінь, 1860-ті — 1980-ті.",
         owner=owner,
         actor=actor,
+        is_demo=True,
     )
     places = {
         key: (await place_service.create_place(session, tree.id, PlaceCreate(**data), actor)).id
@@ -501,8 +711,7 @@ async def seed(session: AsyncSession, owner: User) -> Tree | None:
     ids: dict[str, Any] = {}
     for p in PEOPLE:
         body: dict[str, Any] = {"gender": p.gender, "names": _names(p), **p.extra}
-        if p.key in BIOGRAPHIES:
-            body.setdefault("biography", BIOGRAPHIES[p.key])
+        body.setdefault("biography", BIOGRAPHIES.get(p.key))
         if p.born:
             body["birth"] = {"date": p.born, "place_id": places.get(p.born_in or "")}
         if p.died:
@@ -598,27 +807,59 @@ async def seed(session: AsyncSession, owner: User) -> Tree | None:
         if ev.get("place"):
             body["place_id"] = places[ev["place"]]
         await event_service.create_event(session, tree.id, EventCreate.model_validate(body), actor)
+
+    if portraits:
+        from app.jobs.queue import enqueue_avatar, enqueue_media_processing
+
+        for media_id, person_id in await _portraits(
+            session, storage or get_storage(), tree, ids, actor
+        ):
+            await enqueue_media_processing(media_id)
+            await enqueue_avatar(person_id)
     return tree
 
 
 async def run(args: argparse.Namespace) -> int:
+    from app.jobs.app import app as procrastinate_app
+
     try:
-        async with get_sessionmaker()() as session:
-            query = select(User).where(User.is_superadmin.is_(True), User.is_active.is_(True))
-            if args.owner:
-                query = select(User).where(User.email == args.owner.lower())
-            owner = (await session.scalars(query.order_by(User.created_at))).first()
-            if owner is None:
+        # The job queue must be open: portraits are processed by the worker.
+        async with procrastinate_app.open_async(), get_sessionmaker()() as session:
+            if args.all_users:
+                owners = list(
+                    await session.scalars(
+                        select(User).where(User.is_active.is_(True)).order_by(User.created_at)
+                    )
+                )
+            else:
+                query = select(User).where(User.is_superadmin.is_(True), User.is_active.is_(True))
+                if args.owner:
+                    query = select(User).where(User.email == args.owner.lower())
+                first = (await session.scalars(query.order_by(User.created_at))).first()
+                owners = [first] if first else []
+            if not owners:
                 print(
                     "no owner found: create a superadmin first (SUPERADMIN_* env vars)",
                     file=sys.stderr,
                 )
                 return 1
-            tree = await seed(session, owner)
-            if tree is None:
-                print(f"seed: tree {TREE_NAME!r} already exists, nothing to do")
-            else:
-                print(f"seed: created {TREE_NAME!r} ({len(PEOPLE)} people) owned by {owner.email}")
+            for owner in owners:
+                email = owner.email
+                try:
+                    tree = await seed(session, owner)
+                except IntegrityError:  # created concurrently (e.g. by the worker)
+                    await session.rollback()
+                    await session.refresh(owner)
+                    tree = None
+                if tree is None:
+                    existing = await demo_tree_of(session, owner)
+                    filled = await complete_demo(session, existing, owner) if existing else 0
+                    print(
+                        f"seed: {email} already has {TREE_NAME!r}"
+                        + (f"; added biographies / portraits for {filled} people" if filled else "")
+                    )
+                else:
+                    print(f"seed: created {TREE_NAME!r} ({len(PEOPLE)} people) for {email}")
             return 0
     finally:
         await get_engine().dispose()
@@ -631,6 +872,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--owner", help="email of the tree owner (default: first superadmin)")
+    parser.add_argument(
+        "--all-users", action="store_true", help="give every active user their own copy"
+    )
     return parser.parse_args(argv)
 
 

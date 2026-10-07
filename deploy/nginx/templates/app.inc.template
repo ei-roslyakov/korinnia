@@ -18,6 +18,8 @@ location /api/ {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $forwarded_proto;
     proxy_set_header Connection "";
+    # Tells the backend it may answer file requests with X-Accel-Redirect (see /_media/).
+    proxy_set_header X-Media-Accel "1";
     # Stream large uploads (video/audio) straight to the backend.
     proxy_request_buffering off;
     proxy_read_timeout 300s;

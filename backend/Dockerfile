@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 COPY --from=ghcr.io/astral-sh/uv:0.12 /uv /usr/local/bin/uv
 # Media processing tools: ffmpeg (audio/video previews), poppler (PDF thumbnails).
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ffmpeg poppler-utils \
+ && apt-get install -y --no-install-recommends ffmpeg poppler-utils fonts-dejavu-core \
  && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 1000 korinnia \
  && useradd --system --uid 1000 --gid korinnia --home-dir /app --shell /usr/sbin/nologin korinnia \

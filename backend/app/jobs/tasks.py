@@ -17,7 +17,7 @@ from sqlalchemy import select
 from app.core.db import get_sessionmaker
 from app.core.security import utcnow
 from app.jobs.app import app
-from app.models import MediaFile, ProcessingStatus
+from app.models import MediaFile, ProcessingStatus, User
 from app.services.auth import purge_expired
 from app.services.genealogy import media as media_service
 from app.storage import get_storage
@@ -88,3 +88,17 @@ async def requeue_stuck_media(timestamp: int) -> None:
         await enqueue_media_processing(media_id)
     if stuck:
         logger.info("re-queued stuck media", extra={"count": len(stuck)})
+
+
+@app.task(name="demo.create_for_user", queue="default", retry=2)
+async def create_demo_tree(user_id: str) -> None:
+    """Give a (new) user their own copy of the demo family."""
+    from app import seed as demo  # the demo data imports most services; load lazily
+
+    async with get_sessionmaker()() as session:
+        user = await session.get(User, uuid.UUID(user_id))
+        if user is None or not user.is_active:
+            return
+        tree = await demo.seed(session, user, storage=get_storage())
+    if tree is not None:
+        logger.info("demo tree created", extra={"user_id": user_id, "tree_id": str(tree.id)})

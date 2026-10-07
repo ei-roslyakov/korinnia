@@ -19,6 +19,7 @@ class TreeOut(Schema):
     created_at: datetime
     updated_at: datetime
     my_role: TreeRole
+    is_demo: bool = False
 
 
 class CreateTreeRequest(BaseModel):

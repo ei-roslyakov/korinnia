@@ -8,7 +8,7 @@ import uuid
 
 from procrastinate.exceptions import AlreadyEnqueued
 
-from app.jobs.tasks import make_person_avatar, process_media_file
+from app.jobs.tasks import create_demo_tree, make_person_avatar, process_media_file
 
 logger = logging.getLogger(__name__)
 
@@ -33,3 +33,15 @@ async def enqueue_avatar(person_id: uuid.UUID) -> None:
         pass
     except Exception:
         logger.exception("could not enqueue portrait", extra={"person_id": str(person_id)})
+
+
+async def enqueue_demo_tree(user_id: uuid.UUID) -> None:
+    """Build the user's own copy of the demo family in the background."""
+    try:
+        await create_demo_tree.configure(queueing_lock=f"demo:{user_id}").defer_async(
+            user_id=str(user_id)
+        )
+    except AlreadyEnqueued:
+        pass
+    except Exception:
+        logger.exception("could not enqueue demo tree", extra={"user_id": str(user_id)})

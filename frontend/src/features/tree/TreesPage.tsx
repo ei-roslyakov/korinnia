@@ -52,7 +52,10 @@ export function TreesPage() {
             >
               <div className="mb-2 flex items-start justify-between gap-2">
                 <h2 className="font-serif text-lg font-semibold">{tree.name}</h2>
-                <Badge>{t(`roles.${tree.my_role}`)}</Badge>
+                <span className="flex shrink-0 gap-1">
+                  {tree.is_demo && <Badge tone="amber">{t("trees.demo")}</Badge>}
+                  <Badge>{t(`roles.${tree.my_role}`)}</Badge>
+                </span>
               </div>
               {tree.description && (
                 <p className="text-bark-700 line-clamp-3 text-sm">{tree.description}</p>

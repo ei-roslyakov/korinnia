@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import TreeRole
@@ -15,6 +15,15 @@ from app.models.user import User
 
 class Tree(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "trees"
+    __table_args__ = (
+        # At most one live demo copy per owner (guards against concurrent creation).
+        Index(
+            "uq_trees_demo_owner",
+            "owner_id",
+            unique=True,
+            postgresql_where=text("is_demo AND deleted_at IS NULL"),
+        ),
+    )
 
     name: Mapped[str] = mapped_column(String(200))
     description: Mapped[str | None] = mapped_column(Text)
@@ -22,6 +31,8 @@ class Tree(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # The fictional demo family (each user gets their own copy to explore and practise on).
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
     owner: Mapped[User | None] = relationship()
     memberships: Mapped[list[TreeMembership]] = relationship(

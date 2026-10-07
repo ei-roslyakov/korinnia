@@ -21,6 +21,8 @@ os.environ["ENVIRONMENT"] = "test"
 os.environ.setdefault("POSTGRES_DB", "korinnia_test")
 os.environ["COOKIE_SECURE"] = "false"  # the test client talks plain http://
 os.environ["MEDIA_X_ACCEL"] = "false"  # no nginx in tests: the backend serves files
+# Test users would otherwise each queue a demo family; tests that need it enable it.
+os.environ["DEMO_TREE_FOR_NEW_USERS"] = "false"
 os.environ.setdefault("SECRET_KEY", "test-secret-key-test-secret-key-0123456789")
 
 from alembic import command

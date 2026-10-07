@@ -17,6 +17,7 @@ from app.core.config import get_settings
 from app.core.db import get_engine, get_sessionmaker
 from app.core.errors import AppError
 from app.core.logging import configure_logging
+from app.jobs.app import app as procrastinate_app
 from app.services import users as user_service
 from app.services.auth import get_user_by_email
 from app.services.context import Actor
@@ -36,7 +37,8 @@ def _read_password() -> str:
 async def run(args: argparse.Namespace) -> int:
     settings = get_settings()
     try:
-        async with get_sessionmaker()() as session:
+        # Open the job queue: creating a user enqueues their demo family.
+        async with procrastinate_app.open_async(), get_sessionmaker()() as session:
             if args.command == "bootstrap":
                 user = await user_service.bootstrap_superadmin(session, settings)
                 print(f"superadmin created: {user.email}" if user else "bootstrap: nothing to do")

@@ -303,3 +303,21 @@ Like a real tree, the oldest generation is at the bottom and descendants branch 
 The UI uses a small palette: `bark` (neutrals), `leaf` (accent), `surface` (cards), `on-leaf` (text on accent backgrounds) and a few status colours (green, red, amber, sky, rose, violet, stone). Tailwind maps these to CSS variables (`@theme inline`), and each theme (`light`, `dark`, `sepia` "archive") only redefines the variables under `html[data-theme=…]`. In the dark theme the status colours are flipped (dark tints, light text), and the accent is a brighter green with dark text on it, so buttons and links both keep readable contrast. The tree canvas (sky gradient, branches, soil) and React Flow's controls also follow the theme, and map tiles are darkened in the dark theme.
 
 The choice ("system" by default, which follows `prefers-color-scheme`) is kept in `localStorage` and applied before the first render, so pages never flash in the wrong colours. It is per device on purpose: one may want the dark theme on a phone and the light one on a desktop.
+
+### D78. Every user gets their own demo family
+A new account (created by an admin, through an invitation, or as the bootstrap superadmin) gets its own editable copy of the fictional demo family, so people can explore and practise without touching the real archive. The copy is built by a background job (`demo.create_for_user`) after the user is committed. `make seed` (`python -m app.seed --all-users`) gives a copy to existing users and fills in missing biographies and portraits in older copies, never overwriting anything a user has written. `DEMO_TREE_FOR_NEW_USERS=false` turns this off for a production archive (the E2E stack does so too).
+
+Demo trees carry `is_demo`, and a partial unique index allows only one live copy per owner, so a job and a manual seed running at the same time cannot create two. A copy is an ordinary tree the user administers: they can edit it, share it or delete it. Superadmins, who otherwise see every tree, do not see other people's demo copies in their list.
+
+### D79. Illustrated portraits for invented people
+The demo people are fictional, so there are no photographs of them, and photo-realistic fakes of non-existent people could be mistaken for genuine records in a family archive. Real archival photos are no better: they show real people who would be presented as invented relatives. So each person gets a detailed *drawn* portrait styled as a photograph of their era:
+- **Before 1915:** a sepia cabinet card.
+- **1915–1959:** a faded black-and-white print.
+- **From 1960:** a yellowed colour print.
+
+Each portrait has a shaded face with eyes, brows, nose and mouth, age marks (wrinkles, greying), hair styles, moustaches, and clothing of the time: embroidered shirts, coral beads, headscarves, suits and ties. Every portrait carries the name, years and an "ілюстрація" mark.
+
+Portraits are drawn deterministically with Pillow (supersampled, DejaVu fonts for Cyrillic) and stored through the normal upload path, so they get originals with SHA-256, thumbnails and a face-cropped card portrait like any uploaded photo. `PORTRAIT_VERSION` is part of the file name. When the drawing improves, `make seed` redraws generated portraits that are still in use and moves the old ones to the trash. A photo a user uploaded or chose instead is never touched.
+
+### D80. X-Accel-Redirect only for requests that came through nginx (bug fix)
+Opening the app on the Vite dev server (`:5173`) showed every image broken: Vite proxies `/api` straight to the backend, which answered file requests with an empty body and `X-Accel-Redirect`, a header only nginx understands. nginx now adds `X-Media-Accel: 1` to everything it proxies to the API (overwriting any client value), and the backend hands files over only when that header is present. Otherwise (Vite, direct `:8000`, tests) it streams the file itself. Production behaviour is unchanged.

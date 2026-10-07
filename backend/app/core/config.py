@@ -63,7 +63,8 @@ class Settings(BaseSettings):
 
     # --- Uploads / media ----------------------------------------------------------
     max_upload_size_mb: int = 2048
-    # Hand file downloads to nginx (X-Accel-Redirect to its internal /_media/ location).
+    # Hand file downloads to nginx (X-Accel-Redirect to its internal /_media/ location) for
+    # requests that came through nginx (it sets X-Media-Accel); others are streamed directly.
     # Disable when the backend is reached without nginx (tests, direct dev access).
     media_x_accel: bool = True
 

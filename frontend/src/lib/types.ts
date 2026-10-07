@@ -66,6 +66,8 @@ export interface Tree {
   created_at: string;
   updated_at: string;
   my_role: Role;
+  /** The user's own copy of the fictional demo family. */
+  is_demo?: boolean;
 }
 
 export interface Member {

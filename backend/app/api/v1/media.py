@@ -6,7 +6,7 @@ import uuid
 from typing import Annotated, Literal
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Query, Request, Response, UploadFile, status
 from fastapi.responses import FileResponse
 
 from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer
@@ -164,14 +164,22 @@ async def reorder(
 # --- Files ------------------------------------------------------------------------------
 
 
-def _file_response(storage: Storage, key: str, content_type: str, filename: str) -> Response:
+# nginx sets this on every request it proxies to the API; only then can it act on
+# X-Accel-Redirect. Requests reaching the backend another way (the Vite dev server,
+# port 8000, tests) get the file itself.
+VIA_NGINX_HEADER = "x-media-accel"
+
+
+def _file_response(
+    request: Request, storage: Storage, key: str, content_type: str, filename: str
+) -> Response:
     disposition = f"inline; filename*=UTF-8''{quote(filename)}"
     headers = {
         "Content-Disposition": disposition,
         "Cache-Control": "private, max-age=3600",
         "X-Content-Type-Options": "nosniff",
     }
-    if get_settings().media_x_accel:
+    if get_settings().media_x_accel and request.headers.get(VIA_NGINX_HEADER) == "1":
         # nginx streams the file itself (range requests, no Python in the data path).
         headers["X-Accel-Redirect"] = "/_media/" + quote(key)
         return Response(status_code=200, media_type=content_type, headers=headers)
@@ -182,6 +190,7 @@ def _file_response(storage: Storage, key: str, content_type: str, filename: str)
 
 @router.get("/media/{media_id}/file/{variant}")
 async def media_file(
+    request: Request,
     media_id: uuid.UUID,
     variant: Variant,
     access: TreeViewer,
@@ -197,14 +206,20 @@ async def media_file(
     name = media.original_filename
     if variant != "original":
         name = f"{name.rsplit('.', 1)[0]}-{variant}.{key.rsplit('.', 1)[-1]}"
-    return _file_response(storage, key, content_type, name)
+    return _file_response(request, storage, key, content_type, name)
 
 
 @router.get("/persons/{person_id}/avatar")
 async def person_avatar(
-    person_id: uuid.UUID, access: TreeViewer, session: SessionDep, storage: StorageDep
+    request: Request,
+    person_id: uuid.UUID,
+    access: TreeViewer,
+    session: SessionDep,
+    storage: StorageDep,
 ) -> Response:
     person = await get_live(session, Person, access.tree.id, person_id, "person_not_found")
     if not person.avatar_key:
         raise NotFoundError("file_not_found")
-    return _file_response(storage, person.avatar_key, "image/webp", f"portrait-{person_id}.webp")
+    return _file_response(
+        request, storage, person.avatar_key, "image/webp", f"portrait-{person_id}.webp"
+    )

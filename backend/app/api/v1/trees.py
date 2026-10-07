@@ -47,6 +47,7 @@ def tree_out(tree: Tree, role: TreeRole) -> TreeOut:
         created_at=tree.created_at,
         updated_at=tree.updated_at,
         my_role=role,
+        is_demo=tree.is_demo,
     )
 
 

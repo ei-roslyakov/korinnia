@@ -130,7 +130,13 @@ async def test_x_accel_redirect(ctx: Ctx, monkeypatch: pytest.MonkeyPatch) -> No
 
     media = (await upload(ctx, "a.png", png())).json()
     monkeypatch.setattr(get_settings(), "media_x_accel", True)
-    resp = await ctx.editor.get(media["urls"]["original"])
+    # Not through nginx (e.g. the Vite dev server): the backend sends the file itself.
+    direct = await ctx.editor.get(media["urls"]["original"])
+    assert direct.status_code == 200
+    assert direct.content == png()
+    assert "x-accel-redirect" not in direct.headers
+    # Through nginx: hand the file over.
+    resp = await ctx.editor.get(media["urls"]["original"], headers={"X-Media-Accel": "1"})
     assert resp.status_code == 200
     assert resp.content == b""
     assert resp.headers["x-accel-redirect"].startswith("/_media/originals/")

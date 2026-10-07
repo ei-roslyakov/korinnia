@@ -103,7 +103,16 @@ async def create_user(
     )
     if commit:
         await session.commit()
+        await _after_user_created(user)
     return user
+
+
+async def _after_user_created(user: User) -> None:
+    """Queue the user's own demo family (when enabled). Call after the user is committed."""
+    if get_settings().demo_tree_for_new_users:
+        from app.jobs.queue import enqueue_demo_tree  # jobs import services; avoid a cycle
+
+        await enqueue_demo_tree(user.id)
 
 
 async def _active_superadmins(session: AsyncSession) -> int:
@@ -361,6 +370,7 @@ async def accept_invitation(
     inv.accepted_user_id = user.id
     audit.record(session, new_actor, "invitation.accept", "invitation", inv.id, tree_id=inv.tree_id)
     await session.commit()
+    await _after_user_created(user)
     return user
 
 
