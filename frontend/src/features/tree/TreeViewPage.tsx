@@ -4,7 +4,7 @@ import { Link, useParams, useSearchParams } from "react-router";
 
 import { Button, ErrorAlert, Select, Spinner } from "@/components/ui";
 import { AddRelativeDialog } from "@/features/builder/AddRelativeDialog";
-import { useResetLayout, useSaveLayoutOffset } from "@/features/builder/api";
+import { useResetLayout, useSaveLayoutOffsets } from "@/features/builder/api";
 import { useModerationCounts } from "@/features/collab/api";
 import { useGraph, usePerson } from "@/features/person/api";
 import type { RelativeRelation } from "@/lib/genealogy";
@@ -33,7 +33,7 @@ export function TreeViewPage() {
     relativeId: string | null;
     relation: RelativeRelation | null;
   } | null>(null);
-  const saveOffset = useSaveLayoutOffset(treeId);
+  const saveOffsets = useSaveLayoutOffsets(treeId);
   const resetLayout = useResetLayout(treeId);
   const moderation = useModerationCounts(
     treeId,
@@ -218,7 +218,7 @@ export function TreeViewPage() {
             onSelectPerson={(id) => update({ person: id })}
             builder={builder}
             onAddRelative={(relativeId, relation) => setAdding({ relativeId, relation })}
-            onMoved={(personId, dx, dy) => saveOffset.mutate({ personId, dx, dy })}
+            onMoved={(offsets) => saveOffsets.mutate(offsets)}
           />
         )}
         {personId && (

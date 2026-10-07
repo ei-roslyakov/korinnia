@@ -16,6 +16,7 @@ import {
   hiddenRelatives,
   indexRelations,
   junctionY,
+  branch,
   lineage,
   roman,
   toElkGraph,
@@ -220,5 +221,14 @@ describe("family graph", () => {
       "XII",
       "XIV",
     ]);
+  });
+
+  it("finds the branch that moves with a dragged card", () => {
+    const rel = indexRelations(graph);
+    // dad: his partner and co-parent, all his children, grandchildren and their partners.
+    expect([...branch(rel, "dad")].sort()).toEqual(
+      ["dad", "gp3", "grandkid", "half", "kid1", "kid2", "mom", "other"].sort(),
+    );
+    expect([...branch(rel, "grandkid")]).toEqual(["grandkid"]);
   });
 });

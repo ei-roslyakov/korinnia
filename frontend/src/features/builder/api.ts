@@ -283,6 +283,26 @@ export function useSaveLayoutOffset(treeId: string) {
   });
 }
 
+/** Save several card positions at once (a dragged branch); updates the canvas immediately. */
+export function useSaveLayoutOffsets(treeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (offsets: Record<string, { dx: number; dy: number }>) =>
+      api.put<void>(`${base(treeId)}/layout-offsets`, { offsets }),
+    onMutate: (offsets) => {
+      qc.setQueryData<TreeGraph>(["tree", treeId, "graph"], (old) => {
+        if (!old) return old;
+        const next = { ...(old.layout_offsets ?? {}) };
+        for (const [id, o] of Object.entries(offsets)) {
+          if (o.dx === 0 && o.dy === 0) delete next[id];
+          else next[id] = o;
+        }
+        return { ...old, layout_offsets: next };
+      });
+    },
+  });
+}
+
 export function useResetLayout(treeId: string) {
   const invalidate = useInvalidateTree(treeId);
   return useMutation({

@@ -15,7 +15,7 @@ from app.schemas.persons import (
     PersonSummary,
     PersonUpdate,
 )
-from app.schemas.relationships import LayoutOffset, TreeGraph
+from app.schemas.relationships import LayoutOffset, LayoutOffsets, TreeGraph
 from app.services.genealogy import builder as builder_service
 from app.services.genealogy import persons as person_service
 from app.services.genealogy import trash as trash_service
@@ -102,6 +102,12 @@ async def set_layout_offset(
     """Save a manual nudge of a card on the canvas (0,0 removes it). Not audited:
     presentation only, not family data."""
     await builder_service.set_layout_offset(session, access.tree.id, person_id, body)
+
+
+@router.put("/layout-offsets", status_code=status.HTTP_204_NO_CONTENT)
+async def set_layout_offsets(body: LayoutOffsets, access: TreeEditor, session: SessionDep) -> None:
+    """Save the positions of several cards at once (dragging a whole branch)."""
+    await builder_service.set_layout_offsets(session, access.tree.id, body.offsets)
 
 
 @router.delete("/layout-offsets", status_code=status.HTTP_204_NO_CONTENT)

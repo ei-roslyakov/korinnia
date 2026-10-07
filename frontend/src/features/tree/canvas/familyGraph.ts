@@ -481,3 +481,26 @@ export function roman(n: number): string {
   }
   return out;
 }
+
+/** What moves together when a card is dragged: the person, their partners, and all their
+ * descendants with the descendants' partners and co-parents (the branch growing from them). */
+export function branch(rel: Relations, id: string): Set<string> {
+  const out = new Set<string>([id]);
+  const visited = new Set<string>([id]); // people whose children have been followed
+  const queue = [id];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    for (const p of rel.partners.get(cur) ?? []) out.add(p);
+    for (const e of rel.children.get(cur) ?? []) {
+      // The child's other parent belongs to this couple's family too, even without a
+      // recorded partnership.
+      for (const co of rel.parents.get(e.child_id) ?? []) out.add(co.parent_id);
+      out.add(e.child_id);
+      if (!visited.has(e.child_id)) {
+        visited.add(e.child_id);
+        queue.push(e.child_id);
+      }
+    }
+  }
+  return out;
+}

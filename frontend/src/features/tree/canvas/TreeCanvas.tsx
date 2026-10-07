@@ -25,6 +25,7 @@ import {
   PERSON_WIDTH,
   buildFamilies,
   ROW_GAP,
+  branch,
   hiddenRelatives,
   indexRelations,
   junctionY,
@@ -67,7 +68,8 @@ interface Props {
   /** Builder mode: draggable cards and "+" buttons. */
   builder?: boolean;
   onAddRelative?: (personId: string, relation: RelativeRelation) => void;
-  onMoved?: (personId: string, dx: number, dy: number) => void;
+  /** New offsets (from the automatic layout) of the cards moved by one drag. */
+  onMoved?: (offsets: Record<string, { dx: number; dy: number }>) => void;
 }
 
 type XY = { x: number; y: number };
@@ -132,16 +134,15 @@ function CanvasInner({
   const [dragging, setDragging] = useState<Record<string, XY>>({});
   const offsets = graph.layout_offsets;
 
-  /** Final person positions: automatic layout + saved offsets + live drag. Cards only move
-   * sideways, so every generation stays on its row (a stored vertical offset is ignored). */
+  /** Final person positions: automatic layout + saved offsets + live drag. */
   const personPos = useMemo<Record<string, XY>>(() => {
     const pos = layout.data;
     if (!pos) return {};
     const out: Record<string, XY> = {};
     for (const id of personIds) {
       const base = pos[id] ?? { x: 0, y: 0 };
-      const x = dragging[id]?.x ?? base.x + (offsets?.[id]?.dx ?? 0);
-      out[id] = { x, y: base.y };
+      const off = offsets?.[id];
+      out[id] = dragging[id] ?? { x: base.x + (off?.dx ?? 0), y: base.y + (off?.dy ?? 0) };
     }
     return out;
   }, [layout.data, personIds, offsets, dragging]);
@@ -293,24 +294,51 @@ function CanvasInner({
     t,
   ]);
 
+  // Dragging a card moves its whole branch (partners and descendants); with Alt held,
+  // only the card itself. Start positions are kept so every card moves by the same delta.
+  const dragGroup = useRef<{ id: string; start: Record<string, XY> } | null>(null);
+
+  const onNodeDragStart = (event: MouseEvent | TouchEvent, node: Node) => {
+    if (node.type !== "person") return;
+    const members = "altKey" in event && event.altKey ? new Set([node.id]) : branch(rel, node.id);
+    const start: Record<string, XY> = {};
+    for (const m of members) if (personPos[m]) start[m] = personPos[m]!;
+    dragGroup.current = { id: node.id, start };
+  };
+
   const onNodesChange = (changes: NodeChange[]) => {
-    const live: Record<string, XY> = {};
+    const group = dragGroup.current;
     for (const c of changes) {
-      if (c.type === "position" && c.position && c.dragging) live[c.id] = c.position;
+      if (c.type !== "position" || !c.position || !c.dragging) continue;
+      if (!group || c.id !== group.id) {
+        setDragging((d) => ({ ...d, [c.id]: c.position! }));
+        continue;
+      }
+      const origin = group.start[group.id]!;
+      const dx = c.position.x - origin.x;
+      const dy = c.position.y - origin.y;
+      const live: Record<string, XY> = {};
+      for (const [m, p] of Object.entries(group.start)) live[m] = { x: p.x + dx, y: p.y + dy };
+      setDragging((d) => ({ ...d, ...live }));
     }
-    if (Object.keys(live).length) setDragging((d) => ({ ...d, ...live }));
   };
 
   const onNodeDragStop = (_: unknown, node: Node) => {
-    const base = layout.data?.[node.id];
-    if (node.type === "person" && base) {
-      onMoved?.(node.id, Math.round(node.position.x - base.x), 0);
+    const group = dragGroup.current;
+    dragGroup.current = null;
+    if (node.type === "person" && layout.data && group) {
+      const origin = group.start[group.id]!;
+      const dx = node.position.x - origin.x;
+      const dy = node.position.y - origin.y;
+      const moved: Record<string, { dx: number; dy: number }> = {};
+      for (const [m, p] of Object.entries(group.start)) {
+        const base = layout.data[m];
+        if (!base) continue;
+        moved[m] = { dx: Math.round(p.x + dx - base.x), dy: Math.round(p.y + dy - base.y) };
+      }
+      if (dx !== 0 || dy !== 0) onMoved?.(moved);
     }
-    setDragging((d) => {
-      const rest = { ...d };
-      delete rest[node.id];
-      return rest;
-    });
+    setDragging({});
   };
 
   // Generation rank of each row, counted from the bottom (0 = the oldest generation).
@@ -403,6 +431,7 @@ function CanvasInner({
       onNodeMouseEnter={(_, node) => node.type === "person" && setHovered(node.id)}
       onNodeMouseLeave={() => setHovered(null)}
       onNodesChange={onNodesChange}
+      onNodeDragStart={onNodeDragStart}
       onNodeDragStop={onNodeDragStop}
       nodesDraggable={builder}
       nodesConnectable={false}

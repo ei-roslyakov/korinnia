@@ -293,7 +293,7 @@ ELK's own layering put people on rows by longest path, so in-laws without record
 
 Connectors are drawn as Bézier curves (parent → junction → child) instead of right-angled steps.
 
-### D75. Cards move sideways only
+### D75. Cards move sideways only (replaced by D83)
 Manual nudges change only the horizontal position, so dragging can never break the generation rows. The vertical part of offsets saved before this change is ignored rather than deleted; "Reset layout" removes offsets completely.
 
 ### D76. The tree grows upwards
@@ -331,3 +331,6 @@ Opening the app on the Vite dev server (`:5173`) showed every image broken: Vite
 - **Overviews come from the API:** the tree list's portraits, people count and years covered (three grouped queries for all trees), and each story's cover thumbnail and reading time (180 words per minute).
 - **Historical context on the timeline** is a static list in the frontend (`features/insights/history.ts`), shown only within the years the family's facts cover. It is context, not data, so it is never stored or exported.
 - **Feedback:** toasts (`useToast`, polite live region) replace inline "saved" messages; loading placeholders replace spinners where the page shape is known; the side panel and toasts animate only with `motion-safe`.
+
+### D83. Dragging moves a whole branch, in any direction (replaces D75)
+Users wanted to rearrange the tree freely, so cards move vertically again and stored vertical offsets apply again. Dragging a card moves its branch with it: the person, their partners, and all descendants with the descendants' partners and co-parents (`branch()` in `familyGraph.ts`). A family can therefore be moved aside as a unit without breaking its shape. Holding Alt moves only the one card. One drag is saved in a single request (`PUT /layout-offsets` with all moved cards; all or nothing), so moving a large branch is one transaction rather than one per card. "Reset layout" still restores the automatic layout.

@@ -110,7 +110,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Family editor: change link types, unlink, link existing people, edit partnership dates and end reason
 - ✅ Person history with "restore this version"
 - ✅ Delete with impact preview; trash bin page with restore
-- ✅ Drag cards sideways to adjust the layout (generations stay on their rows; saved per tree as offsets from the automatic layout); reset layout
+- ✅ Drag cards anywhere to adjust the layout: a card moves with its whole branch (partners, descendants and their partners); hold Alt to move a single card. Saved per tree as offsets from the automatic layout; reset layout
 - ✅ Unsaved-changes warning; server validation errors and date warnings shown in place
 - ✅ Sources tab: cite a source for any fact (a name, birth, an event, a parent link, a partnership…)
 

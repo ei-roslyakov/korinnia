@@ -4,6 +4,8 @@ import { useMe, useUpdateMe } from "@/features/auth/api";
 import { SUPPORTED_LANGUAGES } from "@/i18n";
 import type { Language } from "@/lib/types";
 
+import { HeaderSelect } from "./HeaderSelect";
+
 export function LanguageSwitcher() {
   const { t, i18n } = useTranslation();
   const me = useMe();
@@ -11,9 +13,8 @@ export function LanguageSwitcher() {
   return (
     <label className="text-bark-700 flex items-center gap-1.5 text-sm">
       <span>{t("nav.language")}</span>
-      <select
+      <HeaderSelect
         aria-label={t("nav.language")}
-        className="border-bark-100 bg-surface text-bark-900 rounded-md border px-2 py-1 text-sm"
         value={i18n.resolvedLanguage}
         onChange={(e) => {
           const lang = e.target.value as Language;
@@ -29,7 +30,7 @@ export function LanguageSwitcher() {
             {lang.label}
           </option>
         ))}
-      </select>
+      </HeaderSelect>
     </label>
   );
 }

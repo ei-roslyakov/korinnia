@@ -88,6 +88,12 @@ class LayoutOffset(BaseModel):
     dy: float = Field(ge=-100_000, le=100_000)
 
 
+class LayoutOffsets(BaseModel):
+    """Several cards at once (a dragged branch); 0,0 removes a card's offset."""
+
+    offsets: dict[uuid.UUID, LayoutOffset] = Field(max_length=5000)
+
+
 class TreeGraph(BaseModel):
     persons: list[PersonSummary]
     parent_child: list[GraphEdge]

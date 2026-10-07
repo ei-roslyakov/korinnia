@@ -121,3 +121,20 @@ async def test_layout_offsets(ctx: Ctx) -> None:
     )
     assert resp.status_code == 404
     assert (await ctx.editor.put(url, json={"dx": 1e9, "dy": 0})).status_code == 422
+
+
+async def test_layout_offsets_batch(ctx: Ctx) -> None:
+    a, b = await ctx.person("А"), await ctx.person("Б")
+    await ctx.editor.put(f"{ctx.base}/layout-offsets/{b['id']}", json={"dx": 5, "dy": 5})
+    url = f"{ctx.base}/layout-offsets"
+    body = {"offsets": {a["id"]: {"dx": 120, "dy": -80}, b["id"]: {"dx": 0, "dy": 0}}}
+    assert (await ctx.editor.put(url, json=body)).status_code == 204
+    graph = (await ctx.editor.get(f"{ctx.base}/graph")).json()
+    assert graph["layout_offsets"] == {a["id"]: {"dx": 120.0, "dy": -80.0}}  # b reset
+
+    # All or nothing: an unknown person rejects the whole batch.
+    bad = {"offsets": {a["id"]: {"dx": 1, "dy": 1}, str(uuid.uuid4()): {"dx": 1, "dy": 1}}}
+    assert (await ctx.editor.put(url, json=bad)).status_code == 404
+    graph = (await ctx.editor.get(f"{ctx.base}/graph")).json()
+    assert graph["layout_offsets"][a["id"]] == {"dx": 120.0, "dy": -80.0}
+    assert (await ctx.editor.put(url, json={"offsets": {}})).status_code == 204

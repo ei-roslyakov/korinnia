@@ -8,7 +8,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.errors import AppError
+from app.core.errors import AppError, NotFoundError
 from app.models import LayoutOffset, ParentChild, Person
 from app.schemas.persons import PersonCreate
 from app.schemas.relationships import LayoutOffset as LayoutOffsetIn
@@ -99,7 +99,32 @@ async def layout_offsets(
 async def set_layout_offset(
     session: AsyncSession, tree_id: uuid.UUID, person_id: uuid.UUID, offset: LayoutOffsetIn
 ) -> None:
-    await get_live(session, Person, tree_id, person_id, "person_not_found")
+    await set_layout_offsets(session, tree_id, {person_id: offset})
+
+
+async def set_layout_offsets(
+    session: AsyncSession, tree_id: uuid.UUID, offsets: dict[uuid.UUID, LayoutOffsetIn]
+) -> None:
+    """Save several manual card positions in one transaction (e.g. a dragged branch)."""
+    if not offsets:
+        return
+    live = set(
+        await session.scalars(
+            select(Person.id).where(
+                Person.tree_id == tree_id, Person.id.in_(offsets), Person.deleted_at.is_(None)
+            )
+        )
+    )
+    if live != set(offsets):
+        raise NotFoundError("person_not_found")
+    for person_id, offset in offsets.items():
+        await _store_offset(session, tree_id, person_id, offset)
+    await session.commit()
+
+
+async def _store_offset(
+    session: AsyncSession, tree_id: uuid.UUID, person_id: uuid.UUID, offset: LayoutOffsetIn
+) -> None:
     if offset.dx == 0 and offset.dy == 0:
         await session.execute(
             delete(LayoutOffset).where(
@@ -116,7 +141,6 @@ async def set_layout_offset(
                 set_={"dx": offset.dx, "dy": offset.dy},
             )
         )
-    await session.commit()
 
 
 async def reset_layout(session: AsyncSession, tree_id: uuid.UUID) -> None:

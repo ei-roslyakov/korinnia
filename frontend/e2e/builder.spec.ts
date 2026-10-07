@@ -64,7 +64,7 @@ test("builder: add a child from a card, edit, delete and restore", async ({ page
   await expect(page.getByTestId("person-card").filter({ hasText: name })).toBeVisible();
 });
 
-test("builder: dragged card position is remembered", async ({ page }, testInfo) => {
+test("builder: dragging moves the whole branch and is remembered", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name === "mobile", "mouse drag on desktop");
   // Own tree, so parallel tests editing the demo tree cannot shift the layout mid-drag.
   await page.goto("/login");
@@ -87,7 +87,9 @@ test("builder: dragged card position is remembered", async ({ page }, testInfo) 
   });
 
   await page.goto(`/trees/${tree.id}?mode=edit`);
-  const node = page.locator(`.react-flow__node-person[data-id="${child.id}"]`);
+  // Drag the parent: the branch (the daughter above) moves with it.
+  const node = page.locator(`.react-flow__node-person[data-id="${parent.id}"]`);
+  const childNode = page.locator(`.react-flow__node-person[data-id="${child.id}"]`);
   await expect(node).toBeVisible();
   // Wait for fit-to-view to finish: the viewport must stay unchanged across 300 ms.
   const viewport = page.locator(".react-flow__viewport");
@@ -97,9 +99,11 @@ test("builder: dragged card position is remembered", async ({ page }, testInfo) 
     stable = a === (await viewport.getAttribute("style")) ? stable + 1 : 0;
   }
   // Compare positions only: React Flow toggles `visibility` while it measures cards.
-  const position = async () =>
-    /translate\([^)]*\)/.exec((await node.getAttribute("style")) ?? "")?.[0];
+  const positionOf = async (n: typeof node) =>
+    /translate\([^)]*\)/.exec((await n.getAttribute("style")) ?? "")?.[0];
+  const position = () => positionOf(node);
   const before = await position();
+  const childBefore = await positionOf(childNode);
   const box = (await node.boundingBox())!;
   const cx = box.x + box.width / 2;
   const cy = box.y + box.height / 2;
@@ -109,18 +113,16 @@ test("builder: dragged card position is remembered", async ({ page }, testInfo) 
   await page.mouse.up();
   await expect.poll(position).not.toBe(before);
 
-  // The nudge is stored on the server as an offset from the automatic layout...
-  await expect
-    .poll(
-      async () =>
-        (await (await page.request.get(`${base}/graph`)).json()).layout_offsets?.[child.id]?.dx ??
-        0,
-    )
-    .toBeGreaterThan(50);
+  // Both cards moved, sideways and down, and are stored as offsets from the automatic layout...
+  const offsets = async () =>
+    (await (await page.request.get(`${base}/graph`)).json()).layout_offsets ?? {};
+  await expect.poll(async () => (await offsets())[child.id]?.dx ?? 0).toBeGreaterThan(50);
+  const saved = await offsets();
+  expect(saved[parent.id].dx).toBeGreaterThan(50);
+  expect(saved[parent.id].dy).toBeGreaterThan(20);
+  expect(saved[child.id].dy).toBe(saved[parent.id].dy);
+  expect(await positionOf(childNode)).not.toBe(childBefore);
   const moved = await position();
-  // Cards move sideways only, so the generation stays on its row.
-  const y = (t?: string) => /,\s*([-\d.]+)px\)/.exec(t ?? "")?.[1];
-  expect(y(moved)).toBe(y(before));
 
   // ...the card is still there after a reload...
   await page.reload();
