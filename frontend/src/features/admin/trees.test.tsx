@@ -87,4 +87,35 @@ describe("admin trees", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Видалити родовід" }));
     await vi.waitFor(() => expect(deleted).toBe(true));
   });
+
+  it("lets a tree admin delete a tree from its card on the tree list", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const card = (id: string, name: string, my_role: string) => ({
+      id,
+      name,
+      description: null,
+      my_role,
+      person_count: 0,
+      cover: [],
+    });
+    let trees = [card("t1", "Моя родина", "admin"), card("t2", "Чужа родина", "viewer")];
+    mockApi({
+      "GET /api/v1/auth/me": () => json(ME),
+      "GET /api/v1/trees": () => json(trees),
+      "DELETE /api/v1/trees/t1": () => {
+        trees = trees.filter((t) => t.id !== "t1");
+        return json(null, 204);
+      },
+    });
+    renderWithProviders(<App />, { route: "/" });
+    expect(await screen.findByRole("link", { name: /Чужа родина/ })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Видалити родовід «Чужа родина»" }),
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Видалити родовід «Моя родина»" }));
+    expect(window.confirm).toHaveBeenCalled();
+    await vi.waitFor(() =>
+      expect(screen.queryByRole("link", { name: /Моя родина/ })).not.toBeInTheDocument(),
+    );
+  });
 });

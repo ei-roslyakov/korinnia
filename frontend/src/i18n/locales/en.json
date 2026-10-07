@@ -105,6 +105,7 @@
     "yourRole": "Your role:",
     "settings": "Tree settings",
     "delete": "Delete tree",
+    "deleteNamed": "Delete the tree “{{name}}”",
     "confirmDelete": "Delete the tree “{{name}}”? It will be hidden for everyone (data is kept and can be restored).",
     "demo": "Demo",
     "emptyTitle": "Your family tree will grow here",

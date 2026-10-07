@@ -16,8 +16,10 @@ import { EmptyState } from "@/components/EmptyState";
 import { Logo } from "@/components/Logo";
 import { CardsSkeleton } from "@/components/Skeleton";
 import { useMe } from "@/features/auth/api";
+import { useErrorMessage } from "@/lib/hooks";
+import type { Tree } from "@/lib/types";
 
-import { useCreateTree, useTrees } from "./api";
+import { useCreateTree, useDeleteTree, useTrees } from "./api";
 
 export function TreesPage() {
   const { t } = useTranslation();
@@ -50,50 +52,83 @@ export function TreesPage() {
       )}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {trees.data?.map((tree) => (
-          <li key={tree.id}>
-            <Link
-              to={`/trees/${tree.id}`}
-              className="border-bark-100 hover:border-leaf-600 bg-surface block h-full rounded-lg border p-4 shadow-sm transition"
-            >
-              <div className="mb-3 flex items-start justify-between gap-2">
-                {tree.cover?.length ? (
-                  <div className="flex -space-x-3" aria-hidden="true">
-                    {tree.cover.map((url) => (
-                      <img
-                        key={url}
-                        src={url}
-                        alt=""
-                        loading="lazy"
-                        className="border-surface size-12 rounded-full border-2 object-cover shadow-sm"
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <Logo className="size-12" />
-                )}
-                <span className="flex shrink-0 gap-1">
-                  {tree.is_demo && <Badge tone="amber">{t("trees.demo")}</Badge>}
-                  <Badge>{t(`roles.${tree.my_role}`)}</Badge>
-                </span>
-              </div>
-              <h2 className="font-serif text-lg font-semibold">{tree.name}</h2>
-              <p className="text-bark-700 mb-2 text-xs">
-                {[
-                  t("trees.people", { count: tree.person_count ?? 0 }),
-                  tree.first_year && tree.last_year && `${tree.first_year} – ${tree.last_year}`,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-              {tree.description && (
-                <p className="text-bark-700 line-clamp-3 text-sm">{tree.description}</p>
-              )}
-            </Link>
-          </li>
+          <TreeCard key={tree.id} tree={tree} />
         ))}
       </ul>
       <CreateTreeDialog open={creating} onClose={() => setCreating(false)} />
     </div>
+  );
+}
+
+/** A tree's card; its admins can delete the tree from here (a soft delete). */
+function TreeCard({ tree }: { tree: Tree }) {
+  const { t } = useTranslation();
+  const del = useDeleteTree(tree.id);
+  const errorMessage = useErrorMessage();
+  const canDelete = tree.my_role === "admin";
+
+  return (
+    <li className="relative">
+      <Link
+        to={`/trees/${tree.id}`}
+        className={`border-bark-100 hover:border-leaf-600 bg-surface block h-full rounded-lg border p-4 shadow-sm transition ${canDelete ? "pb-12" : ""}`}
+      >
+        <div className="mb-3 flex items-start justify-between gap-2">
+          {tree.cover?.length ? (
+            <div className="flex -space-x-3" aria-hidden="true">
+              {tree.cover.map((url) => (
+                <img
+                  key={url}
+                  src={url}
+                  alt=""
+                  loading="lazy"
+                  className="border-surface size-12 rounded-full border-2 object-cover shadow-sm"
+                />
+              ))}
+            </div>
+          ) : (
+            <Logo className="size-12" />
+          )}
+          <span className="flex shrink-0 gap-1">
+            {tree.is_demo && <Badge tone="amber">{t("trees.demo")}</Badge>}
+            <Badge>{t(`roles.${tree.my_role}`)}</Badge>
+          </span>
+        </div>
+        <h2 className="font-serif text-lg font-semibold">{tree.name}</h2>
+        <p className="text-bark-700 mb-2 text-xs">
+          {[
+            t("trees.people", { count: tree.person_count ?? 0 }),
+            tree.first_year && tree.last_year && `${tree.first_year} – ${tree.last_year}`,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+        {tree.description && (
+          <p className="text-bark-700 line-clamp-3 text-sm">{tree.description}</p>
+        )}
+      </Link>
+      {canDelete && (
+        // Outside the link: a button cannot sit inside an <a>.
+        <div className="absolute right-3 bottom-3 left-4 flex items-center justify-end gap-2">
+          {del.error && (
+            <span role="alert" className="truncate text-xs text-red-700">
+              {errorMessage(del.error)}
+            </span>
+          )}
+          <Button
+            variant="ghost"
+            className="text-xs text-red-700"
+            aria-label={t("trees.deleteNamed", { name: tree.name })}
+            busy={del.isPending}
+            onClick={() => {
+              if (window.confirm(t("trees.confirmDelete", { name: tree.name }))) del.mutate();
+            }}
+          >
+            {t("common.delete")}
+          </Button>
+        </div>
+      )}
+    </li>
   );
 }
 
