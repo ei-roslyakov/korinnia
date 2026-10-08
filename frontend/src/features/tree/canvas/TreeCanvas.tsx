@@ -622,7 +622,7 @@ function CanvasInner({
     >
       <Background gap={24} color="var(--k-canvas-dots)" bgColor="transparent" />
       {exportTitle && (
-        <Panel position="top-left">
+        <Panel position="top-right">
           <div
             role="group"
             aria-label={t("canvas.export.label")}
