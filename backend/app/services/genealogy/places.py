@@ -43,7 +43,12 @@ def _apply(place: Place, data: dict[str, Any]) -> None:
 
 
 async def create_place(
-    session: AsyncSession, tree_id: uuid.UUID, body: PlaceCreate, actor: Actor
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    body: PlaceCreate,
+    actor: Actor,
+    *,
+    commit: bool = True,
 ) -> Place:
     place = Place(id=uuid.uuid4(), tree_id=tree_id, created_by_id=actor.user and actor.user.id)
     _apply(
@@ -61,7 +66,8 @@ async def create_place(
         tree_id=tree_id,
         after=place_snapshot(place),
     )
-    await session.commit()
+    if commit:
+        await session.commit()
     return place
 
 

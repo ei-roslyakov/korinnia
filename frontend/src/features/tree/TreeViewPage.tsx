@@ -181,6 +181,9 @@ export function TreeViewPage() {
             <Link to={`/trees/${treeId}/trash`} className="text-leaf-700 hover:underline">
               {t("builder.trash.title")}
             </Link>
+            <Link to={`/trees/${treeId}/import`} className="text-leaf-700 hover:underline">
+              {t("imports.link")}
+            </Link>
             {Object.keys(graph.data.layout_offsets ?? {}).length > 0 && (
               <Button
                 variant="ghost"
@@ -226,9 +229,17 @@ export function TreeViewPage() {
               hint={canEdit ? t("canvas.emptyHintEditor") : t("canvas.emptyHint")}
               action={
                 canEdit && (
-                  <Button onClick={() => setAdding({ relativeId: null, relation: null })}>
-                    + {t("builder.addPerson")}
-                  </Button>
+                  <div className="flex flex-col items-center gap-2">
+                    <Button onClick={() => setAdding({ relativeId: null, relation: null })}>
+                      + {t("builder.addPerson")}
+                    </Button>
+                    <Link
+                      to={`/trees/${treeId}/import`}
+                      className="text-leaf-700 text-sm underline"
+                    >
+                      {t("imports.orImport")}
+                    </Link>
+                  </div>
                 )
               }
             />

@@ -5,6 +5,7 @@ import { Layout } from "@/components/Layout";
 import { AdminLayout } from "@/features/admin/AdminLayout";
 import { PersonEditorPage } from "@/features/builder/PersonEditorPage";
 import { TrashPage } from "@/features/builder/TrashPage";
+import { ImportPage } from "@/features/imports/ImportPage";
 import { AuditLogPage } from "@/features/admin/AuditLogPage";
 import { InvitationsPage } from "@/features/admin/InvitationsPage";
 import { SystemPage } from "@/features/admin/SystemPage";
@@ -190,6 +191,14 @@ export function App() {
             element={
               <RequireAuth>
                 <TrashPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/import"
+            element={
+              <RequireAuth>
+                <ImportPage />
               </RequireAuth>
             }
           />

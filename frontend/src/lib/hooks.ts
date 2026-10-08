@@ -23,3 +23,23 @@ export function useFormatDate() {
     }).format(new Date(iso));
   };
 }
+
+/** Bytes as "1.2 GB" in the interface language. */
+export function useFormatBytes() {
+  const { i18n } = useTranslation();
+  return (bytes: number) => {
+    const units = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte"] as const;
+    let i = 0;
+    let n = bytes;
+    while (n >= 1024 && i < units.length - 1) {
+      n /= 1024;
+      i++;
+    }
+    return new Intl.NumberFormat(i18n.language, {
+      style: "unit",
+      unit: units[i],
+      unitDisplay: "short",
+      maximumFractionDigits: n < 10 && i > 0 ? 1 : 0,
+    }).format(n);
+  };
+}

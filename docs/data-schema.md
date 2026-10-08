@@ -107,5 +107,14 @@ New `persons` columns: `primary_photo_id` (FK `media_files`), `primary_photo_cro
 ### Phase 8: insights
 No new tables. The timeline, map, "on this day", relationship calculator and statistics are computed from the tables above when requested.
 
+### Phase 9: GEDCOM import and integrity checks
+| Table | Purpose | Key columns |
+|---|---|---|
+| `gedcom_imports` | One uploaded GEDCOM file and what happened to it | `tree_id`, `created_by_id`, `status` (`analyzing`/`ready`/`importing`/`done`/`failed`/`undoing`/`undone`/`cancelled`), `file_key` (the original file, kept in storage under `imports/`), `filename`, `size`, `sha256`, `preview` (JSON: counts, warnings, people, duplicate candidates), `decisions` (JSON: `merge` = GEDCOM xref → existing person id), `result` (JSON: counts, skipped items, ids of everything created), `error`, `finished_at` |
+| `integrity_runs` | One pass over all stored originals | `status` (`running`/`done`/`failed`), `trigger` (`scheduled`/`manual`), `triggered_by_id`, `started_at`, `finished_at`, `files_checked`, `bytes_checked`, `problems`, `untracked_files`, `error` |
+| `integrity_issues` | An original that failed its check | `run_id`, `media_id`, `tree_id`, `key`, `problem` (`missing`/`size_mismatch`/`hash_mismatch`/`unreadable`), `expected_size`, `actual_size`, `expected_sha256`, `actual_sha256` |
+
+Imported people, events, places, sources and citations are ordinary rows of the tables above (created through the same services, with revisions and audit entries); `gedcom_imports.result` only remembers their ids for "undo import".
+
 ### Planned
-GEDCOM import bookkeeping and integrity-check results (phase 9); share links (phase 10); export jobs (phase 11). Each section is documented here when it is implemented.
+Share links (phase 10); export jobs (phase 11). Each section is documented here when it is implemented.

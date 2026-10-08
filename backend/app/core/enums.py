@@ -206,3 +206,32 @@ class CommentTarget(StrEnum):
 class QuestionStatus(StrEnum):
     open = "open"
     resolved = "resolved"
+
+
+# --- Data safety (phase 9) ----------------------------------------------------------------
+
+
+class ImportStatus(StrEnum):
+    """GEDCOM import lifecycle: analyzing → ready → importing → done (→ undoing → undone)."""
+
+    analyzing = "analyzing"
+    ready = "ready"
+    importing = "importing"
+    done = "done"
+    failed = "failed"
+    undoing = "undoing"
+    undone = "undone"
+    cancelled = "cancelled"
+
+
+class IntegrityStatus(StrEnum):
+    running = "running"
+    done = "done"
+    failed = "failed"
+
+
+class IntegrityProblem(StrEnum):
+    missing = "missing"
+    size_mismatch = "size_mismatch"
+    hash_mismatch = "hash_mismatch"
+    unreadable = "unreadable"

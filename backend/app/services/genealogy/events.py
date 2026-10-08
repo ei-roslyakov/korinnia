@@ -60,7 +60,12 @@ async def _check_participants(
 
 
 async def create_event(
-    session: AsyncSession, tree_id: uuid.UUID, body: EventCreate, actor: Actor
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    body: EventCreate,
+    actor: Actor,
+    *,
+    commit: bool = True,
 ) -> Event:
     await _check_participants(session, tree_id, body.type, body.participants, event_id=None)
     await check_place(session, tree_id, body.place_id)
@@ -94,7 +99,8 @@ async def create_event(
         tree_id=tree_id,
         after=event_snapshot(event),
     )
-    await session.commit()
+    if commit:
+        await session.commit()
     return await get_event(session, tree_id, event.id)
 
 

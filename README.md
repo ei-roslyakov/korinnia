@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phases 1–8 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media; sources, stories and collaboration; map, timeline, relationship calculator, statistics and "On this day"). GEDCOM import, integrity checks and scheduled backups are next. See [Features](#features) for what works today.
+> **Status:** Phases 1–9 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media; sources, stories and collaboration; map, timeline, relationship calculator, statistics and "On this day"; GEDCOM import and integrity checks). Hardening and the user guide (phase 10) are next. See [Features](#features) for what works today.
 
 ---
 
@@ -138,10 +138,10 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Media picker (tree library, search, upload for editors) to attach scans to sources and photos / documents to stories; comments on photos and videos in the lightbox
 
 ### Data safety
-- 📋 GEDCOM 5.5.1 import with preview and duplicate detection
+- ✅ GEDCOM 5.5 / 5.5.1 import (MyHeritage, Ancestry, Gramps, FamilySearch, Geni…): UTF-8, UTF-16, ANSEL and Windows code pages; a preview of what is in the file, people who are probably already in the tree (any spelling, birth year) to merge instead of duplicating; names with patronymics and married names, events, places with coordinates, families with adoptive / step / foster links, sources and citations, notes; everything in one transaction with skipped items explained; "undo import" moves it all to the trash. Start it from the builder toolbar (into the open tree), from an empty tree, or with "Import GEDCOM" next to "New tree" (creates a tree named after the file; cancelling removes it)
 - 📋 AI-assisted import from social media: upload an exported archive (e.g. Facebook / Instagram data download) or posts and photos; AI suggests people, relationships, dates, places and stories for an editor to review before anything is saved
-- 📋 Periodic integrity check of stored originals (SHA-256)
-- 📋 Scheduled backups with retention and an off-site copy (3-2-1)
+- ✅ Integrity check of stored originals: every file re-hashed (SHA-256) weekly and on demand; missing, changed or unreadable files and untracked files listed on the admin System page
+- Scheduled backups with retention and an off-site copy (3-2-1) are handled by the hosting infrastructure (volume snapshots / database backups), not by the application; `make backup` / `make restore` remain for manual copies
 
 ### Export (final phase)
 - 📋 Family archive ZIP: offline static website, JSON + GEDCOM, Markdown, original media with manifest, README (uk / en)
@@ -168,7 +168,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 
 - **nginx** serves the frontend and proxies `/api`. It mounts the media volume read-only so that, from phase 6, the backend can authorise a download and hand it to nginx with `X-Accel-Redirect` (no large files pass through Python).
 - **backend** is the REST API (`/api/v1`). On start it runs `alembic upgrade head`.
-- **worker** runs the same image with `python -m app.jobs.worker` and consumes jobs from PostgreSQL. Later phases add thumbnails, video previews, integrity checks, backups and exports.
+- **worker** runs the same image with `python -m app.jobs.worker` and consumes jobs from PostgreSQL. It makes thumbnails and video previews, imports GEDCOM files, checks the integrity of stored originals weekly, and (phase 11) will build exports.
 - **PostgreSQL** holds all structured data *and* the job queue.
 - **Media volume** (`media`, mounted at `/data/media`) holds original and derived files as plain files. On Kubernetes this is a PersistentVolumeClaim shared by backend, worker and nginx.
 
@@ -266,7 +266,7 @@ scripts/    Maintenance helpers (third-party licence notices)
 
 ## Backup & restore
 
-`make backup` writes `backups/<UTC timestamp>/` containing a `pg_dump` of the database, a plain `tar` of the media volume and a `SHA256SUMS` file. `make restore dir=backups/<timestamp>` verifies the checksums, then replaces the database and the media. Scheduled backups, retention and off-site copies come in phase 9. See [docs/backup-restore.md](docs/backup-restore.md).
+`make backup` writes `backups/<UTC timestamp>/` containing a `pg_dump` of the database, a plain `tar` of the media volume and a `SHA256SUMS` file. `make restore dir=backups/<timestamp>` verifies the checksums, then replaces the database and the media. Scheduled backups, retention and off-site copies are the job of the hosting infrastructure. See [docs/backup-restore.md](docs/backup-restore.md).
 
 ## License
 

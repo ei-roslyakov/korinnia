@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { Logo } from "@/components/Logo";
 import { CardsSkeleton } from "@/components/Skeleton";
 import { useMe } from "@/features/auth/api";
+import { NewTreeImport } from "@/features/imports/NewTreeImport";
 import type { Tree } from "@/lib/types";
 
 import { useCreateTree, useTrees } from "./api";
@@ -33,7 +34,10 @@ export function TreesPage() {
         title={t("trees.title")}
         actions={
           me.data?.is_superadmin && (
-            <Button onClick={() => setCreating(true)}>{t("trees.create")}</Button>
+            <>
+              <NewTreeImport />
+              <Button onClick={() => setCreating(true)}>{t("trees.create")}</Button>
+            </>
           )
         }
       />
@@ -45,7 +49,10 @@ export function TreesPage() {
           hint={me.data?.is_superadmin ? t("trees.emptyAdmin") : t("trees.empty")}
           action={
             me.data?.is_superadmin && (
-              <Button onClick={() => setCreating(true)}>{t("trees.create")}</Button>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Button onClick={() => setCreating(true)}>{t("trees.create")}</Button>
+                <NewTreeImport />
+              </div>
             )
           }
         />

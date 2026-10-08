@@ -163,3 +163,54 @@ export function useRestoreTree() {
     onSuccess,
   });
 }
+
+export interface IntegrityRun {
+  id: string;
+  status: "running" | "done" | "failed";
+  trigger: "scheduled" | "manual";
+  triggered_by: string | null;
+  started_at: string;
+  finished_at: string | null;
+  files_checked: number;
+  bytes_checked: number;
+  problems: number;
+  untracked_files: number;
+  error: string | null;
+}
+
+export interface IntegrityIssue {
+  key: string;
+  problem: "missing" | "size_mismatch" | "hash_mismatch" | "unreadable";
+  media_id: string | null;
+  tree_id: string | null;
+  tree_name: string | null;
+  filename: string | null;
+  expected_size: number | null;
+  actual_size: number | null;
+}
+
+export interface IntegrityOverview {
+  total_files: number;
+  total_bytes: number;
+  runs: IntegrityRun[];
+  issues: IntegrityIssue[];
+}
+
+const integrityKey = ["admin", "integrity"] as const;
+
+export function useIntegrity() {
+  return useQuery({
+    queryKey: integrityKey,
+    queryFn: () => api.get<IntegrityOverview>("/api/v1/admin/integrity"),
+    // Follow a running check.
+    refetchInterval: (q) => (q.state.data?.runs[0]?.status === "running" ? 3000 : false),
+  });
+}
+
+export function useStartIntegrityCheck() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<IntegrityRun>("/api/v1/admin/integrity/run"),
+    onSuccess: () => qc.invalidateQueries({ queryKey: integrityKey }),
+  });
+}

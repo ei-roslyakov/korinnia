@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-08_
+_Last updated: 2026-10-08 (phase 9 done)_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -18,8 +18,8 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 | 7 | Sources, citations, stories, suggestions, moderation, comments, data quality | ✅ done |
 | 8 | Map, timeline, relationship calculator, statistics, "On this day" | ✅ done |
 | — | Post-phase-8 polish: tree drawn growing upwards, themes, tree styles, demo family, licence, deploy to Kubernetes, tree rename/delete, tree export to PNG / PDF | ✅ done |
-| 9 | GEDCOM import, integrity checks of stored files, scheduled backups | 📋 next — waiting for the go-ahead |
-| 10 | Hardening and user guide | 📋 planned |
+| 9 | GEDCOM import, integrity checks of stored files (backups: infrastructure) | ✅ done |
+| 10 | Hardening and user guide | 📋 next — waiting for the go-ahead |
 | 11 | Exports (family archive) | 📋 planned |
 
 ## Live deployment
@@ -34,17 +34,19 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   from the side panel).
 - Media volume: NFS (`nfs-csi`), fixed by an init container (D87).
 
-## Next: phase 9 (not started)
+## Phase 9 (done 2026-10-08)
 
-1. **GEDCOM 5.5.1 import** with a preview (people, families, events, places, sources found) and
-   duplicate detection against the existing tree before anything is saved; runs as a worker job for
-   big files; all imported rows audited.
-2. **Integrity checks**: periodic worker job that re-hashes stored originals (SHA-256) and reports
-   missing or changed files on the admin System page.
-3. **Scheduled backups**: database dump + media copy on a schedule, retention policy, off-site copy
-   (3-2-1), documented restore procedure (extend `docs/backup-restore.md`, `make backup/restore`).
+- GEDCOM 5.5 / 5.5.1 import with preview, duplicate candidates (merge instead of creating),
+  one-transaction import with per-item warnings, undo via the trash (D89).
+- Integrity checks of stored originals: weekly + "Check now" on the admin System page (D90).
+- **Backups are not part of the app**: the owner handles scheduled backups, retention and
+  off-site copies on the infrastructure side (D90). `make backup` / `make restore` stay for
+  manual use.
+- Possible follow-ups (not planned yet): import photos referenced by a GEDCOM (GEDZIP / a zip of
+  the media folder); fill missing facts of a merged person from the file; email the admin when
+  an integrity check finds problems.
 
-## Phase 10: hardening and user guide (planned)
+## Next: phase 10 — hardening and user guide (waiting for the go-ahead)
 
 - Trusted-proxy configuration for client IPs (`X-Forwarded-For` only from known proxies)
 - Encrypt TOTP secrets at rest
@@ -84,3 +86,6 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   cooldown, the nginx `/__vite_hmr` path or the E2E RegExp edits without asking.
 - The person side panel in View mode has no delete (only in Builder mode, by design).
 - `docs/user-guide.md` is still a placeholder (phase 10).
+- Running `make test-e2e` while the dev stack is up restarted the dev backend/worker/frontend
+  once (2026-10-08) and left dev nginx with stale upstream addresses (502); fix:
+  `docker compose restart nginx`. Cause not investigated.

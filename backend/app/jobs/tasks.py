@@ -3,7 +3,7 @@
 Queues:
 - default: short jobs
 - media:   thumbnails / previews (phase 6)
-- maintenance: integrity checks, backups (phase 9)
+- maintenance: periodic housekeeping and integrity checks of stored originals
 """
 
 from __future__ import annotations
@@ -102,3 +102,62 @@ async def create_demo_tree(user_id: str) -> None:
         tree = await demo.seed(session, user, storage=get_storage())
     if tree is not None:
         logger.info("demo tree created", extra={"user_id": user_id, "tree_id": str(tree.id)})
+
+
+# --- Integrity of stored originals (phase 9) --------------------------------------------
+
+
+@app.task(name="integrity.check", queue="maintenance", lock="integrity")
+async def check_integrity(run_id: str) -> None:
+    """Re-hash every stored original for an integrity run created by `start_run`."""
+    from app.services import integrity
+
+    async with get_sessionmaker()() as session:
+        await integrity.run_check(session, get_storage(), uuid.UUID(run_id))
+
+
+@app.periodic(cron="23 4 * * 0")
+@app.task(name="integrity.weekly", queue="maintenance", queueing_lock="integrity.weekly")
+async def weekly_integrity_check(timestamp: int) -> None:
+    """Sundays 04:23: a full integrity check (skipped if one is already running)."""
+    from app.core.errors import ConflictError
+    from app.services import integrity
+    from app.services.context import Actor
+
+    async with get_sessionmaker()() as session:
+        try:
+            run = await integrity.start_run(session, trigger="scheduled", actor=Actor(None))
+        except ConflictError:
+            logger.info("integrity check already running; weekly run skipped")
+            return
+        await integrity.run_check(session, get_storage(), run.id)
+
+
+# --- GEDCOM import (phase 9) --------------------------------------------------------------
+
+
+@app.task(name="gedcom.analyze", queue="default", lock="gedcom")
+async def analyze_gedcom(import_id: str) -> None:
+    """Read an uploaded GEDCOM file and build its preview."""
+    from app.services import gedcom_import
+
+    async with get_sessionmaker()() as session:
+        await gedcom_import.analyze(session, get_storage(), uuid.UUID(import_id))
+
+
+@app.task(name="gedcom.apply", queue="default", lock="gedcom")
+async def apply_gedcom(import_id: str) -> None:
+    """Import a confirmed GEDCOM file into its tree (one transaction)."""
+    from app.services import gedcom_import
+
+    async with get_sessionmaker()() as session:
+        await gedcom_import.apply(session, get_storage(), uuid.UUID(import_id))
+
+
+@app.task(name="gedcom.undo", queue="default", lock="gedcom")
+async def undo_gedcom(import_id: str) -> None:
+    """Move what an import created to the trash."""
+    from app.services import gedcom_import
+
+    async with get_sessionmaker()() as session:
+        await gedcom_import.undo(session, uuid.UUID(import_id))

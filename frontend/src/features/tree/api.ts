@@ -41,6 +41,18 @@ export function useUpdateTree(id: string) {
   });
 }
 
+/** Delete any tree by id (e.g. an empty tree made for a refused import). */
+export function useDeleteTreeById() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/api/v1/trees/${id}`),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: treesKey });
+      void qc.invalidateQueries({ queryKey: ME_KEY });
+    },
+  });
+}
+
 export function useDeleteTree(id: string) {
   const qc = useQueryClient();
   return useMutation({

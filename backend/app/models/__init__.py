@@ -27,6 +27,7 @@ from app.core.enums import (
 from app.models.audit import AuditLog
 from app.models.base import Base
 from app.models.collaboration import Comment, EditSuggestion, OpenQuestion
+from app.models.data_safety import GedcomImport, IntegrityIssue, IntegrityRun
 from app.models.event import Event, EventParticipant
 from app.models.invitation import Invitation, PasswordResetToken
 from app.models.layout import LayoutOffset
@@ -52,7 +53,10 @@ __all__ = [
     "Event",
     "EventParticipant",
     "EventType",
+    "GedcomImport",
     "Gender",
+    "IntegrityIssue",
+    "IntegrityRun",
     "Invitation",
     "Language",
     "LayoutOffset",

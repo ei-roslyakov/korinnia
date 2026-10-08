@@ -164,7 +164,12 @@ async def sources_out(session: AsyncSession, sources: Sequence[Source]) -> list[
 
 
 async def create_source(
-    session: AsyncSession, tree_id: uuid.UUID, body: SourceCreate, actor: Actor
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    body: SourceCreate,
+    actor: Actor,
+    *,
+    commit: bool = True,
 ) -> Source:
     user_id = actor.user.id if actor.user else None
     source = Source(
@@ -182,7 +187,8 @@ async def create_source(
         session, actor, "source.create", "source", source.id, tree_id=tree_id,
         after=source_snapshot(source, body.media_ids or []),
     )  # fmt: skip
-    await session.commit()
+    if commit:
+        await session.commit()
     return source
 
 
@@ -269,7 +275,12 @@ async def get_citation(session: AsyncSession, tree_id: uuid.UUID, cid: uuid.UUID
 
 
 async def create_citation(
-    session: AsyncSession, tree_id: uuid.UUID, body: CitationCreate, actor: Actor
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    body: CitationCreate,
+    actor: Actor,
+    *,
+    commit: bool = True,
 ) -> Citation:
     await get_source(session, tree_id, body.source_id)
     await _check_target(session, tree_id, body.entity_type, body.entity_id)
@@ -305,7 +316,8 @@ async def create_citation(
         session, actor, "citation.create", "citation", c.id, tree_id=tree_id,
         after=citation_snapshot(c),
     )  # fmt: skip
-    await session.commit()
+    if commit:
+        await session.commit()
     return c
 
 

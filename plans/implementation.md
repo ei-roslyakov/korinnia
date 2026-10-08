@@ -28,12 +28,13 @@ backend/app/
   models/        SQLAlchemy models;  schemas/  Pydantic models
   jobs/          procrastinate app, tasks (media processing, demo family), worker
   storage/       local filesystem storage (atomic writes, SHA-256)
-  importers/ exporters/   placeholders for phases 9 and 11
+  importers/gedcom/  GEDCOM reader (parser, ANSEL, dates, records → plain data)
+  exporters/         placeholder for phase 11
   seed.py, cli.py         demo family seeding; operator CLI (create-superadmin, disable-2fa)
 backend/alembic/  migrations (run automatically on backend start)
 frontend/src/
-  features/      admin, auth, builder, collab, insights, map, media, person, sources, stories,
-                 timeline, tree (canvas in tree/canvas)
+  features/      admin, auth, builder, collab, imports, insights, map, media, person, sources,
+                 stories, timeline, tree (canvas in tree/canvas)
   components/    shared UI (ui.tsx, Layout, Logo, EmptyState, Skeleton, HeaderSelect, toasts)
   i18n/locales/  en.json, uk.json, pl.json (parity is tested)
   lib/           api client (CSRF), types, dates, kinship terms, hooks, version
@@ -68,6 +69,9 @@ plans/            this folder
    panel. (D60–D67)
 8. **Insights** — family map, timeline with historical context, relationship calculator (kinship
    terms in uk/en/pl), statistics, "On this day". (D68–D73)
+9. **Data safety** — GEDCOM import (preview, duplicate merge, one transaction, undo) and weekly /
+   on-demand integrity checks of stored originals; backups are left to the infrastructure.
+   (D89–D90)
 
 ## After phase 8 (polish and operations)
 

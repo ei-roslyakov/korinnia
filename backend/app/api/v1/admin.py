@@ -1,4 +1,4 @@
-"""Superadmin endpoints: users, trees, invitations, global audit log."""
+"""Superadmin endpoints: users, trees, invitations, global audit log, integrity checks."""
 
 from __future__ import annotations
 
@@ -6,12 +6,16 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy import select
 
 from app.api.deps import ActorDep, PageParams, SessionDep, require_superadmin
-from app.core.errors import NotFoundError
-from app.models import Invitation, Tree
+from app.core.enums import IntegrityStatus
+from app.core.errors import AppError, NotFoundError
+from app.core.security import utcnow
+from app.models import IntegrityRun, Invitation, MediaFile, Tree
 from app.schemas.audit import AuditEntryOut, AuditQuery
 from app.schemas.common import Page
+from app.schemas.data_safety import IntegrityIssueOut, IntegrityOverview, IntegrityRunOut
 from app.schemas.trees import AdminTreeOut
 from app.schemas.users import (
     CreatedInvitation,
@@ -22,7 +26,7 @@ from app.schemas.users import (
     UpdateUserRequest,
     UserOut,
 )
-from app.services import audit
+from app.services import audit, integrity
 from app.services import trees as tree_service
 from app.services import users as user_service
 
@@ -208,3 +212,82 @@ async def audit_log(
 @router.get("/audit-log/actions", response_model=list[str])
 async def audit_actions(session: SessionDep) -> list[str]:
     return await audit.list_actions(session)
+
+
+# --- Integrity of stored originals -------------------------------------------------------
+
+
+async def _run_out(session: SessionDep, run: IntegrityRun) -> IntegrityRunOut:
+    return IntegrityRunOut(
+        id=run.id,
+        status=run.status,
+        trigger=run.trigger,
+        triggered_by=await integrity.user_label(session, run.triggered_by_id),
+        started_at=run.started_at,
+        finished_at=run.finished_at,
+        files_checked=run.files_checked,
+        bytes_checked=run.bytes_checked,
+        problems=run.problems,
+        untracked_files=run.untracked_files,
+        error=run.error,
+    )
+
+
+@router.get("/integrity", response_model=IntegrityOverview)
+async def integrity_overview(session: SessionDep) -> IntegrityOverview:
+    runs = await integrity.latest_runs(session)
+    finished = next((r for r in runs if r.finished_at is not None), None)
+    issues = await integrity.run_issues(session, finished.id) if finished else []
+    trees = {
+        t.id: t.name
+        for t in await session.scalars(
+            select(Tree).where(Tree.id.in_({i.tree_id for i in issues if i.tree_id}))
+        )
+    }
+    media = {
+        m.id: m
+        for m in await session.scalars(
+            select(MediaFile).where(MediaFile.id.in_({i.media_id for i in issues if i.media_id}))
+        )
+    }
+    files, size = await integrity.originals_total(session)
+    return IntegrityOverview(
+        total_files=files,
+        total_bytes=size,
+        runs=[await _run_out(session, r) for r in runs],
+        issues=[
+            IntegrityIssueOut(
+                key=i.key,
+                problem=i.problem,
+                media_id=i.media_id,
+                tree_id=i.tree_id,
+                tree_name=trees.get(i.tree_id) if i.tree_id else None,
+                filename=(
+                    (media[i.media_id].title or media[i.media_id].original_filename)
+                    if i.media_id in media
+                    else None
+                ),
+                expected_size=i.expected_size,
+                actual_size=i.actual_size,
+                expected_sha256=i.expected_sha256,
+                actual_sha256=i.actual_sha256,
+            )
+            for i in issues
+        ],
+    )
+
+
+@router.post("/integrity/run", response_model=IntegrityRunOut, status_code=202)
+async def start_integrity_check(session: SessionDep, actor: ActorDep) -> IntegrityRunOut:
+    from app.jobs.queue import enqueue_integrity_check
+
+    run = await integrity.start_run(session, trigger="manual", actor=actor)
+    try:
+        await enqueue_integrity_check(run.id)
+    except Exception as exc:
+        run.status = IntegrityStatus.failed
+        run.error = "could not queue the check"
+        run.finished_at = utcnow()
+        await session.commit()
+        raise AppError("job_queue_unavailable", status_code=503) from exc
+    return await _run_out(session, run)

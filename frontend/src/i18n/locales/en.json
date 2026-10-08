@@ -276,7 +276,15 @@
     "comment_not_found": "Comment not found.",
     "comment_target_not_found": "Not found.",
     "question_not_found": "Question not found.",
-    "demo_tree_exists": "This user already has a newer demo family; delete it first to restore this one."
+    "demo_tree_exists": "This user already has a newer demo family; delete it first to restore this one.",
+    "not_gedcom": "This is not a GEDCOM file.",
+    "import_not_ready": "This import is not ready for that step.",
+    "import_not_done": "Only a finished import can be undone.",
+    "unknown_import_person": "A chosen person is not in the import.",
+    "import_not_found": "Import not found.",
+    "integrity_check_running": "A check is already running.",
+    "integrity_run_not_found": "Check not found.",
+    "job_queue_unavailable": "The background worker is not available. Please try again later."
   },
   "dates": {
     "approx": "about {{date}}",
@@ -977,5 +985,138 @@
     "rights": "All rights reserved",
     "thirdParty": "Third-party licences",
     "version": "App version"
+  },
+  "imports": {
+    "link": "Import GEDCOM",
+    "title": "Import a GEDCOM file",
+    "intro": "Bring in a family tree exported from another program (MyHeritage, Ancestry, Gramps, FamilySearch, Geni…). You will see what is in the file and choose who is already in this tree before anything is saved; an import can be undone afterwards.",
+    "choose": "Choose a .ged file",
+    "formats": "GEDCOM 5.5 / 5.5.1, up to 50 MB; UTF-8, UTF-16, ANSEL and Windows code pages. Photos are not part of a .ged file — upload them separately.",
+    "history": "Earlier imports",
+    "open": "Open",
+    "people_one": "{{count}} person",
+    "people_other": "{{count}} people",
+    "status": {
+      "analyzing": "Reading the file",
+      "ready": "Ready to import",
+      "importing": "Importing",
+      "done": "Imported",
+      "failed": "Failed",
+      "undoing": "Undoing",
+      "undone": "Undone",
+      "cancelled": "Cancelled"
+    },
+    "busy": {
+      "analyzing": "Reading the file…",
+      "importing": "Importing — this can take a minute for large trees…",
+      "undoing": "Moving the imported people to the trash…"
+    },
+    "errors": {
+      "not_gedcom": "This is not a GEDCOM file (it must start with “0 HEAD”).",
+      "unreadable": "The file could not be read.",
+      "import_failed": "The import failed; nothing was saved. Please try again or contact the administrator.",
+      "job_queue_unavailable": "The background worker is not available. Please try again later."
+    },
+    "counts": {
+      "persons": "People",
+      "families": "Families",
+      "events": "Events",
+      "places": "Places",
+      "sources": "Sources",
+      "citations": "Citations"
+    },
+    "from": "Exported from {{source}}",
+    "warnings": {
+      "no_name_one": "{{count}} person has no name (shown as “?”).",
+      "no_name_other": "{{count}} people have no name (shown as “?”).",
+      "bad_lines_one": "{{count}} line could not be read and is skipped.",
+      "bad_lines_other": "{{count}} lines could not be read and are skipped.",
+      "missing_people_one": "{{count}} family member is referenced but missing from the file.",
+      "missing_people_other": "{{count}} family members are referenced but missing from the file.",
+      "media_not_imported_one": "{{count}} photo or document link is not imported: upload the files separately.",
+      "media_not_imported_other": "{{count}} photo or document links are not imported: upload the files separately.",
+      "skipped_tags": "Not imported (program-specific data):"
+    },
+    "duplicates": {
+      "title": "Already in this tree?",
+      "hint": "These people in the file look like someone already in the tree. Ticked ones are not created again: the existing person is kept as is and gets the family links from the file.",
+      "inTree": "In the tree: {{name}} ({{years}})",
+      "possible": "possible match (birth year unknown)",
+      "same": "Same person"
+    },
+    "showPeople": "Show everyone in the file",
+    "hidePeople": "Hide the list",
+    "morePeople_one": "…and {{count}} more",
+    "morePeople_other": "…and {{count}} more",
+    "import_one": "Import ({{count}} new person)",
+    "import_other": "Import ({{count}} new people)",
+    "done": "The family tree has been imported.",
+    "undone": "This import was undone: the people and sources it created are in the trash.",
+    "undo": "Undo import",
+    "undoConfirm": "Move everyone and every source this import created to the trash? They can be restored from the trash.",
+    "openTree": "Open the tree",
+    "result": {
+      "counts": {
+        "persons_created_one": "{{count}} person created",
+        "persons_created_other": "{{count}} people created",
+        "persons_merged_one": "{{count}} person matched to the tree",
+        "persons_merged_other": "{{count}} people matched to the tree",
+        "partnerships_one": "{{count}} couple",
+        "partnerships_other": "{{count}} couples",
+        "parent_links_one": "{{count}} parent–child link",
+        "parent_links_other": "{{count}} parent–child links",
+        "events_one": "{{count}} event",
+        "events_other": "{{count}} events",
+        "places_created_one": "{{count}} new place",
+        "places_created_other": "{{count}} new places",
+        "sources_one": "{{count}} source",
+        "sources_other": "{{count}} sources",
+        "citations_one": "{{count}} citation",
+        "citations_other": "{{count}} citations"
+      },
+      "warnings_one": "{{count}} item was skipped",
+      "warnings_other": "{{count}} items were skipped",
+      "person_skipped": "{{name}}: not imported ({{reason}})",
+      "event_skipped": "{{name}}: an event was not imported ({{reason}})",
+      "link_skipped": "{{parent}} → {{child}}: parent link not added ({{reason}})",
+      "partnership_skipped": "{{a}} & {{b}}: couple not added ({{reason}})",
+      "extra_vital": "{{name}}: more than one {{type}} record, only the first is kept",
+      "missing_source": "A citation points to a source that is not in the file"
+    },
+    "newTree": "Import GEDCOM",
+    "newTreeHint": "A new tree was created for this file. Cancelling removes it.",
+    "orImport": "or import a GEDCOM file"
+  },
+  "integrity": {
+    "title": "File integrity",
+    "checkNow": "Check now",
+    "hint": "Every original photo, scan and recording is read back and compared with the fingerprint (SHA-256) taken when it was uploaded. Runs automatically every Sunday night.",
+    "stored_one": "{{count}} original stored ({{size}})",
+    "stored_other": "{{count}} originals stored ({{size}})",
+    "running": "Checking… {{done}} of {{total}} files",
+    "lastCheck": "Last check: {{date}}",
+    "trigger": {
+      "scheduled": "scheduled",
+      "manual": "started by {{name}}"
+    },
+    "failed": "Check failed",
+    "problems_one": "{{count}} problem",
+    "problems_other": "{{count}} problems",
+    "allGood": "All files intact",
+    "checked_one": "{{count}} file checked ({{size}})",
+    "checked_other": "{{count}} files checked ({{size}})",
+    "untracked_one": "{{count}} file in storage not linked to any record",
+    "untracked_other": "{{count}} files in storage not linked to any record",
+    "never": "No check has run yet.",
+    "issuesHint": "These originals are missing or have changed since they were uploaded. Restore them from a backup.",
+    "file": "File",
+    "tree": "Tree",
+    "problem": "Problem",
+    "kinds": {
+      "missing": "Missing",
+      "size_mismatch": "Size changed",
+      "hash_mismatch": "Content changed",
+      "unreadable": "Unreadable"
+    }
   }
 }
