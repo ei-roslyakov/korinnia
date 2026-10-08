@@ -146,7 +146,8 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 ### Export (final phase)
 - 📋 Family archive ZIP: offline static website, JSON + GEDCOM, Markdown, original media with manifest, README (uk / en)
 - 📋 Printable PDF family book
-- 📋 GEDCOM export; PNG / PDF export of the tree view; option to hide living persons
+- ✅ Download the tree view as an image (PNG) or a one-page PDF: the whole tree (not only what is on screen), with the tree's name and date on top, in the current theme and style
+- 📋 GEDCOM export; option to hide living persons
 
 ### Optional (after all phases)
 - 📋 Letters to descendants (sealed until a date); duplicate detection & merge; PWA
@@ -275,6 +276,7 @@ Korinnia uses open-source components under their own licences; their notices are
 
 ## Documentation
 
+- [plans/](plans/README.md): roadmap, work log and implementation overview (kept current every session)
 - [docs/decisions.md](docs/decisions.md): architecture decision log
 - [docs/data-schema.md](docs/data-schema.md): data schema and conventions
 - [docs/backup-restore.md](docs/backup-restore.md): backup and restore procedure

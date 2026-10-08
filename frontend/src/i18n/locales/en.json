@@ -313,6 +313,12 @@
       "simple": "Simple",
       "oak": "Oak",
       "spring": "Spring"
+    },
+    "export": {
+      "label": "Download",
+      "pngHint": "Download the whole tree as an image (PNG)",
+      "pdfHint": "Download the whole tree as a PDF",
+      "failed": "Could not export the tree. Please try again."
     }
   },
   "person": {

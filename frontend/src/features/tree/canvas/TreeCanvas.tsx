@@ -5,6 +5,7 @@ import {
   Background,
   Controls,
   MiniMap,
+  Panel,
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
@@ -15,9 +16,10 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Spinner } from "@/components/ui";
+import { Button, Spinner } from "@/components/ui";
 import type { RelativeRelation, TreeGraph } from "@/lib/genealogy";
 import { useTheme } from "@/lib/theme";
+import { useToast } from "@/lib/toast";
 
 import {
   FAMILY_SIZE,
@@ -35,6 +37,7 @@ import {
   type Family,
 } from "./familyGraph";
 import { edgeTypes } from "./edgeTypes";
+import { exportFileName, exportTree, type ExportFormat } from "./exportTree";
 import { computeLayout } from "./layout";
 import {
   BRANCH,
@@ -81,6 +84,8 @@ interface Props {
   onAddRelative?: (personId: string, relation: RelativeRelation) => void;
   /** New offsets (from the automatic layout) of the cards moved by one drag. */
   onMoved?: (offsets: Record<string, { dx: number; dy: number }>) => void;
+  /** Tree name: offers "download as PNG / PDF" with this title. */
+  exportTitle?: string;
 }
 
 type XY = { x: number; y: number };
@@ -100,14 +105,17 @@ function CanvasInner({
   builder = false,
   onAddRelative,
   onMoved,
+  exportTitle,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme } = useTheme();
   const rf = useReactFlow();
   const rel = useMemo(() => indexRelations(graph), [graph]);
   // The person whose line is highlighted: the one under the pointer, else the selected one.
   const [hovered, setHovered] = useState<string | null>(null);
-  const focusPerson = hovered ?? selectedId ?? null;
+  // While exporting, every card is rendered and nothing is highlighted.
+  const [exporting, setExporting] = useState<ExportFormat | null>(null);
+  const focusPerson = exporting ? null : (hovered ?? selectedId ?? null);
   const lit = useMemo(() => (focusPerson ? lineage(rel, focusPerson) : null), [rel, focusPerson]);
   /** A family junction on the highlighted line (or nothing highlighted). */
   const familyLit = useCallback(
@@ -299,12 +307,12 @@ function CanvasInner({
           // node array can drop measurements, leaving the canvas blank until a resize.
           initialWidth: PERSON_WIDTH,
           initialHeight: PERSON_HEIGHT,
-          selected: id === selectedId,
+          selected: !exporting && id === selectedId,
           draggable: builder,
           style: { opacity: lit && !lit.has(id) ? 0.3 : 1, transition: "opacity 150ms" },
           data: {
             person: byId.get(id)!,
-            highlighted: id === center?.personId,
+            highlighted: !exporting && id === center?.personId,
             hiddenUp: hiddenRel.up,
             hiddenDown: hiddenRel.down,
             onAdd: builder ? onAddRelative : undefined,
@@ -367,6 +375,7 @@ function CanvasInner({
     focusMode,
     selectedId,
     center,
+    exporting,
     builder,
     onAddRelative,
     offsets,
@@ -539,6 +548,38 @@ function CanvasInner({
     fitted.current = false;
   }, [focusMode]);
 
+  // Export runs once the canvas has re-rendered without culling and highlights (and the
+  // 150 ms opacity transition of dimmed cards has finished).
+  const rootRef = useRef<HTMLDivElement>(null);
+  const toast = useToast();
+  useEffect(() => {
+    if (!exporting || !exportTitle) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      const root = rootRef.current;
+      const run = root
+        ? exportTree({
+            root,
+            bounds: rf.getNodesBounds(rf.getNodes()),
+            format: exporting,
+            title: exportTitle,
+            subtitle: [
+              t("canvas.persons", { count: graph.persons.length }),
+              new Intl.DateTimeFormat(i18n.language, { dateStyle: "long" }).format(new Date()),
+            ].join(" · "),
+            fileName: exportFileName(exportTitle),
+          })
+        : Promise.reject(new Error("no canvas"));
+      run
+        .catch(() => !cancelled && toast(t("canvas.export.failed"), "error"))
+        .finally(() => !cancelled && setExporting(null));
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [exporting, exportTitle, rf, t, i18n.language, graph.persons.length, toast]);
+
   if (layout.isPending) {
     return (
       <div className="text-bark-700 flex h-full items-center justify-center gap-2">
@@ -549,6 +590,7 @@ function CanvasInner({
 
   return (
     <ReactFlow
+      ref={rootRef}
       // Sky above, meadow towards the ground (per theme).
       style={{ background: "var(--k-canvas)" }}
       colorMode={theme === "dark" ? "dark" : "light"}
@@ -565,7 +607,7 @@ function CanvasInner({
       nodesDraggable={builder}
       nodesConnectable={false}
       edgesFocusable={false}
-      onlyRenderVisibleElements
+      onlyRenderVisibleElements={!exporting}
       ariaLabelConfig={{
         "controls.ariaLabel": t("canvas.controls"),
         "controls.zoomIn.ariaLabel": t("canvas.zoomIn"),
@@ -579,6 +621,30 @@ function CanvasInner({
       fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
     >
       <Background gap={24} color="var(--k-canvas-dots)" bgColor="transparent" />
+      {exportTitle && (
+        <Panel position="top-left">
+          <div
+            role="group"
+            aria-label={t("canvas.export.label")}
+            className="border-bark-100 bg-surface flex items-center gap-1 rounded-md border px-2 py-1 text-xs shadow-sm"
+          >
+            <span className="text-bark-700">{t("canvas.export.label")}:</span>
+            {(["png", "pdf"] as const).map((f) => (
+              <Button
+                key={f}
+                variant="ghost"
+                className="px-2 py-0.5 text-xs"
+                busy={exporting === f}
+                disabled={Boolean(exporting)}
+                title={t(`canvas.export.${f}Hint`)}
+                onClick={() => setExporting(f)}
+              >
+                {f.toUpperCase()}
+              </Button>
+            ))}
+          </div>
+        </Panel>
+      )}
       <Controls showInteractive={false} fitViewOptions={{ padding: 0.15, duration: 300 }} />
       <MiniMap
         bgColor="var(--k-surface)"

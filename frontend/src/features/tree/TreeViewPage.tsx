@@ -246,6 +246,7 @@ export function TreeViewPage() {
             builder={builder}
             onAddRelative={(relativeId, relation) => setAdding({ relativeId, relation })}
             onMoved={(offsets) => saveOffsets.mutate(offsets)}
+            exportTitle={tree.data.name}
           />
         )}
         {personId && (

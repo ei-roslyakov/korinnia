@@ -317,6 +317,12 @@
       "simple": "Prosty",
       "oak": "Dąb",
       "spring": "Wiosna"
+    },
+    "export": {
+      "label": "Pobierz",
+      "pngHint": "Pobierz całe drzewo jako obraz (PNG)",
+      "pdfHint": "Pobierz całe drzewo jako PDF",
+      "failed": "Nie udało się wyeksportować drzewa. Spróbuj ponownie."
     }
   },
   "person": {
