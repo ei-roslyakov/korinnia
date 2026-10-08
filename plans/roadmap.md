@@ -30,8 +30,8 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 - Every push to `main` (except `*.md` and `deploy/argocd/**`) runs the **Deploy** workflow: builds
   and pushes images to GHCR, publishes the Helm chart, bumps the patch version (v0.0.N), tags it, and
   commits the new version into the Argo CD Application ("Deploy vX [skip ci]").
-- Last deployed at the time of writing: v0.0.8 (tree rename/delete in list and builder, person delete
-  from the side panel).
+- Last deployed at the time of writing: v0.0.11 (phase 9: GEDCOM import, integrity checks;
+  migration 0008 applied in production 2026-10-08). CI fully green again (E2E included).
 - Media volume: NFS (`nfs-csi`), fixed by an init container (D87).
 
 ## Phase 9 (done 2026-10-08)

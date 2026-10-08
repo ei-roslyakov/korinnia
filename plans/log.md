@@ -4,6 +4,8 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-08
 
+- **Deployed v0.0.11** — production ran migration 0008, `/api/readyz` 200; CI green
+  including end-to-end tests (first time since 2026-10-07 afternoon).
 - **"Import GEDCOM" next to "New tree"** (superadmins, like "New tree"): creates a tree named
   after the file and opens the preview; cancelling removes that tree; a refused file deletes it
   at once. Empty trees also offer "or import a GEDCOM file". (commit "Phase 9: GEDCOM import and integrity checks")
