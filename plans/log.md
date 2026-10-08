@@ -7,7 +7,7 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 - **Tree export to PNG / PDF** — "Download: PNG | PDF" in the top-left corner of the tree canvas
   (view and builder). Whole tree with title, people count and date; current theme and style. New
   dependency `html-to-image` 1.11.11 (notices regenerated); own one-page PDF writer `lib/pdf.ts`.
-  D88. Verified by downloading both from the local app (PNG 6858×3276, PDF on A2). (not yet committed)
+  D88. Verified by downloading both from the local app (PNG 6858×3276, PDF on A2). (d8267da)
 - **Added `plans/`** (this folder: README, roadmap, implementation overview, log) and `CLAUDE.md`
   telling every session to read and update it.
 
