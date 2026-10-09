@@ -1,13 +1,15 @@
 """Demo family: `python -m app.seed` (or `make seed`).
 
-Creates the tree "Родина Коваленків (демо)" — 25 fictional people across 5 generations
-(1860s–1980s) with Cyrillic and Latin names, places with historical names, life events,
-burial details, an emigration to Canada, a biography and an illustrated portrait for every
-person. Uses the regular services, so everything is validated and recorded in the history
-like a manual edit.
+Creates the tree "Родина Коваленків (демо)" — 64 fictional people across 7 generations
+(1830s–2010s) with several root families, Cyrillic and Latin names, places with historical
+names, life events, burial details, two emigrations to Canada, a biography and an
+illustrated portrait for every person. Uses the regular services, so everything is validated
+and recorded in the history like a manual edit.
 
 Every user gets their own copy (new accounts automatically, through a background job; see
-DEMO_TREE_FOR_NEW_USERS). Running it again does nothing for owners who already have one.
+DEMO_TREE_FOR_NEW_USERS). Running it again brings existing copies up to date (people added
+in a newer version of the demo, missing biographies and portraits) without touching what
+their owners changed.
 """
 
 from __future__ import annotations
@@ -16,6 +18,7 @@ import argparse
 import asyncio
 import io
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -26,6 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.dates import PartialDate
 from app.core.db import get_engine, get_sessionmaker
+from app.core.errors import AppError
 from app.core.logging import configure_logging
 from app.models import Person, Tree, User
 from app.schemas.events import EventCreate
@@ -43,6 +47,12 @@ from app.services.genealogy import relationships as rel_service
 from app.storage import Storage, get_storage
 
 TREE_NAME = "Родина Коваленків (демо)"
+DESCRIPTION = (
+    "Вигадана демонстраційна родина: сім поколінь, 1830-ті — 2010-ті, кілька родових гілок "
+    "з Полтавщини, Прикарпаття, Слобожанщини й Канади."
+)
+# The first version's description; replaced in older copies unless the owner changed it.
+OLD_DESCRIPTION = "Вигадана демонстраційна родина: п'ять поколінь, 1860-ті — 1980-ті."
 
 PLACES: dict[str, dict[str, Any]] = {
     "sorochyntsi": {
@@ -112,6 +122,43 @@ PLACES: dict[str, dict[str, Any]] = {
         "country": "Canada",
         "latitude": "43.653200",
         "longitude": "-79.383200",
+    },
+    "myrhorod": {
+        "name": "Миргород",
+        "region": "Полтавська область",
+        "country": "Україна",
+        "latitude": "49.967600",
+        "longitude": "33.608600",
+        "historical_names": [{"name": "Миргород, Полтавська губернія", "until_year": 1923}],
+    },
+    "kolomyia": {
+        "name": "Коломия",
+        "region": "Івано-Франківська область",
+        "country": "Україна",
+        "latitude": "48.531000",
+        "longitude": "25.036500",
+        "historical_names": [
+            {"name": "Kołomyja", "from_year": 1919, "until_year": 1939, "note": "У складі Польщі"},
+            {"name": "Kolomea", "until_year": 1918, "note": "Австро-Угорщина"},
+        ],
+    },
+    "dnipro": {
+        "name": "Дніпро",
+        "region": "Дніпропетровська область",
+        "country": "Україна",
+        "latitude": "48.464700",
+        "longitude": "35.046200",
+        "historical_names": [
+            {"name": "Катеринослав", "until_year": 1926},
+            {"name": "Дніпропетровськ", "from_year": 1926, "until_year": 2016},
+        ],
+    },
+    "winnipeg": {
+        "name": "Winnipeg",
+        "region": "Manitoba",
+        "country": "Canada",
+        "latitude": "49.895100",
+        "longitude": "-97.138400",
     },
 }
 
@@ -381,6 +428,355 @@ PEOPLE: list[P] = [
         latin=("Emily", "Tkachuk"),
         latin_primary=True,
     ),
+    # --- Added in the second version of the demo (2026-10): two older generations, the
+    # families of everyone who married in (several roots), side branches and the youngest
+    # generation. Kept after the original 25 so their portraits stay the same.
+    # Generation 0 (1830s)
+    P(
+        "hnat",
+        "male",
+        "Гнат",
+        "Коваленко",
+        born=yr(1834),
+        born_in="sorochyntsi",
+        died=yr(1899),
+        died_in="sorochyntsi",
+        latin=("Hnat", "Kovalenko"),
+        extra={"occupation": "Коваль"},
+    ),
+    P(
+        "yavdokha",
+        "female",
+        "Явдоха",
+        "Коваленко",
+        maiden="Дяченко",
+        born=yr(1838, precision="approx"),
+        born_in="sorochyntsi",
+        died=yr(1905),
+        died_in="sorochyntsi",
+    ),
+    P(
+        "mykyta",
+        "male",
+        "Микита",
+        "Бойко",
+        born=yr(1838),
+        born_in="sorochyntsi",
+        died=yr(1902),
+        died_in="sorochyntsi",
+        extra={"occupation": "Чумак"},
+    ),
+    P(
+        "horpyna",
+        "female",
+        "Горпина",
+        "Бойко",
+        born=yr(1842, precision="approx"),
+        born_in="myrhorod",
+        died=yr(1910),
+        died_in="sorochyntsi",
+    ),
+    # Generation 1
+    P(
+        "omelian",
+        "male",
+        "Омелян",
+        "Коваленко",
+        "Гнатович",
+        born=yr(1859),
+        born_in="sorochyntsi",
+        died=yr(1920),
+        died_in="sorochyntsi",
+    ),
+    P(
+        "uliana",
+        "female",
+        "Уляна",
+        "Коваленко",
+        maiden="Педенко",
+        born=yr(1863),
+        born_in="sorochyntsi",
+        died=yr(1930),
+        died_in="sorochyntsi",
+    ),
+    P(
+        "vasyl_b",
+        "male",
+        "Василь",
+        "Бойко",
+        "Микитович",
+        born=yr(1870),
+        born_in="sorochyntsi",
+        died=yr(1938),
+        died_in="myrhorod",
+    ),
+    P(
+        "trokhym",
+        "male",
+        "Трохим",
+        "Мельник",
+        born=yr(1860),
+        born_in="poltava",
+        died=yr(1921),
+        died_in="poltava",
+        extra={"occupation": "Мірошник"},
+    ),
+    P(
+        "olena_m",
+        "female",
+        "Олена",
+        "Мельник",
+        maiden="Савченко",
+        born=yr(1864),
+        born_in="poltava",
+        died=yr(1933),
+        died_in="poltava",
+    ),
+    P(
+        "ostap",
+        "male",
+        "Остап",
+        "Ткач",
+        born=yr(1855),
+        born_in="poltava",
+        died=yr(1920),
+        died_in="poltava",
+        extra={"occupation": "Столяр"},
+    ),
+    P(
+        "marfa",
+        "female",
+        "Марфа",
+        "Ткач",
+        born=yr(1860, precision="approx"),
+        born_in="poltava",
+        died=yr(1928),
+        died_in="poltava",
+    ),
+    P(
+        "mykhailo_sh",
+        "male",
+        "Михайло",
+        "Шевчук",
+        born=yr(1855),
+        born_in="kolomyia",
+        died=yr(1915),
+        died_in="ivano",
+        latin=("Michał", "Szewczuk"),
+        extra={"occupation": "Кравець", "religion": "Греко-католик"},
+    ),
+    P(
+        "kseniia",
+        "female",
+        "Ксенія",
+        "Шевчук",
+        born=yr(1859),
+        born_in="kolomyia",
+        died=yr(1931),
+        died_in="ivano",
+    ),
+    P(
+        "petro_h",
+        "male",
+        "Петро",
+        "Гнатюк",
+        born=yr(1860),
+        born_in="kolomyia",
+        died=yr(1930),
+        died_in="kolomyia",
+        extra={"occupation": "Дяк"},
+    ),
+    P(
+        "mariia_h",
+        "female",
+        "Марія",
+        "Гнатюк",
+        born=yr(1864),
+        born_in="kolomyia",
+        died=yr(1940),
+        died_in="kolomyia",
+    ),
+    # Generation 2
+    P(
+        "sava",
+        "male",
+        "Сава",
+        "Коваленко",
+        "Омелянович",
+        born=yr(1888),
+        born_in="sorochyntsi",
+        died=yr(1933),
+        died_in="sorochyntsi",
+        extra={"short_summary": "Загинув під час Голодомору."},
+    ),
+    P(
+        "hryhorii",
+        "male",
+        "Григорій",
+        "Мельник",
+        "Трохимович",
+        born=yr(1897),
+        born_in="poltava",
+        died=yr(1964),
+        died_in="dnipro",
+    ),
+    P(
+        "anna_sh",
+        "female",
+        "Анна",
+        "Гуменюк",
+        "Михайлівна",
+        maiden="Шевчук",
+        born=yr(1890),
+        born_in="ivano",
+        died=yr(1979),
+        died_in="winnipeg",
+        latin=("Anna", "Humeniuk"),
+    ),
+    P(
+        "ivan_h",
+        "male",
+        "Іван",
+        "Гуменюк",
+        born=yr(1886),
+        born_in="kolomyia",
+        died=yr(1951),
+        died_in="winnipeg",
+        latin=("John", "Humeniuk"),
+        extra={"occupation": "Фермер"},
+    ),
+    # Generation 3
+    P(
+        "peter_h",
+        "male",
+        "Петро",
+        "Гуменюк",
+        "Іванович",
+        born=yr(1915),
+        born_in="winnipeg",
+        died=yr(1990),
+        died_in="winnipeg",
+        latin=("Peter", "Humeniuk"),
+        latin_primary=True,
+    ),
+    P(
+        "nina",
+        "female",
+        "Ніна",
+        "Мельник",
+        "Григорівна",
+        born=yr(1925),
+        born_in="dnipro",
+        died=yr(2003),
+        died_in="dnipro",
+        extra={"occupation": "Бібліотекарка"},
+    ),
+    P(
+        "viktor",
+        "male",
+        "Віктор",
+        "Романенко",
+        born=yr(1925),
+        born_in="kharkiv",
+        died=yr(1999),
+        died_in="kharkiv",
+    ),
+    P(
+        "zoia",
+        "female",
+        "Зоя",
+        "Романенко",
+        born=yr(1928),
+        born_in="kharkiv",
+        died=yr(2011),
+        died_in="kharkiv",
+    ),
+    P(
+        "vira",
+        "female",
+        "Віра",
+        "Ткач",
+        maiden="Головко",
+        born=yr(1920),
+        born_in="poltava",
+        died=yr(1990),
+        died_in="poltava",
+    ),
+    # Generation 4
+    P(
+        "mary_h",
+        "female",
+        "Mary",
+        "Humeniuk",
+        born=yr(1945),
+        born_in="winnipeg",
+        latin=("Mary", "Humeniuk"),
+        latin_primary=True,
+    ),
+    P(
+        "yurii",
+        "male",
+        "Юрій",
+        "Ткач",
+        "Миколайович",
+        born=yr(1946),
+        born_in="poltava",
+        died=yr(2019),
+        died_in="poltava",
+        extra={"occupation": "Інженер-залізничник"},
+    ),
+    P("serhii", "male", "Сергій", "Литвин", born=yr(1950), born_in="dnipro"),
+    P("valentyna", "female", "Валентина", "Литвин", born=yr(1952), born_in="dnipro"),
+    P(
+        "sarah",
+        "female",
+        "Sarah",
+        "Tkachuk",
+        maiden="Miller",
+        born=yr(1954),
+        born_in="toronto",
+        latin=("Sarah", "Tkachuk"),
+        latin_primary=True,
+    ),
+    # Generation 5
+    P("olena_t", "female", "Олена", "Ткач", "Юріївна", born=yr(1972), born_in="poltava"),
+    P("maksym", "male", "Максим", "Гончаренко", born=yr(1977), born_in="kharkiv"),
+    P("yuliia", "female", "Юлія", "Бондар", maiden="Кравець", born=yr(1984), born_in="kyiv"),
+    P(
+        "daniel",
+        "male",
+        "Daniel",
+        "Harris",
+        born=yr(1978),
+        born_in="toronto",
+        latin=("Daniel", "Harris"),
+        latin_primary=True,
+    ),
+    # Generation 6 (2000s–2010s)
+    P("bohdan", "male", "Богдан", "Ткач", born=yr(2001), born_in="poltava"),
+    P(
+        "taras",
+        "male",
+        "Тарас",
+        "Коваленко",
+        "Андрійович",
+        born=yr(2005, month=4, day=18),
+        born_in="kyiv",
+        latin=("Taras", "Kovalenko"),
+    ),
+    P("daryna", "female", "Дарина", "Гончаренко", "Максимівна", born=yr(2008), born_in="kyiv"),
+    P("sofiia", "female", "Софія", "Коваленко", "Андріївна", born=yr(2009), born_in="kyiv"),
+    P(
+        "olivia",
+        "female",
+        "Olivia",
+        "Harris",
+        born=yr(2011),
+        born_in="toronto",
+        latin=("Olivia", "Harris"),
+        latin_primary=True,
+    ),
+    P("danylo", "male", "Данило", "Бондар", "Олегович", born=yr(2014), born_in="kyiv"),
 ]
 
 # Short biographies (fictional) so the demo person pages are not empty.
@@ -480,6 +876,107 @@ BIOGRAPHIES: dict[str, str] = {
         "Народилася в Торонто. Вивчає історію української еміграції до Канади "
         "й записала спогади бабусі Ольги."
     ),
+    "hnat": (
+        "Найдавніший відомий предок Коваленків. Від нього пішло ковальство в родині: "
+        "кузню біля миргородського шляху він передав синові Степанові."
+    ),
+    "yavdokha": (
+        "Дружина Гната, родом із Дяченків. Народила сімох дітей, із яких вижили двоє — "
+        "Омелян і Степан."
+    ),
+    "mykyta": (
+        "Чумак із Великих Сорочинців. Возив сіль із Криму, а з останньої мандрівки привіз "
+        "дружині мідний хрестик, що досі передається в родині."
+    ),
+    "horpyna": ("Родом із Миргорода. Знала цілющі трави, і до неї по пораду ходило все село."),
+    "omelian": (
+        "Старший брат Степана. Хліборобствував на батьковій землі й мав найкращий у селі "
+        "сад, де росли груші, щеплені ще дідом."
+    ),
+    "uliana": "Дружина Омеляна, ткаля. Її килими з півнями прикрашали хати всієї родини.",
+    "vasyl_b": (
+        "Молодший брат Параски. Учителював у Миргороді, листувався зі Степаном "
+        "і хрестив його дітей."
+    ),
+    "trokhym": (
+        "Мірошник із Полтави. Його млин на Ворсклі мололи і для Мельників, і для сусідніх "
+        "сіл; звідси й прізвище роду."
+    ),
+    "olena_m": (
+        "Дружина Трохима, з роду Савченків. Вела господарство млина й виховала "
+        "доньку Ганну та сина Григорія."
+    ),
+    "ostap": (
+        "Полтавський столяр, батько Федора. Навчив сина ремесла, тож столярство "
+        "в родині Ткачів тримається вже кілька поколінь."
+    ),
+    "marfa": "Дружина Остапа. Співала в церковному хорі й пекла найкращі в околиці паляниці.",
+    "mykhailo_sh": (
+        "Кравець із Коломиї, згодом переїхав до Станиславова. Шив святкові сурдути "
+        "й навчив дітей поважати добру роботу."
+    ),
+    "kseniia": (
+        "Дружина Михайла. Пережила його на шістнадцять років і дочекалася онучок Галини та Ольги."
+    ),
+    "petro_h": (
+        "Дяк у Коломиї. Гарно писав, тож саме його рукою зроблено частину записів "
+        "у родинній Біблії."
+    ),
+    "mariia_h": (
+        "Дружина Петра Гнатюка. Виховала доньку Катерину, яка стала вчителькою, "
+        "і пишалася, що в родині є «вчена людина»."
+    ),
+    "sava": (
+        "Син Омеляна. Загинув 1933 року під час Голодомору; його ім'я родина "
+        "згадує щороку в листопаді."
+    ),
+    "hryhorii": (
+        "Брат Ганни. Пройшов Першу світову війну, після неї оселився в Катеринославі "
+        "й працював на металургійному заводі."
+    ),
+    "anna_sh": (
+        "Сестра Йосипа. 1910 року разом із чоловіком емігрувала до Канади; у Вінніпезі "
+        "вони мали ферму й допомагали новоприбулим українцям."
+    ),
+    "ivan_h": (
+        "Чоловік Анни, з Коломиї. У Канаді спочатку будував залізницю, потім "
+        "обробляв власну землю в Манітобі."
+    ),
+    "peter_h": (
+        "Народився у Вінніпезі. Учитель і хормейстер українського хору; "
+        "завдяки його листам канадські родини знайшли одна одну."
+    ),
+    "nina": (
+        "Донька Григорія. Бібліотекарка в Дніпрі, берегла фотографії Мельників "
+        "і передала їх Наталії."
+    ),
+    "viktor": "Батько Людмили, харківський лікар-терапевт. Від нього Людмила взяла професію.",
+    "zoia": "Мати Людмили, вчителька музики. Учила грати на фортепіано і онуків.",
+    "vira": "Дружина Миколи, медсестра. Разом вони виростили сина Юрія.",
+    "mary_h": (
+        "Донька Петра Гуменюка. Бібліотекарка у Вінніпезі, зібрала архів листів "
+        "канадської гілки родини."
+    ),
+    "yurii": (
+        "Син Миколи, інженер-залізничник. Сорок років працював на Південній залізниці "
+        "і, як батько, любив розповідати родинні історії."
+    ),
+    "serhii": "Батько Оксани, інженер із Дніпра.",
+    "valentyna": "Мати Оксани, учителька математики.",
+    "sarah": (
+        "Дружина Степана (Stephen), канадка. Вивчила українську, щоб розмовляти "
+        "зі свекрухою Ольгою."
+    ),
+    "olena_t": "Донька Юрія, учителька історії в Полтаві.",
+    "maksym": "Чоловік Наталії, журналіст.",
+    "yuliia": "Дружина Олега, дизайнерка.",
+    "daniel": "Чоловік Emily, учитель історії з Торонто.",
+    "bohdan": "Син Олени, студент-інженер — четверте покоління Ткачів, що працює руками.",
+    "taras": "Син Андрія та Оксани. Вивчає історію й допомагає батькові з родоводом.",
+    "daryna": "Донька Наталії та Максима. Малює родинне дерево для шкільного проєкту.",
+    "sofiia": "Донька Андрія та Оксани, наймолодша Коваленко.",
+    "olivia": "Донька Emily та Daniel. Вчить українську в суботній школі в Торонто.",
+    "danylo": "Син Олега та Юлії, наймолодший у родоводі.",
 }
 
 # (parents..., children)
@@ -492,7 +989,27 @@ FAMILIES: list[tuple[tuple[str, ...], list[str]]] = [
     (("olha", "mykhailo"), ["stephen"]),
     (("volodymyr", "liudmyla"), ["andrii", "nataliia"]),
     (("tetiana", "andrii_b"), ["iryna", "oleh"]),
-    (("stephen",), ["emily"]),
+    (("stephen", "sarah"), ["emily"]),
+    # Second version: the older generations and the families of those who married in.
+    (("hnat", "yavdokha"), ["omelian", "stepan"]),
+    (("mykyta", "horpyna"), ["paraska", "vasyl_b"]),
+    (("omelian", "uliana"), ["sava"]),
+    (("trokhym", "olena_m"), ["hanna", "hryhorii"]),
+    (("ostap", "marfa"), ["fedir"]),
+    (("mykhailo_sh", "kseniia"), ["yosyp", "anna_sh"]),
+    (("petro_h", "mariia_h"), ["kateryna"]),
+    (("hryhorii",), ["nina"]),
+    (("anna_sh", "ivan_h"), ["peter_h"]),
+    (("peter_h",), ["mary_h"]),
+    (("viktor", "zoia"), ["liudmyla"]),
+    (("mykola", "vira"), ["yurii"]),
+    (("yurii",), ["olena_t"]),
+    (("olena_t",), ["bohdan"]),
+    (("serhii", "valentyna"), ["oksana"]),
+    (("andrii", "oksana"), ["taras", "sofiia"]),
+    (("nataliia", "maksym"), ["daryna"]),
+    (("oleh", "yuliia"), ["danylo"]),
+    (("emily", "daniel"), ["olivia"]),
 ]
 
 # (a, b, start, place, end, end_reason)
@@ -508,6 +1025,133 @@ MARRIAGES: list[
     ("volodymyr", "liudmyla", yr(1973), "kyiv", None, None),
     ("tetiana", "andrii_b", yr(1974), "kyiv", None, None),
     ("andrii", "oksana", yr(2003, month=8, day=16), "kyiv", None, None),
+    ("hnat", "yavdokha", yr(1857, precision="approx"), "sorochyntsi", yr(1899), "death"),
+    ("mykyta", "horpyna", yr(1864), "myrhorod", None, None),
+    ("omelian", "uliana", yr(1885), "sorochyntsi", None, None),
+    ("trokhym", "olena_m", yr(1888), "poltava", None, None),
+    ("ostap", "marfa", yr(1882), "poltava", None, None),
+    ("mykhailo_sh", "kseniia", yr(1880), "kolomyia", None, None),
+    ("petro_h", "mariia_h", yr(1885), "kolomyia", None, None),
+    ("anna_sh", "ivan_h", yr(1909), "kolomyia", None, None),
+    ("viktor", "zoia", yr(1949), "kharkiv", None, None),
+    ("mykola", "vira", yr(1945), "poltava", None, None),
+    ("serhii", "valentyna", yr(1975), "dnipro", None, None),
+    ("stephen", "sarah", yr(1978, month=6, day=10), "toronto", None, None),
+    ("nataliia", "maksym", yr(2006), "kyiv", None, None),
+    ("oleh", "yuliia", yr(2011), "kyiv", None, None),
+    ("emily", "daniel", yr(2009), "toronto", None, None),
+]
+
+# Life events besides birth and death; "who" are the principals.
+EVENTS: list[dict[str, Any]] = [
+    {
+        "type": "burial",
+        "who": ["stepan"],
+        "date": yr(1931, month=11, day=5),
+        "place": "sorochyntsi",
+        "cemetery_name": "Сільське кладовище Великих Сорочинців",
+        "burial_plot": "Ряд 4, місце 12",
+        "latitude": "50.024100",
+        "longitude": "33.936800",
+    },
+    {
+        "type": "military_service",
+        "who": ["petro"],
+        "title": "Служба в Червоній армії",
+        "date": {"year": 1941, "end_year": 1944, "precision": "between"},
+    },
+    {
+        "type": "education",
+        "who": ["oleksandr"],
+        "title": "Харківський інженерно-будівельний інститут",
+        "date": {"year": 1936, "end_year": 1941, "precision": "between"},
+        "place": "kharkiv",
+    },
+    {
+        "type": "residence",
+        "who": ["halyna"],
+        "title": "Переїзд до Львова",
+        "date": yr(1944),
+        "place": "lviv",
+    },
+    {
+        "type": "emigration",
+        "who": ["olha"],
+        "title": "Еміграція до Канади",
+        "date": yr(1949, month=5),
+        "place": "lviv",
+        "description": "Виїхала через табори для переміщених осіб у Німеччині.",
+    },
+    {"type": "immigration", "who": ["olha"], "date": yr(1949, month=9), "place": "toronto"},
+    {
+        "type": "award",
+        "who": ["volodymyr"],
+        "title": "Заслужений будівельник України",
+        "date": yr(1998),
+    },
+    {
+        "type": "graduation",
+        "who": ["andrii"],
+        "title": "Київський політехнічний інститут",
+        "date": yr(1997),
+        "place": "kyiv",
+    },
+    # Second version
+    {
+        "type": "burial",
+        "who": ["hnat"],
+        "date": yr(1899),
+        "place": "sorochyntsi",
+        "cemetery_name": "Сільське кладовище Великих Сорочинців",
+    },
+    {
+        "type": "emigration",
+        "who": ["anna_sh", "ivan_h"],
+        "title": "Еміграція до Канади",
+        "date": yr(1910, month=4),
+        "place": "kolomyia",
+        "description": "Пароплавом із Гамбурга до Галіфакса, далі потягом до Вінніпега.",
+    },
+    {
+        "type": "immigration",
+        "who": ["anna_sh", "ivan_h"],
+        "date": yr(1910, month=5),
+        "place": "winnipeg",
+    },
+    {
+        "type": "military_service",
+        "who": ["hryhorii"],
+        "title": "Служба в армії під час Першої світової війни",
+        "date": {"year": 1915, "end_year": 1918, "precision": "between"},
+    },
+    {
+        "type": "residence",
+        "who": ["hryhorii"],
+        "title": "Переїзд до Катеринослава",
+        "date": yr(1922),
+        "place": "dnipro",
+    },
+    {
+        "type": "education",
+        "who": ["yurii"],
+        "title": "Харківський інститут інженерів залізничного транспорту",
+        "date": {"year": 1964, "end_year": 1969, "precision": "between"},
+        "place": "kharkiv",
+    },
+    {
+        "type": "occupation",
+        "who": ["peter_h"],
+        "title": "Хормейстер українського хору",
+        "date": {"year": 1946, "end_year": 1985, "precision": "between"},
+        "place": "winnipeg",
+    },
+    {
+        "type": "graduation",
+        "who": ["taras"],
+        "title": "Ліцей",
+        "date": yr(2022, month=6),
+        "place": "kyiv",
+    },
 ]
 
 
@@ -529,6 +1173,7 @@ def _names(p: P) -> list[dict[str, Any]]:
                 "patronymic": p.patronymic,
                 "last_name": p.maiden,
                 "type": "birth",
+                "script": native["script"],
             }
         )
     if p.latin and p.latin != (p.first, p.last):
@@ -621,12 +1266,19 @@ async def _store_portrait(
 
 
 async def _portraits(
-    session: AsyncSession, storage: Storage, tree: Tree, ids: dict[str, Any], actor: Actor
+    session: AsyncSession,
+    storage: Storage,
+    tree: Tree,
+    ids: dict[str, Any],
+    actor: Actor,
+    only: set[str] | None = None,
 ) -> list[tuple[Any, Any]]:
-    """An illustrated portrait per person."""
+    """An illustrated portrait per person (or per person in `only`)."""
     stored = []
     for i, p in enumerate(PEOPLE):
-        person = await session.get(Person, ids[p.key])
+        if only is not None and p.key not in only:
+            continue
+        person = await session.get(Person, ids[p.key]) if p.key in ids else None
         if person is not None:
             stored.append(
                 (await _store_portrait(session, storage, tree, person, i, p, actor), person.id)
@@ -634,17 +1286,153 @@ async def _portraits(
     return stored
 
 
+def _person_body(p: P, places: dict[str, Any]) -> PersonCreate:
+    body: dict[str, Any] = {"gender": p.gender, "names": _names(p), **p.extra}
+    body.setdefault("biography", BIOGRAPHIES.get(p.key))
+    if p.born:
+        body["birth"] = {"date": p.born, "place_id": places.get(p.born_in or "")}
+    if p.died:
+        body["death"] = {"date": p.died, "place_id": places.get(p.died_in or "")}
+    return PersonCreate.model_validate(body)
+
+
+def _wanted(keys: Iterable[str], ids: dict[str, Any], only: set[str] | None) -> bool:
+    """All `keys` exist, and (when extending) at least one of them is new."""
+    keys = list(keys)
+    return all(k in ids for k in keys) and (only is None or any(k in only for k in keys))
+
+
+async def _relations(
+    session: AsyncSession,
+    tree_id: Any,
+    ids: dict[str, Any],
+    places: dict[str, Any],
+    actor: Actor,
+    only: set[str] | None = None,
+) -> None:
+    """Parent links, marriages and life events between people in `ids`. With `only`, just
+    those that involve a newly added person (an existing copy keeps what it has)."""
+    for parents, children in FAMILIES:
+        for child in children:
+            for parent in parents:
+                if not _wanted((parent, child), ids, only):
+                    continue
+                try:
+                    await rel_service.create_parent_child(
+                        session,
+                        tree_id,
+                        ParentChildCreate(parent_id=ids[parent], child_id=ids[child]),
+                        actor,
+                    )
+                except AppError:  # already linked, or the owner changed this part
+                    await session.rollback()
+    for a, b, start, place, end, reason in MARRIAGES:
+        if not _wanted((a, b), ids, only):
+            continue
+        try:
+            await rel_service.create_partnership(
+                session,
+                tree_id,
+                PartnershipCreate.model_validate(
+                    {
+                        "person_a_id": ids[a],
+                        "person_b_id": ids[b],
+                        "start_date": start,
+                        "place_id": places.get(place or ""),
+                        "end_date": end,
+                        "end_reason": reason,
+                    }
+                ),
+                actor,
+            )
+        except AppError:
+            await session.rollback()
+    for ev in EVENTS:
+        if not _wanted(ev["who"], ids, only):
+            continue
+        body = {k: v for k, v in ev.items() if k not in ("who", "place")}
+        body["participants"] = [{"person_id": ids[k]} for k in ev["who"]]
+        if ev.get("place"):
+            body["place_id"] = places[ev["place"]]
+        await event_service.create_event(session, tree_id, EventCreate.model_validate(body), actor)
+
+
+async def _places(session: AsyncSession, tree: Tree, actor: Actor) -> dict[str, Any]:
+    """Ids of the demo places in `tree`, creating those that are missing."""
+    from app.models import Place
+
+    rows = await session.execute(
+        select(Place.name, Place.id).where(Place.tree_id == tree.id, Place.deleted_at.is_(None))
+    )
+    existing: dict[str, Any] = dict(rows.all())
+    out = {}
+    for key, data in PLACES.items():
+        out[key] = (
+            existing.get(data["name"])
+            or (await place_service.create_place(session, tree.id, PlaceCreate(**data), actor)).id
+        )
+    return out
+
+
+async def _extend(
+    session: AsyncSession, tree: Tree, owner: User, actor: Actor, storage: Storage
+) -> int:
+    """Add the people (and their links and events) that an older copy of the demo does not
+    have yet. Someone the owner deleted is not brought back: names in the trash count."""
+    from app.models import PersonName
+
+    rows = await session.execute(
+        select(PersonName.first_name, PersonName.last_name, Person.id, Person.deleted_at)
+        .join(Person, Person.id == PersonName.person_id)
+        .where(Person.tree_id == tree.id)
+    )
+    seen: set[tuple[str | None, str | None]] = set()
+    live: dict[tuple[str | None, str | None], Any] = {}
+    for first, last, pid, deleted_at in rows:
+        seen.add((first, last))
+        if deleted_at is None:
+            live.setdefault((first, last), pid)
+    ids = {p.key: live[(p.first, p.last)] for p in PEOPLE if (p.first, p.last) in live}
+    missing = [p for p in PEOPLE if (p.first, p.last) not in seen]
+    if not missing:
+        return 0
+    places = await _places(session, tree, actor)
+    for p in missing:
+        ids[p.key] = (
+            await person_service.create_person(session, tree.id, _person_body(p, places), actor)
+        ).id
+    new = {p.key for p in missing}
+    await _relations(session, tree.id, ids, places, actor, only=new)
+    if tree.description == OLD_DESCRIPTION:
+        tree.description = DESCRIPTION
+        await session.commit()
+    from app.jobs.queue import enqueue_avatar, enqueue_media_processing
+
+    for media_id, person_id in await _portraits(session, storage, tree, ids, actor, only=new):
+        await enqueue_media_processing(media_id)
+        await enqueue_avatar(person_id)
+    return len(missing)
+
+
+@dataclass
+class DemoUpdate:
+    added: int = 0  # people new in this version of the demo
+    updated: int = 0  # biographies / portraits filled in or redrawn
+
+
 async def complete_demo(
     session: AsyncSession, tree: Tree, owner: User, *, storage: Storage | None = None
-) -> int:
-    """Bring an older demo copy up to date: missing biographies, missing portraits, and
-    generated portraits from an older drawing version. Never touches what the user wrote or
-    a photo they chose. Returns the number of people updated."""
+) -> DemoUpdate:
+    """Bring an older demo copy up to date: people added in newer versions of the demo,
+    missing biographies, missing portraits, and generated portraits from an older drawing
+    version. Never touches what the user wrote, a photo they chose or a person they
+    deleted."""
     from app.jobs.queue import enqueue_avatar, enqueue_media_processing
     from app.models import MediaFile, PersonName
 
     actor = Actor(owner, ip="seed")
     store = storage or get_storage()
+    result = DemoUpdate(added=await _extend(session, tree, owner, actor, store))
     by_name: dict[tuple[str | None, str | None], Person] = {}
     rows = await session.execute(
         select(PersonName.first_name, PersonName.last_name, Person)
@@ -653,7 +1441,6 @@ async def complete_demo(
     )
     for first, last, row in rows:
         by_name.setdefault((first, last), row)
-    updated = 0
     for i, p in enumerate(PEOPLE):
         person = by_name.get((p.first, p.last))
         if person is None:
@@ -681,8 +1468,8 @@ async def complete_demo(
             await enqueue_media_processing(media_id)
             await enqueue_avatar(person.id)
             changed = True
-        updated += changed
-    return updated
+        result.updated += changed
+    return result
 
 
 async def seed(
@@ -699,114 +1486,19 @@ async def seed(
     tree = await tree_service.create_tree(
         session,
         name=TREE_NAME,
-        description="Вигадана демонстраційна родина: п'ять поколінь, 1860-ті — 1980-ті.",
+        description=DESCRIPTION,
         owner=owner,
         actor=actor,
         is_demo=True,
     )
-    places = {
-        key: (await place_service.create_place(session, tree.id, PlaceCreate(**data), actor)).id
-        for key, data in PLACES.items()
-    }
+    places = await _places(session, tree, actor)
     ids: dict[str, Any] = {}
     for p in PEOPLE:
-        body: dict[str, Any] = {"gender": p.gender, "names": _names(p), **p.extra}
-        body.setdefault("biography", BIOGRAPHIES.get(p.key))
-        if p.born:
-            body["birth"] = {"date": p.born, "place_id": places.get(p.born_in or "")}
-        if p.died:
-            body["death"] = {"date": p.died, "place_id": places.get(p.died_in or "")}
         person = await person_service.create_person(
-            session, tree.id, PersonCreate.model_validate(body), actor
+            session, tree.id, _person_body(p, places), actor
         )
         ids[p.key] = person.id
-
-    for parents, children in FAMILIES:
-        for child in children:
-            for parent in parents:
-                await rel_service.create_parent_child(
-                    session,
-                    tree.id,
-                    ParentChildCreate(parent_id=ids[parent], child_id=ids[child]),
-                    actor,
-                )
-    for a, b, start, place, end, reason in MARRIAGES:
-        await rel_service.create_partnership(
-            session,
-            tree.id,
-            PartnershipCreate.model_validate(
-                {
-                    "person_a_id": ids[a],
-                    "person_b_id": ids[b],
-                    "start_date": start,
-                    "place_id": places.get(place or ""),
-                    "end_date": end,
-                    "end_reason": reason,
-                }
-            ),
-            actor,
-        )
-
-    events: list[dict[str, Any]] = [
-        {
-            "type": "burial",
-            "who": "stepan",
-            "date": yr(1931, month=11, day=5),
-            "place": "sorochyntsi",
-            "cemetery_name": "Сільське кладовище Великих Сорочинців",
-            "burial_plot": "Ряд 4, місце 12",
-            "latitude": "50.024100",
-            "longitude": "33.936800",
-        },
-        {
-            "type": "military_service",
-            "who": "petro",
-            "title": "Служба в Червоній армії",
-            "date": {"year": 1941, "end_year": 1944, "precision": "between"},
-        },
-        {
-            "type": "education",
-            "who": "oleksandr",
-            "title": "Харківський інженерно-будівельний інститут",
-            "date": {"year": 1936, "end_year": 1941, "precision": "between"},
-            "place": "kharkiv",
-        },
-        {
-            "type": "residence",
-            "who": "halyna",
-            "title": "Переїзд до Львова",
-            "date": yr(1944),
-            "place": "lviv",
-        },
-        {
-            "type": "emigration",
-            "who": "olha",
-            "title": "Еміграція до Канади",
-            "date": yr(1949, month=5),
-            "place": "lviv",
-            "description": "Виїхала через табори для переміщених осіб у Німеччині.",
-        },
-        {"type": "immigration", "who": "olha", "date": yr(1949, month=9), "place": "toronto"},
-        {
-            "type": "award",
-            "who": "volodymyr",
-            "title": "Заслужений будівельник України",
-            "date": yr(1998),
-        },
-        {
-            "type": "graduation",
-            "who": "andrii",
-            "title": "Київський політехнічний інститут",
-            "date": yr(1997),
-            "place": "kyiv",
-        },
-    ]
-    for ev in events:
-        body = {k: v for k, v in ev.items() if k not in ("who", "place")}
-        body["participants"] = [{"person_id": ids[ev["who"]]}]
-        if ev.get("place"):
-            body["place_id"] = places[ev["place"]]
-        await event_service.create_event(session, tree.id, EventCreate.model_validate(body), actor)
+    await _relations(session, tree.id, ids, places, actor)
 
     if portraits:
         from app.jobs.queue import enqueue_avatar, enqueue_media_processing
@@ -853,10 +1545,17 @@ async def run(args: argparse.Namespace) -> int:
                     tree = None
                 if tree is None:
                     existing = await demo_tree_of(session, owner)
-                    filled = await complete_demo(session, existing, owner) if existing else 0
+                    done = (
+                        await complete_demo(session, existing, owner) if existing else DemoUpdate()
+                    )
                     print(
                         f"seed: {email} already has {TREE_NAME!r}"
-                        + (f"; added biographies / portraits for {filled} people" if filled else "")
+                        + (f"; added {done.added} new people" if done.added else "")
+                        + (
+                            f"; added biographies / portraits for {done.updated} people"
+                            if done.updated
+                            else ""
+                        )
                     )
                 else:
                     print(f"seed: created {TREE_NAME!r} ({len(PEOPLE)} people) for {email}")

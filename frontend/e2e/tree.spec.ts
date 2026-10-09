@@ -79,6 +79,7 @@ test("search by Latin spelling centres and opens the person", async ({ page }) =
   // Focus mode around her: only nearby generations stay on the canvas.
   await panel.getByRole("button", { name: "Зосередитися тут" }).click();
   await page.getByLabel("Покоління").selectOption("2");
-  // Emily, her father Stephen and his parents Olha & Mykhailo.
-  await expect(page.getByTestId("person-card")).toHaveCount(4);
+  // Emily, her parents Stephen & Sarah, his parents Olha & Mykhailo, her husband Daniel
+  // and their daughter Olivia.
+  await expect(page.getByTestId("person-card")).toHaveCount(7);
 });

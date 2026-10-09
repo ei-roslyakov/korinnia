@@ -79,7 +79,8 @@ plans/            this folder
   branch in any direction, Alt-drag one card; lineage highlight; generation labels. (D74, D76, D83)
 - Themes light / dark / archive (sepia); tree styles Simple / Oak / Spring; logo per theme. (D77, D84)
 - English by default (`DEFAULT_LANGUAGE`), remembered per user. (D81)
-- Demo family for every new user (25 people, 5 generations, biographies, illustrated portraits).
+- Demo family for every new user (64 people, 7 generations, several root families, biographies,
+  illustrated portraits); `make seed` grows older copies into the current version. (D91)
   (D78, D79)
 - Licence "All rights reserved", footer with copyright, app version and third-party notices. (D85)
 - Kubernetes: Helm chart, GHCR images, Deploy workflow with automatic patch versions, Argo CD;

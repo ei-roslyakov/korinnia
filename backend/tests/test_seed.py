@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import seed as seed_module
 from app.core.config import get_settings
-from app.models import MediaFile, ParentChild, Partnership, Person, Tree, User
+from app.models import MediaFile, ParentChild, Partnership, Person, PersonName, Tree, User
 from app.services import trees as tree_service
 from app.services.context import Actor
 from app.services.demo_portraits import ERAS, era_of, render_portrait
@@ -36,19 +36,23 @@ async def test_seed_creates_demo_family(
             or 0
         )
 
-    assert await count(Person) == 25
-    assert await count(ParentChild) == 29
-    assert await count(Partnership) == 9
+    n = len(seed_module.PEOPLE)
+    assert n == 64
+    assert await count(Person) == n
+    links = sum(len(parents) * len(children) for parents, children in seed_module.FAMILIES)
+    assert await count(ParentChild) == links
+    assert await count(Partnership) == len(seed_module.MARRIAGES)
+    assert tree.description == seed_module.DESCRIPTION
     assert await seed_module.seed(session, owner, storage=local_storage) is None  # idempotent
 
     # Everyone has a biography and an illustrated portrait (processed by the worker).
     people = list(await session.scalars(select(Person).where(Person.tree_id == tree.id)))
     assert all(p.biography for p in people)
     assert all(p.primary_photo_id and p.primary_photo_crop for p in people)
-    assert await count(MediaFile) == 25
+    assert await count(MediaFile) == n
     tasks = [j["task_name"] for j in job_queue.jobs.values()]
-    assert tasks.count("media.process") == 25
-    assert tasks.count("media.avatar") == 25
+    assert tasks.count("media.process") == n
+    assert tasks.count("media.avatar") == n
 
     # Seeded data is coherent: no implausibility warnings anywhere.
     for person in await session.scalars(select(Person).where(Person.tree_id == tree.id)):
@@ -107,7 +111,9 @@ async def test_seed_cli(
     assert "created" in capsys.readouterr().out
     assert await run() == 0
     # The copy was made without portraits; a re-run fills them in.
-    assert "added biographies / portraits for 25 people" in capsys.readouterr().out
+    assert f"added biographies / portraits for {len(seed_module.PEOPLE)} people" in (
+        capsys.readouterr().out
+    )
     assert await run() == 0
     out = capsys.readouterr().out
     assert "already has" in out
@@ -264,13 +270,17 @@ async def test_complete_demo_fills_gaps_without_overwriting(
     paraska.biography = "Моя власна біографія."
     await session.commit()
 
-    assert await seed_module.complete_demo(session, tree, owner, storage=local_storage) == 25
+    done = await seed_module.complete_demo(session, tree, owner, storage=local_storage)
+    assert (done.added, done.updated) == (0, len(seed_module.PEOPLE))
     await session.refresh(stepan)
     await session.refresh(paraska)
     assert stepan.biography == seed_module.BIOGRAPHIES["stepan"]
     assert paraska.biography == "Моя власна біографія."  # never overwritten
     assert stepan.primary_photo_id is not None
-    assert await seed_module.complete_demo(session, tree, owner, storage=local_storage) == 0
+    assert (
+        await seed_module.complete_demo(session, tree, owner, storage=local_storage)
+        == seed_module.DemoUpdate()
+    )
 
 
 async def test_complete_demo_redraws_outdated_generated_portraits(
@@ -294,11 +304,92 @@ async def test_complete_demo_redraws_outdated_generated_portraits(
     my_media.original_filename = "grandma-1950.jpg"
     await session.commit()
 
-    assert await seed_module.complete_demo(session, tree, owner, storage=local_storage) == 1
+    done = await seed_module.complete_demo(session, tree, owner, storage=local_storage)
+    assert (done.added, done.updated) == (0, 1)
     await session.refresh(old)
     await session.refresh(old_media)
     await session.refresh(mine)
     assert old.primary_photo_id != old_media.id
     assert old_media.deleted_at is not None  # moved to the trash, not destroyed
     assert mine.primary_photo_id == my_media.id  # the user's choice is kept
-    assert await seed_module.complete_demo(session, tree, owner, storage=local_storage) == 0
+    assert (
+        await seed_module.complete_demo(session, tree, owner, storage=local_storage)
+        == seed_module.DemoUpdate()
+    )
+
+
+async def test_complete_demo_adds_the_people_of_a_newer_version(
+    session: AsyncSession,
+    make_user: Callable[..., Awaitable[User]],
+    local_storage: LocalStorage,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A copy made from the first version (25 people) grows into the current one; someone
+    the owner deleted stays deleted, and their own description is kept."""
+    from app.services.genealogy import trash
+
+    owner = await make_user("root@example.com")
+    first = {"stepan", "paraska", "ivan", "hanna", "mariia", "fedir", "yosyp", "kateryna"}
+    first |= {"oleksandr", "halyna", "petro", "olha", "mykhailo", "mykola", "volodymyr"}
+    first |= {"liudmyla", "tetiana", "andrii_b", "stephen", "andrii", "oksana", "nataliia"}
+    first |= {"iryna", "oleh", "emily"}
+    full = (seed_module.PEOPLE, seed_module.FAMILIES, seed_module.MARRIAGES, seed_module.EVENTS)
+    monkeypatch.setattr(seed_module, "PEOPLE", [p for p in full[0] if p.key in first])
+    monkeypatch.setattr(
+        seed_module,
+        "FAMILIES",
+        [
+            (tuple(x for x in parents if x in first), [c for c in kids if c in first])
+            for parents, kids in full[1]
+            if all(x in first for x in (*parents, *kids)) or parents == ("stephen", "sarah")
+        ],
+    )
+    monkeypatch.setattr(
+        seed_module, "MARRIAGES", [m for m in full[2] if m[0] in first and m[1] in first]
+    )
+    monkeypatch.setattr(
+        seed_module, "EVENTS", [e for e in full[3] if all(k in first for k in e["who"])]
+    )
+    tree = await seed_module.seed(session, owner, storage=local_storage, portraits=False)
+    assert tree is not None
+    assert len(seed_module.PEOPLE) == 25
+    tree.description = seed_module.OLD_DESCRIPTION
+    await session.commit()
+    # The owner moved Emily (who is in both versions) to the trash.
+    emily = await session.scalar(
+        select(Person)
+        .join(PersonName, PersonName.person_id == Person.id)
+        .where(Person.tree_id == tree.id, PersonName.first_name == "Emily")
+    )
+    assert emily is not None
+    await trash.delete_person(session, emily, Actor(owner))
+
+    monkeypatch.setattr(seed_module, "PEOPLE", full[0])
+    monkeypatch.setattr(seed_module, "FAMILIES", full[1])
+    monkeypatch.setattr(seed_module, "MARRIAGES", full[2])
+    monkeypatch.setattr(seed_module, "EVENTS", full[3])
+    done = await seed_module.complete_demo(session, tree, owner, storage=local_storage)
+    assert done.added == 64 - 25
+    live = await session.scalar(
+        select(func.count())
+        .select_from(Person)
+        .where(Person.tree_id == tree.id, Person.deleted_at.is_(None))
+    )
+    assert live == 64 - 1  # Emily stays in the trash
+    await session.refresh(tree)
+    assert tree.description == seed_module.DESCRIPTION
+    # Stepan now has parents, and the new people are linked to the old ones.
+    stepan = await session.scalar(
+        select(Person)
+        .join(PersonName, PersonName.person_id == Person.id)
+        .where(Person.tree_id == tree.id, PersonName.first_name == "Степан",
+               PersonName.last_name == "Коваленко")
+    )  # fmt: skip
+    assert stepan is not None
+    parents = await session.scalar(
+        select(func.count()).select_from(ParentChild).where(ParentChild.child_id == stepan.id)
+    )
+    assert parents == 2
+    # Running it again changes nothing more.
+    again = await seed_module.complete_demo(session, tree, owner, storage=local_storage)
+    assert again.added == 0
