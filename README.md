@@ -80,7 +80,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Full revision history of every change (complete snapshots) and restore of any earlier version
 - ✅ Soft delete with impact preview; trash bin with restore (a person comes back together with their relationships and events)
 - ✅ Living-person flag inferred when not set (privacy-first default)
-- ✅ Demo family for every user: each account gets its own editable copy of a fictional family (25 people, 5 generations), every person with a biography and an illustrated portrait; marked "Demo" in the tree list and deletable (`DEMO_TREE_FOR_NEW_USERS`, `make seed` for existing users)
+- ✅ Demo family for every user: each account gets its own editable copy of a fictional family (64 people, 7 generations from the 1830s to the 2010s, several root families from Poltava region, Prykarpattia, Kharkiv, Dnipro and two emigrant branches in Canada), every person with a biography and an illustrated portrait; marked "Demo" in the tree list and deletable (`DEMO_TREE_FOR_NEW_USERS`; `make seed` gives existing users a copy and brings older copies up to date)
 
 ### Tree view
 - ✅ Infinite canvas: drag to pan, wheel / pinch to zoom, fit to screen, zoom buttons, minimap
@@ -112,7 +112,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Family editor: change link types, unlink, link existing people, edit partnership dates and end reason
 - ✅ Person history with "restore this version"
 - ✅ Delete with impact preview; trash bin page with restore
-- ✅ Drag cards anywhere to adjust the layout: a card moves with its whole branch (partners, descendants and their partners); hold Alt to move a single card. Saved per tree as offsets from the automatic layout; reset layout
+- ✅ Drag cards anywhere to adjust the layout: a card moves with its whole branch (partners, descendants and their partners); hold Alt to move a single card. Saved per tree as offsets from the automatic layout; cards never overlap (others make room); reset layout
 - ✅ Unsaved-changes warning; server validation errors and date warnings shown in place
 - ✅ Sources tab: cite a source for any fact (a name, birth, an event, a parent link, a partnership…)
 
@@ -181,7 +181,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 3. **Start:** `make up`. This builds the images and starts PostgreSQL, the backend (which applies migrations), the worker, the Vite dev server and nginx, then waits until they're healthy.
 4. **Open:** <http://localhost:8080>
 
-Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). Every new account automatically gets its own copy of the demo family (25 people, 5 generations, with biographies and illustrated portraits); `make seed` gives one to existing users and fills in anything missing in older copies.
+Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). Every new account automatically gets its own copy of the demo family (64 people, 7 generations, with biographies and illustrated portraits); `make seed` gives one to existing users and brings older copies up to date (adds people from newer versions of the demo, missing biographies and portraits, without touching anything the owner changed or deleted).
 
 ### URLs (development)
 

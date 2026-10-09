@@ -2,6 +2,24 @@
 
 Newest first. One entry per finished task: what changed, why, commit, anything left open.
 
+## 2026-10-09
+
+- **No overlapping cards on the canvas (D92)** — `canvas/overlap.ts` (`separate`) pushes
+  overlapping cards apart left to right after saved offsets are applied; drawing only, offsets
+  untouched. Found because the dev admin's demo copy had old drags that landed on new people
+  (e.g. Stephen Tkachuk on Андрій Бондар). Frontend tests 143. (commit "Canvas: cards never overlap")
+- **Bigger demo family (D91)** — 25 → 64 people, 5 → 7 generations (1830s–2010s), several root
+  couples, side branches, 4 new places (Миргород, Коломия/Kolomea, Дніпро/Катеринослав,
+  Winnipeg). The original 25 are unchanged. `make seed` extends existing copies (people in the
+  trash are not brought back). Seed refactored into helpers (`_person_body`, `_relations`,
+  `_places`, `_extend`); `complete_demo` returns `DemoUpdate(added, updated)`. E2E focus test
+  now expects 7 cards around Emily. Tests: backend 307, E2E 23. Dev copies extended with
+  `make seed`. (commit "Bigger demo family")
+  - To update production copies after deploying: run `python -m app.seed --all-users` in the
+    backend pod.
+  - Copies with dragged cards (e.g. the dev admin's: 8 offsets) look tangled until "Reset
+    layout".
+
 ## 2026-10-08
 
 - **Deployed v0.0.11** — production ran migration 0008, `/api/readyz` 200; CI green

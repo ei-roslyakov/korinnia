@@ -38,6 +38,7 @@ import {
 } from "./familyGraph";
 import { edgeTypes } from "./edgeTypes";
 import { exportFileName, exportTree, type ExportFormat } from "./exportTree";
+import { separate } from "./overlap";
 import { computeLayout } from "./layout";
 import {
   BRANCH,
@@ -157,18 +158,26 @@ function CanvasInner({
   const [dragging, setDragging] = useState<Record<string, XY>>({});
   const offsets = graph.layout_offsets;
 
-  /** Final person positions: automatic layout + saved offsets + live drag. */
-  const personPos = useMemo<Record<string, XY>>(() => {
+  /** Automatic layout + saved offsets, with cards pushed apart where they would overlap
+   * (e.g. a card dragged onto another, or saved offsets after the family grew). */
+  const placedPos = useMemo<Record<string, XY>>(() => {
     const pos = layout.data;
     if (!pos) return {};
     const out: Record<string, XY> = {};
     for (const id of personIds) {
       const base = pos[id] ?? { x: 0, y: 0 };
       const off = offsets?.[id];
-      out[id] = dragging[id] ?? { x: base.x + (off?.dx ?? 0), y: base.y + (off?.dy ?? 0) };
+      out[id] = { x: base.x + (off?.dx ?? 0), y: base.y + (off?.dy ?? 0) };
     }
-    return out;
-  }, [layout.data, personIds, offsets, dragging]);
+    return separate(out, PERSON_WIDTH, PERSON_HEIGHT);
+  }, [layout.data, personIds, offsets]);
+
+  /** Final person positions: the cards being dragged follow the pointer freely; the others
+   * keep their places until the drop. */
+  const personPos = useMemo<Record<string, XY>>(
+    () => (Object.keys(dragging).length ? { ...placedPos, ...dragging } : placedPos),
+    [placedPos, dragging],
+  );
 
   const nodes = useMemo<Node[]>(() => {
     const pos = layout.data;

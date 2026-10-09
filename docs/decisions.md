@@ -373,3 +373,15 @@ A worker job reads every stored original back and compares size and SHA-256 with
 
 Scheduled backups with retention and an off-site copy are left to the hosting infrastructure (database backups of the managed PostgreSQL cluster, snapshots / replication of the media volume): the operator already runs them for every application, and an in-app backup would duplicate that while needing write access to backup storage. The manual `make backup` / `make restore` scripts stay for self-hosters without such infrastructure.
 
+## After phase 9
+
+### D91. A bigger demo family that existing copies grow into
+
+The demo family grew from 25 people in 5 generations to 64 people in 7 (1830s–2010s) so the tree shows what a real archive looks like: two older generations, the parents of everyone who married in (several root couples at different heights: Kovalenko and Boyko at the bottom, Melnyk, Tkach, Shevchuk and Hnatiuk a generation up, Romanenko and Lytvyn later), side branches (a Holodomor victim, a second Canadian branch in Winnipeg, the Tkach line down to 2001) and the youngest generation. The original 25 people are unchanged and stay first in the list, so their portraits (seeded by position) and every test or tour that refers to them still hold.
+
+`make seed` (`complete_demo`) now also adds people that a copy does not have yet, matched by first and last name, with their links, events, places and portraits, and replaces the first version's tree description unless the owner changed it. Names of people in the trash count as present, so someone the owner deleted is not brought back; links and marriages are only added when they involve a newly added person, so nothing the owner rearranged is redone. Cards the owner dragged keep their saved offsets, which can look odd next to the new people until "Reset layout".
+
+### D92. Cards never overlap on the canvas
+
+Saved card offsets are relative to the automatic layout, so when the family grows (new people move the automatic positions) or a card is dropped onto another, cards could end up on top of each other. After offsets are applied, a sweep from left to right pushes any card that overlaps an already placed one (same or neighbouring row) to the right, just far enough, which can push the cards after it; nothing moves vertically and the left-to-right order is kept. Cards that do not overlap keep their exact position, so a tree without overlaps looks the same as before. This only affects drawing: the saved offsets are not changed. While dragging, the dragged cards follow the pointer and the rest stay put; on drop the others make room. Tangled lines from old drags still need "Reset layout".
+
