@@ -37,7 +37,7 @@ async def test_seed_creates_demo_family(
         )
 
     n = len(seed_module.PEOPLE)
-    assert n == 64
+    assert n == 66
     assert await count(Person) == n
     links = sum(len(parents) * len(children) for parents, children in seed_module.FAMILIES)
     assert await count(ParentChild) == links
@@ -369,13 +369,13 @@ async def test_complete_demo_adds_the_people_of_a_newer_version(
     monkeypatch.setattr(seed_module, "MARRIAGES", full[2])
     monkeypatch.setattr(seed_module, "EVENTS", full[3])
     done = await seed_module.complete_demo(session, tree, owner, storage=local_storage)
-    assert done.added == 64 - 25
+    assert done.added == 66 - 25
     live = await session.scalar(
         select(func.count())
         .select_from(Person)
         .where(Person.tree_id == tree.id, Person.deleted_at.is_(None))
     )
-    assert live == 64 - 1  # Emily stays in the trash
+    assert live == 66 - 1  # Emily stays in the trash
     await session.refresh(tree)
     assert tree.description == seed_module.DESCRIPTION
     # Stepan now has parents, and the new people are linked to the old ones.

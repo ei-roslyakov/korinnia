@@ -4,6 +4,16 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-09
 
+- **Couple link on the canvas (D93)** — rings + wedding year (marriage), dashed line + heart
+  (unmarried), struck-through rings (divorce / separation), tooltip with date and place;
+  `PARTNER_GAP` 24 → 56; graph endpoint returns `end_reason` and `place` for partnerships.
+  Demo: +2 people (Лариса — divorced from Юрій; Ігор — Олена's unmarried partner) → 66; dev
+  copies extended with `make seed`. Tests: backend graph + seed, frontend 145, E2E 23.
+  (commit "Couple link on the tree"; seed run in production after deploy)
+- **Production: demo copies extended** — v0.0.12 deployed (CI green incl. E2E); ran
+  `python -m app.seed --all-users` in the backend pod: 5 users' copies 25 → 64 people, all 690
+  portrait jobs succeeded, readyz 200. One demo copy whose owner account was deleted (no owner)
+  stays at 25 — visible only in Admin → Trees; delete it there if not needed.
 - **No overlapping cards on the canvas (D92)** — `canvas/overlap.ts` (`separate`) pushes
   overlapping cards apart left to right after saved offsets are applied; drawing only, offsets
   untouched. Found because the dev admin's demo copy had old drags that landed on new people

@@ -73,6 +73,8 @@ const graph: TreeGraph = {
       type: "marriage",
       start_date: null,
       end_date: null,
+      end_reason: null,
+      place: null,
     },
     {
       id: "p2",
@@ -81,6 +83,8 @@ const graph: TreeGraph = {
       type: "marriage",
       start_date: null,
       end_date: null,
+      end_reason: null,
+      place: null,
     },
     {
       id: "p3",
@@ -89,6 +93,8 @@ const graph: TreeGraph = {
       type: "marriage",
       start_date: null,
       end_date: null,
+      end_reason: null,
+      place: null,
     },
   ],
 };

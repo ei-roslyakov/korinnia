@@ -331,6 +331,10 @@
       "pngHint": "Pobierz całe drzewo jako obraz (PNG)",
       "pdfHint": "Pobierz całe drzewo jako PDF",
       "failed": "Nie udało się wyeksportować drzewa. Spróbuj ponownie."
+    },
+    "couple": {
+      "divorce": "rozwód {{date}}",
+      "separation": "w separacji od {{date}}"
     }
   },
   "person": {

@@ -450,6 +450,9 @@ async def test_partnerships_and_family_view(ctx: Ctx) -> None:
     assert len(graph["persons"]) == 6
     assert len(graph["parent_child"]) == 6
     assert len(graph["partnerships"]) == 1
+    # The canvas draws how a partnership ended (divorce ≠ widowhood) and where it began.
+    assert graph["partnerships"][0]["end_reason"] == "death"
+    assert "place" in graph["partnerships"][0]
 
 
 # --- Delete, trash, history ------------------------------------------------------------

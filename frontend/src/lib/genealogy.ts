@@ -55,6 +55,9 @@ export interface GraphPartnership {
   type: PartnershipType;
   start_date: PartialDate | null;
   end_date: PartialDate | null;
+  end_reason: "divorce" | "death" | "separation" | "other" | null;
+  /** Where it began (name of the place). */
+  place: string | null;
 }
 
 export interface TreeGraph {

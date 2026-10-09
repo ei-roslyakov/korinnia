@@ -416,3 +416,84 @@ export const RowLabelNode = memo(function RowLabelNode({ data }: NodeProps<RowLa
     </div>
   );
 });
+
+export interface CoupleNodeData extends Record<string, unknown> {
+  /** Gap between the two cards, which the link spans. */
+  width: number;
+  married: boolean;
+  /** Divorced or separated: the rings are struck through. */
+  broken: boolean;
+  /** "1946", "~1888" or null. */
+  year: string | null;
+  /** "Marriage · 22 June 1946 · Lviv". */
+  label: string;
+  dim: boolean;
+}
+export type CoupleFlowNode = Node<CoupleNodeData, "couple">;
+
+export const COUPLE_HEIGHT = 40;
+
+/** The link between partners' cards: solid with rings for a marriage, dashed with a heart
+ * otherwise, rings struck through after a divorce or separation; the wedding year below. */
+export const CoupleNode = memo(function CoupleNode({ data }: NodeProps<CoupleFlowNode>) {
+  const { width, married, broken, year, label, dim } = data;
+  const mid = width / 2;
+  const y = 14; // the line runs at the cards' mid-height
+  return (
+    <div
+      className="pointer-events-none relative select-none"
+      style={{ width, height: COUPLE_HEIGHT, opacity: dim ? 0.3 : 1, transition: "opacity 150ms" }}
+    >
+      <svg width={width} height={COUPLE_HEIGHT} aria-hidden="true" className="absolute inset-0">
+        <g stroke={BRANCH} fill="none" strokeLinecap="round">
+          <line
+            x1={0}
+            y1={y}
+            x2={mid - 10}
+            y2={y}
+            strokeWidth={2}
+            strokeDasharray={married ? undefined : "3 3"}
+          />
+          <line
+            x1={mid + 10}
+            y1={y}
+            x2={width}
+            y2={y}
+            strokeWidth={2}
+            strokeDasharray={married ? undefined : "3 3"}
+          />
+          {married ? (
+            <>
+              <circle cx={mid - 3} cy={y} r={5} strokeWidth={1.8} />
+              <circle cx={mid + 3} cy={y} r={5} strokeWidth={1.8} />
+            </>
+          ) : (
+            <path
+              d={`M ${mid} ${y + 5} C ${mid - 9} ${y - 1}, ${mid - 4} ${y - 8}, ${mid} ${y - 3}
+                  C ${mid + 4} ${y - 8}, ${mid + 9} ${y - 1}, ${mid} ${y + 5} Z`}
+              fill={BRANCH}
+              stroke="none"
+            />
+          )}
+          {broken && <line x1={mid - 8} y1={y + 8} x2={mid + 8} y2={y - 8} strokeWidth={2} />}
+        </g>
+      </svg>
+      {/* Hover target for the details (the rest of the link lets the canvas pan). */}
+      <span
+        className="pointer-events-auto absolute rounded-full"
+        style={{ left: mid - 11, top: y - 11, width: 22, height: 22 }}
+        title={label}
+        aria-label={label}
+        role="img"
+      />
+      {year && (
+        <span
+          className="text-bark-700 absolute w-full text-center text-[10px] leading-none tabular-nums"
+          style={{ top: y + 10 }}
+        >
+          {year}
+        </span>
+      )}
+    </div>
+  );
+});

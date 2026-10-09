@@ -171,7 +171,8 @@ export function defaultFocus(graph: TreeGraph, rel: Relations): string | null {
 // the partners for a couple). ELK orders the units to minimise crossings and centres children
 // under their parents; family junctions are then placed halfway between the rows.
 
-export const PARTNER_GAP = 24;
+/** Space between partners' cards: room for the couple link (rings and wedding year). */
+export const PARTNER_GAP = 56;
 export const UNIT_GAP = 40;
 export const ROW_GAP = 80;
 

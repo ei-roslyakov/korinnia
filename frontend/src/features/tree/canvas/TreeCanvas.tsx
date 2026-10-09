@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button, Spinner } from "@/components/ui";
 import type { RelativeRelation, TreeGraph } from "@/lib/genealogy";
+import { formatPartialDate } from "@/lib/dates";
 import { useTheme } from "@/lib/theme";
 import { useToast } from "@/lib/toast";
 
@@ -38,6 +39,7 @@ import {
 } from "./familyGraph";
 import { edgeTypes } from "./edgeTypes";
 import { exportFileName, exportTree, type ExportFormat } from "./exportTree";
+import { COUPLE_HEIGHT, type CoupleFlowNode } from "./nodes";
 import { separate } from "./overlap";
 import { computeLayout } from "./layout";
 import {
@@ -372,10 +374,65 @@ function CanvasInner({
           },
         };
       });
-    return [...crownNodes(), ...groundNodes(), ...rowLabels(), ...personNodes, ...familyNodes];
+    // The link between partners standing next to each other in a row (D93).
+    const coupleNodes: Node[] = graph.partnerships.flatMap((p) => {
+      const a = personPos[p.person_a_id];
+      const b = personPos[p.person_b_id];
+      if (!a || !b || !pos[p.person_a_id] || !pos[p.person_b_id]) return [];
+      if (Math.abs(a.y - b.y) > PERSON_HEIGHT / 2) return [];
+      const [left, right] = a.x <= b.x ? [a, b] : [b, a];
+      const gap = right.x - (left.x + PERSON_WIDTH);
+      // Cards dragged far apart (or with someone in between) get no link.
+      if (gap < 24 || gap > PERSON_WIDTH) return [];
+      const start = p.start_date;
+      const year = start?.year
+        ? `${start.precision === "approx" || start.precision === "before" ? "~" : ""}${start.year}`
+        : null;
+      const broken = p.end_reason === "divorce" || p.end_reason === "separation";
+      const label = [
+        t(`partnershipTypes.${p.type}`),
+        start && formatPartialDate(start, t, i18n.language),
+        p.place,
+        broken &&
+          t(`canvas.couple.${p.end_reason}`, {
+            date: p.end_date ? formatPartialDate(p.end_date, t, i18n.language) : "",
+          }).trim(),
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      const node: CoupleFlowNode = {
+        id: `couple-${p.id}`,
+        type: "couple",
+        position: { x: left.x + PERSON_WIDTH, y: left.y + PERSON_HEIGHT / 2 - 14 },
+        initialWidth: gap,
+        initialHeight: COUPLE_HEIGHT,
+        draggable: false,
+        selectable: false,
+        focusable: false,
+        zIndex: -1,
+        data: {
+          width: gap,
+          married: p.type === "marriage",
+          broken,
+          year,
+          label,
+          dim: Boolean(lit && !(lit.has(p.person_a_id) && lit.has(p.person_b_id))),
+        },
+      };
+      return [node];
+    });
+    return [
+      ...crownNodes(),
+      ...groundNodes(),
+      ...rowLabels(),
+      ...coupleNodes,
+      ...personNodes,
+      ...familyNodes,
+    ];
   }, [
     layout.data,
     graph,
+    i18n.language,
     personIds,
     personPos,
     families,

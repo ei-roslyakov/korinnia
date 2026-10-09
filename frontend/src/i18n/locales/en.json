@@ -327,6 +327,10 @@
       "pngHint": "Download the whole tree as an image (PNG)",
       "pdfHint": "Download the whole tree as a PDF",
       "failed": "Could not export the tree. Please try again."
+    },
+    "couple": {
+      "divorce": "divorced {{date}}",
+      "separation": "separated {{date}}"
     }
   },
   "person": {

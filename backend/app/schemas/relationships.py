@@ -79,6 +79,9 @@ class GraphPartnership(BaseModel):
     type: PartnershipType
     start_date: PartialDateOut | None
     end_date: PartialDateOut | None
+    # How it ended (a divorce is drawn differently from widowhood) and where it began.
+    end_reason: PartnershipEndReason | None = None
+    place: str | None = None
 
 
 class LayoutOffset(BaseModel):

@@ -1,6 +1,6 @@
 """Demo family: `python -m app.seed` (or `make seed`).
 
-Creates the tree "Родина Коваленків (демо)" — 64 fictional people across 7 generations
+Creates the tree "Родина Коваленків (демо)" — 66 fictional people across 7 generations
 (1830s–2010s) with several root families, Cyrillic and Latin names, places with historical
 names, life events, burial details, two emigrations to Canada, a biography and an
 illustrated portrait for every person. Uses the regular services, so everything is validated
@@ -725,6 +725,16 @@ PEOPLE: list[P] = [
         died_in="poltava",
         extra={"occupation": "Інженер-залізничник"},
     ),
+    P(
+        "larysa",
+        "female",
+        "Лариса",
+        "Ткач",
+        maiden="Мороз",
+        born=yr(1948),
+        born_in="poltava",
+        extra={"occupation": "Економістка"},
+    ),
     P("serhii", "male", "Сергій", "Литвин", born=yr(1950), born_in="dnipro"),
     P("valentyna", "female", "Валентина", "Литвин", born=yr(1952), born_in="dnipro"),
     P(
@@ -740,6 +750,7 @@ PEOPLE: list[P] = [
     ),
     # Generation 5
     P("olena_t", "female", "Олена", "Ткач", "Юріївна", born=yr(1972), born_in="poltava"),
+    P("ihor", "male", "Ігор", "Савчук", born=yr(1970), born_in="poltava"),
     P("maksym", "male", "Максим", "Гончаренко", born=yr(1977), born_in="kharkiv"),
     P("yuliia", "female", "Юлія", "Бондар", maiden="Кравець", born=yr(1984), born_in="kyiv"),
     P(
@@ -961,6 +972,11 @@ BIOGRAPHIES: dict[str, str] = {
         "Син Миколи, інженер-залізничник. Сорок років працював на Південній залізниці "
         "і, як батько, любив розповідати родинні історії."
     ),
+    "larysa": (
+        "Перша дружина Юрія, мати Олени. Шлюб розпався 1978 року, але вона й далі "
+        "приїжджала на родинні свята."
+    ),
+    "ihor": "Батько Богдана, музикант. Разом з Оленою вони живуть у Полтаві без шлюбу.",
     "serhii": "Батько Оксани, інженер із Дніпра.",
     "valentyna": "Мати Оксани, учителька математики.",
     "sarah": (
@@ -1003,8 +1019,8 @@ FAMILIES: list[tuple[tuple[str, ...], list[str]]] = [
     (("peter_h",), ["mary_h"]),
     (("viktor", "zoia"), ["liudmyla"]),
     (("mykola", "vira"), ["yurii"]),
-    (("yurii",), ["olena_t"]),
-    (("olena_t",), ["bohdan"]),
+    (("yurii", "larysa"), ["olena_t"]),
+    (("olena_t", "ihor"), ["bohdan"]),
     (("serhii", "valentyna"), ["oksana"]),
     (("andrii", "oksana"), ["taras", "sofiia"]),
     (("nataliia", "maksym"), ["daryna"]),
@@ -1035,12 +1051,17 @@ MARRIAGES: list[
     ("anna_sh", "ivan_h", yr(1909), "kolomyia", None, None),
     ("viktor", "zoia", yr(1949), "kharkiv", None, None),
     ("mykola", "vira", yr(1945), "poltava", None, None),
+    ("yurii", "larysa", yr(1970), "poltava", yr(1978), "divorce"),
+    ("olena_t", "ihor", yr(2000), None, None, None),
     ("serhii", "valentyna", yr(1975), "dnipro", None, None),
     ("stephen", "sarah", yr(1978, month=6, day=10), "toronto", None, None),
     ("nataliia", "maksym", yr(2006), "kyiv", None, None),
     ("oleh", "yuliia", yr(2011), "kyiv", None, None),
     ("emily", "daniel", yr(2009), "toronto", None, None),
 ]
+
+# Couples that are not married (everyone else in MARRIAGES is).
+UNMARRIED: set[tuple[str, str]] = {("olena_t", "ihor")}
 
 # Life events besides birth and death; "who" are the principals.
 EVENTS: list[dict[str, Any]] = [
@@ -1337,6 +1358,7 @@ async def _relations(
                     {
                         "person_a_id": ids[a],
                         "person_b_id": ids[b],
+                        "type": "partnership" if (a, b) in UNMARRIED else "marriage",
                         "start_date": start,
                         "place_id": places.get(place or ""),
                         "end_date": end,

@@ -80,13 +80,14 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Full revision history of every change (complete snapshots) and restore of any earlier version
 - ✅ Soft delete with impact preview; trash bin with restore (a person comes back together with their relationships and events)
 - ✅ Living-person flag inferred when not set (privacy-first default)
-- ✅ Demo family for every user: each account gets its own editable copy of a fictional family (64 people, 7 generations from the 1830s to the 2010s, several root families from Poltava region, Prykarpattia, Kharkiv, Dnipro and two emigrant branches in Canada), every person with a biography and an illustrated portrait; marked "Demo" in the tree list and deletable (`DEMO_TREE_FOR_NEW_USERS`; `make seed` gives existing users a copy and brings older copies up to date)
+- ✅ Demo family for every user: each account gets its own editable copy of a fictional family (66 people, 7 generations from the 1830s to the 2010s, several root families from Poltava region, Prykarpattia, Kharkiv, Dnipro and two emigrant branches in Canada), every person with a biography and an illustrated portrait; marked "Demo" in the tree list and deletable (`DEMO_TREE_FOR_NEW_USERS`; `make seed` gives existing users a copy and brings older copies up to date)
 
 ### Tree view
 - ✅ Infinite canvas: drag to pan, wheel / pinch to zoom, fit to screen, zoom buttons, minimap
 - ✅ Drawn as a real tree growing upwards: the oldest generation stands on the ground with a trunk and roots, one row per generation above it, partners always side by side, curved brown branches that thin out towards the youngest generations; adoptive/step/foster links dashed; layout (ELK) runs in a Web Worker
 - ✅ Person cards: portrait, primary name, life years with uncertainty markers (~1850, <1944) and † for the deceased; coloured accent by gender; hover preview with full name, dates and birthplace
 - ✅ Three tree styles to choose from: Simple, Oak (a broad trunk and a leafy crown behind the family) and Spring (leaves at every family knot, blossoms on the youngest branches); remembered per browser
+- ✅ Couples are joined by a link between their cards: interlocked rings and the wedding year for a marriage, a dashed line with a heart for unmarried partners, struck-through rings after a divorce or separation; hover the rings for the date and place
 - ✅ Hover or select a person to highlight their line (ancestors, descendants, partners); generation labels beside each row ("III покоління · 1920-ті")
 - ✅ Click a card → side panel; full person page with shareable link: all names, birth / death / burial (with map link), facts, rendered Markdown biography, life timeline, relatives with portraits, a life bar with the events of their life, notes for descendants, data notes (editors)
 - ✅ Search by any name variant (Cyrillic ↔ Latin), place (incl. historical names) or year; the result is centred and opened
@@ -181,7 +182,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 3. **Start:** `make up`. This builds the images and starts PostgreSQL, the backend (which applies migrations), the worker, the Vite dev server and nginx, then waits until they're healthy.
 4. **Open:** <http://localhost:8080>
 
-Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). Every new account automatically gets its own copy of the demo family (64 people, 7 generations, with biographies and illustrated portraits); `make seed` gives one to existing users and brings older copies up to date (adds people from newer versions of the demo, missing biographies and portraits, without touching anything the owner changed or deleted).
+Sign in as the dev superadmin: **`admin@example.com` / `change-me-now-please`** (from `SUPERADMIN_EMAIL` / `SUPERADMIN_PASSWORD` in `.env`; created on first start only). Every new account automatically gets its own copy of the demo family (66 people, 7 generations, with biographies and illustrated portraits); `make seed` gives one to existing users and brings older copies up to date (adds people from newer versions of the demo, missing biographies and portraits, without touching anything the owner changed or deleted).
 
 ### URLs (development)
 
