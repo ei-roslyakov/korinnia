@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-08 (phase 9 done)_
+_Last updated: 2026-10-11 (phase 10 in progress: share links and the performance test done)_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -18,8 +18,9 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 | 7 | Sources, citations, stories, suggestions, moderation, comments, data quality | ✅ done |
 | 8 | Map, timeline, relationship calculator, statistics, "On this day" | ✅ done |
 | — | Post-phase-8 polish: tree drawn growing upwards, themes, tree styles, demo family, licence, deploy to Kubernetes, tree rename/delete, tree export to PNG / PDF | ✅ done |
+| — | After phase 9: bigger demo family (66 people, D91), cards never overlap (D92), couple links (D93), share a tree by email (D94), welcome guide + What's new (D95), GEDCOM export (D96) | ✅ done |
 | 9 | GEDCOM import, integrity checks of stored files (backups: infrastructure) | ✅ done |
-| 10 | Hardening and user guide | 📋 next — waiting for the go-ahead |
+| 10 | Hardening and user guide | 🚧 in progress (share links, performance test done) |
 | 11 | Exports (family archive) | 📋 planned |
 
 ## Live deployment
@@ -30,8 +31,10 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 - Every push to `main` (except `*.md` and `deploy/argocd/**`) runs the **Deploy** workflow: builds
   and pushes images to GHCR, publishes the Helm chart, bumps the patch version (v0.0.N), tags it, and
   commits the new version into the Argo CD Application ("Deploy vX [skip ci]").
-- Last deployed at the time of writing: v0.0.11 (phase 9: GEDCOM import, integrity checks;
-  migration 0008 applied in production 2026-10-08). CI fully green again (E2E included).
+- Last deployed at the time of writing: v0.0.15 (welcome guide + What's new, migration 0009,
+  2026-10-11). Not yet deployed: GEDCOM export, performance work, share links (migration 0010).
+- Production demo copies are updated with `python -m app.seed --all-users` in the backend pod
+  after a deploy that changes the demo family.
 - Media volume: NFS (`nfs-csi`), fixed by an init container (D87).
 
 ## Phase 9 (done 2026-10-08)
@@ -46,14 +49,17 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   the media folder); fill missing facts of a merged person from the file; email the admin when
   an integrity check finds problems.
 
-## Next: phase 10 — hardening and user guide (waiting for the go-ahead)
+## Now: phase 10 — hardening and user guide
 
-- Trusted-proxy configuration for client IPs (`X-Forwarded-For` only from known proxies)
-- Encrypt TOTP secrets at rest
-- Route-level code splitting in the frontend
-- Performance test with a 2,000-person tree (layout, render, graph endpoint)
-- Read-only share links (revocable, expiring)
-- Full user guide in Ukrainian and English (`docs/user-guide.md` is a stub)
+- ✅ Read-only share links (revocable, expiring) — D98. Possible follow-up: hide living people
+  from link visitors.
+- ✅ Performance test with large trees: `make perf` (PEOPLE=2000 by default), results in
+  `docs/performance.md`; simplified cards when zoomed out, faster GEDCOM export — D97.
+- 📋 Full user guide in Ukrainian and English (`docs/user-guide.md` is a stub; the welcome guide
+  covers the basics).
+- 📋 Route-level code splitting in the frontend (first load).
+- 📋 Trusted-proxy configuration for client IPs (`X-Forwarded-For` only from known proxies).
+- 📋 Encrypt TOTP secrets at rest.
 - (Already done early: couple-aware layout, D74.)
 
 ## Phase 11: exports (planned)
@@ -61,7 +67,7 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 - Family archive ZIP: offline static website, JSON + GEDCOM, Markdown, original media with manifest,
   README (uk / en)
 - Printable PDF family book
-- GEDCOM export; option to hide living persons
+- (Done early: GEDCOM export with an option to hide living people, D96.)
 - (Already done early: PNG / PDF download of the tree view, D88.)
 
 ## Backlog (agreed ideas, not scheduled)
@@ -86,6 +92,8 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   cooldown, the nginx `/__vite_hmr` path or the E2E RegExp edits without asking.
 - The person side panel in View mode has no delete (only in Builder mode, by design).
 - `docs/user-guide.md` is still a placeholder (phase 10).
+- The dev database holds synthetic trees from the performance work ("Великий родовід (тест,
+  2000/5000)", "Імпорт 2000 (тест)"); delete them from the tree list when no longer needed.
 - Running `make test-e2e` while the dev stack is up restarted the dev backend/worker/frontend
   once (2026-10-08) and left dev nginx with stale upstream addresses (502); fix:
   `docker compose restart nginx`. Cause not investigated.

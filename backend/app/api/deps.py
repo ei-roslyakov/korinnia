@@ -10,13 +10,14 @@ from typing import Annotated
 from fastapi import Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.cookies import ACCESS_COOKIE
+from app.api.cookies import ACCESS_COOKIE, SHARE_COOKIE
 from app.core.db import get_session
 from app.core.errors import NotAuthenticatedError, NotFoundError, PermissionDeniedError
 from app.core.security import TokenError, decode_token
 from app.models import Tree, TreeRole, User
 from app.services.auth import session_revoked
 from app.services.context import Actor
+from app.services.share_links import resolve as resolve_share_link
 from app.services.trees import get_tree_role
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
@@ -71,17 +72,48 @@ class TreeAccess:
     user: User
 
 
+def _share_guest() -> User:
+    """Who a share-link visitor is to the services: nobody in particular (never stored)."""
+    return User(
+        id=uuid.UUID(int=0),
+        email="",
+        display_name="",
+        is_superadmin=False,
+        is_active=True,
+        totp_enabled=False,
+    )
+
+
 def tree_access(min_role: TreeRole) -> Callable[..., Awaitable[TreeAccess]]:
     """Dependency factory: the current user must have at least `min_role` in `tree_id`.
 
     Non-members get 404 (the tree's existence is not revealed); members with a lower role
-    get 403.
+    get 403. Without a signed-in user, a share-link cookie for this very tree gives viewer
+    access to read-only (GET) requests (D98).
     """
 
-    async def dependency(tree_id: uuid.UUID, user: CurrentUser, session: SessionDep) -> TreeAccess:
+    async def dependency(tree_id: uuid.UUID, request: Request, session: SessionDep) -> TreeAccess:
+        async def via_share_link(user: User | None) -> TreeAccess | None:
+            shared = await resolve_share_link(session, request.cookies.get(SHARE_COOKIE))
+            if shared is None or shared[1].id != tree_id:
+                return None
+            if request.method not in ("GET", "HEAD") or min_role != TreeRole.viewer:
+                raise PermissionDeniedError()
+            return TreeAccess(tree=shared[1], role=TreeRole.viewer, user=user or _share_guest())
+
+        if not request.cookies.get(ACCESS_COOKIE):
+            guest = await via_share_link(None)
+            if guest is None:
+                raise NotAuthenticatedError()
+            return guest
+        user = await get_current_user(request, session)
         found = await get_tree_role(session, tree_id, user)
         if found is None:
-            raise NotFoundError("tree_not_found")
+            # Not a member: a share link opened in this browser still lets them look.
+            shared = await via_share_link(user)
+            if shared is None:
+                raise NotFoundError("tree_not_found")
+            return shared
         tree, role = found
         if not role.at_least(min_role):
             raise PermissionDeniedError()

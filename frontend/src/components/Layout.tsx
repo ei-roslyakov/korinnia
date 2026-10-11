@@ -5,6 +5,7 @@ import { Link, NavLink, Outlet, useMatch, useNavigate } from "react-router";
 
 import { useLogout, useMe } from "@/features/auth/api";
 import { Onboarding, type OnboardingView } from "@/features/onboarding/Onboarding";
+import { useShareSession } from "@/features/share/api";
 import { hadStoredLanguage } from "@/i18n";
 import { getMeta } from "@/lib/api";
 
@@ -26,6 +27,7 @@ export function Layout() {
   // The tree canvas uses the full viewport below the header.
   const fullBleed = useMatch("/trees/:treeId") !== null;
   const [guide, setGuide] = useState<OnboardingView>(null);
+  const shared = useShareSession(me.isSuccess && !me.data);
 
   // Apply the user's saved language once their profile is known.
   useEffect(() => {
@@ -76,6 +78,16 @@ export function Layout() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <ThemeSwitcher />
             <LanguageSwitcher />
+            {!me.data && shared.data && (
+              <>
+                <span className="bg-bark-100 text-bark-700 rounded-full px-2 py-0.5 text-xs">
+                  {t("shareLinks.guestBadge")}
+                </span>
+                <Link to="/login" className={navClass({ isActive: false })}>
+                  {t("shareLinks.signIn")}
+                </Link>
+              </>
+            )}
             {me.data && (
               <>
                 <NavLink to="/profile" className={navClass}>

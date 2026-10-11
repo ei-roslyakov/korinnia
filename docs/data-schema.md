@@ -116,5 +116,12 @@ No new tables. The timeline, map, "on this day", relationship calculator and sta
 
 Imported people, events, places, sources and citations are ordinary rows of the tables above (created through the same services, with revisions and audit entries); `gedcom_imports.result` only remembers their ids for "undo import".
 
+### Phase 10: share links
+| Table | Purpose | Key columns |
+|---|---|---|
+| `share_links` | A read-only link to one tree for people without an account | `tree_id`, `token_hash` (SHA-256 of the token in the URL; the token is shown once), `label`, `created_by_id`, `created_at`, `expires_at` (null: no expiry), `revoked_at`, `last_used_at`, `use_count` |
+
+`users` also gained `welcome_dismissed`, `changelog_seen` and `show_changelog` (migration 0009, D95).
+
 ### Planned
-Share links (phase 10); export jobs (phase 11). Each section is documented here when it is implemented.
+Export jobs (phase 11). Each section is documented here when it is implemented.

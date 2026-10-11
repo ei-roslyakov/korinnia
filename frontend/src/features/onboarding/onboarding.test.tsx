@@ -66,7 +66,7 @@ describe("what's new", () => {
     renderWithProviders(<App />, { route: "/" });
     const dialog = within(await screen.findByRole("dialog", { name: "Що нового" }));
     expect(dialog.getAllByRole("listitem")).toHaveLength(CHANGELOG[0]!.items.uk.length);
-    expect(dialog.getByText(/Поділитися родоводом/)).toBeInTheDocument();
+    expect(dialog.getByText(CHANGELOG[0]!.items.uk[0]!)).toBeInTheDocument();
     await userEvent.click(
       dialog.getByRole("checkbox", { name: "Не показувати новини під час входу" }),
     );

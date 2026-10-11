@@ -126,7 +126,7 @@ function NewsDialog({
   };
   const date = (id: string) =>
     new Intl.DateTimeFormat(i18n.language, { dateStyle: "long" }).format(
-      new Date(`${id}T12:00:00`),
+      new Date(`${id.slice(0, 10)}T12:00:00`), // "2026-10-11.2" → its day
     );
   return (
     <Dialog open title={t("news.title")} onClose={close}>

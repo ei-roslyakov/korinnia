@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button, Spinner } from "@/components/ui";
 import type { RelativeRelation, TreeGraph } from "@/lib/genealogy";
+import { useMe } from "@/features/auth/api";
 import { formatPartialDate } from "@/lib/dates";
 import { useTheme } from "@/lib/theme";
 import { useToast } from "@/lib/toast";
@@ -39,8 +40,10 @@ import {
 } from "./familyGraph";
 import { edgeTypes } from "./edgeTypes";
 import { exportFileName, exportTree, type ExportFormat } from "./exportTree";
+import { FullDetail } from "./detail";
 import { COUPLE_HEIGHT, type CoupleFlowNode } from "./nodes";
 import { separate } from "./overlap";
+import { GedcomExportDialog } from "../GedcomExportDialog";
 import { computeLayout } from "./layout";
 import {
   BRANCH,
@@ -118,6 +121,8 @@ function CanvasInner({
   const [hovered, setHovered] = useState<string | null>(null);
   // While exporting, every card is rendered and nothing is highlighted.
   const [exporting, setExporting] = useState<ExportFormat | null>(null);
+  const [gedcom, setGedcom] = useState(false);
+  const me = useMe();
   const focusPerson = exporting ? null : (hovered ?? selectedId ?? null);
   const lit = useMemo(() => (focusPerson ? lineage(rel, focusPerson) : null), [rel, focusPerson]);
   /** A family junction on the highlighted line (or nothing highlighted). */
@@ -655,79 +660,93 @@ function CanvasInner({
   }
 
   return (
-    <ReactFlow
-      ref={rootRef}
-      // Sky above, meadow towards the ground (per theme).
-      style={{ background: "var(--k-canvas)" }}
-      colorMode={theme === "dark" ? "dark" : "light"}
-      nodes={nodes}
-      edges={edges}
-      edgeTypes={edgeTypes}
-      nodeTypes={nodeTypes}
-      onNodeClick={(_, node) => node.type === "person" && onSelectPerson(node.id)}
-      onNodeMouseEnter={(_, node) => node.type === "person" && setHovered(node.id)}
-      onNodeMouseLeave={() => setHovered(null)}
-      onNodesChange={onNodesChange}
-      onNodeDragStart={onNodeDragStart}
-      onNodeDragStop={onNodeDragStop}
-      nodesDraggable={builder}
-      nodesConnectable={false}
-      edgesFocusable={false}
-      onlyRenderVisibleElements={!exporting}
-      ariaLabelConfig={{
-        "controls.ariaLabel": t("canvas.controls"),
-        "controls.zoomIn.ariaLabel": t("canvas.zoomIn"),
-        "controls.zoomOut.ariaLabel": t("canvas.zoomOut"),
-        "controls.fitView.ariaLabel": t("canvas.fit"),
-        "minimap.ariaLabel": t("canvas.minimap"),
-      }}
-      minZoom={0.05}
-      maxZoom={2}
-      fitView
-      fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
-    >
-      <Background gap={24} color="var(--k-canvas-dots)" bgColor="transparent" />
-      {exportTitle && (
-        <Panel position="top-right">
-          <div
-            role="group"
-            aria-label={t("canvas.export.label")}
-            className="border-bark-100 bg-surface flex items-center gap-1 rounded-md border px-2 py-1 text-xs shadow-sm"
-          >
-            <span className="text-bark-700">{t("canvas.export.label")}:</span>
-            {(["png", "pdf"] as const).map((f) => (
-              <Button
-                key={f}
-                variant="ghost"
-                className="px-2 py-0.5 text-xs"
-                busy={exporting === f}
-                disabled={Boolean(exporting)}
-                title={t(`canvas.export.${f}Hint`)}
-                onClick={() => setExporting(f)}
-              >
-                {f.toUpperCase()}
-              </Button>
-            ))}
-          </div>
-        </Panel>
-      )}
-      <Controls showInteractive={false} fitViewOptions={{ padding: 0.15, duration: 300 }} />
-      <MiniMap
-        bgColor="var(--k-surface)"
-        pannable
-        zoomable
-        ariaLabel={t("canvas.minimap")}
-        nodeColor={
-          (n) =>
-            n.type === "person"
-              ? (GENDER_COLORS[(n as PersonFlowNode).data.person.gender] ?? "#e7e5e4")
-              : n.type === "family"
-                ? BRANCH_COLOR
-                : "transparent" // decorations (ground, crown, row labels)
-        }
-        className="!hidden sm:!block"
-      />
-    </ReactFlow>
+    <FullDetail.Provider value={Boolean(exporting)}>
+      <ReactFlow
+        ref={rootRef}
+        // Sky above, meadow towards the ground (per theme).
+        style={{ background: "var(--k-canvas)" }}
+        colorMode={theme === "dark" ? "dark" : "light"}
+        nodes={nodes}
+        edges={edges}
+        edgeTypes={edgeTypes}
+        nodeTypes={nodeTypes}
+        onNodeClick={(_, node) => node.type === "person" && onSelectPerson(node.id)}
+        onNodeMouseEnter={(_, node) => node.type === "person" && setHovered(node.id)}
+        onNodeMouseLeave={() => setHovered(null)}
+        onNodesChange={onNodesChange}
+        onNodeDragStart={onNodeDragStart}
+        onNodeDragStop={onNodeDragStop}
+        nodesDraggable={builder}
+        nodesConnectable={false}
+        edgesFocusable={false}
+        onlyRenderVisibleElements={!exporting}
+        ariaLabelConfig={{
+          "controls.ariaLabel": t("canvas.controls"),
+          "controls.zoomIn.ariaLabel": t("canvas.zoomIn"),
+          "controls.zoomOut.ariaLabel": t("canvas.zoomOut"),
+          "controls.fitView.ariaLabel": t("canvas.fit"),
+          "minimap.ariaLabel": t("canvas.minimap"),
+        }}
+        minZoom={0.05}
+        maxZoom={2}
+        fitView
+        fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
+      >
+        <Background gap={24} color="var(--k-canvas-dots)" bgColor="transparent" />
+        {exportTitle && (
+          <Panel position="top-right">
+            <div
+              role="group"
+              aria-label={t("canvas.export.label")}
+              className="border-bark-100 bg-surface flex items-center gap-1 rounded-md border px-2 py-1 text-xs shadow-sm"
+            >
+              <span className="text-bark-700">{t("canvas.export.label")}:</span>
+              {(["png", "pdf"] as const).map((f) => (
+                <Button
+                  key={f}
+                  variant="ghost"
+                  className="px-2 py-0.5 text-xs"
+                  busy={exporting === f}
+                  disabled={Boolean(exporting)}
+                  title={t(`canvas.export.${f}Hint`)}
+                  onClick={() => setExporting(f)}
+                >
+                  {f.toUpperCase()}
+                </Button>
+              ))}
+              {/* GEDCOM is exported by the server for signed-in members (not share links). */}
+              {me.data && (
+                <Button
+                  variant="ghost"
+                  className="px-2 py-0.5 text-xs"
+                  title={t("gedcomExport.title")}
+                  onClick={() => setGedcom(true)}
+                >
+                  GEDCOM
+                </Button>
+              )}
+            </div>
+          </Panel>
+        )}
+        {gedcom && <GedcomExportDialog treeId={treeId} onClose={() => setGedcom(false)} />}
+        <Controls showInteractive={false} fitViewOptions={{ padding: 0.15, duration: 300 }} />
+        <MiniMap
+          bgColor="var(--k-surface)"
+          pannable
+          zoomable
+          ariaLabel={t("canvas.minimap")}
+          nodeColor={
+            (n) =>
+              n.type === "person"
+                ? (GENDER_COLORS[(n as PersonFlowNode).data.person.gender] ?? "#e7e5e4")
+                : n.type === "family"
+                  ? BRANCH_COLOR
+                  : "transparent" // decorations (ground, crown, row labels)
+          }
+          className="!hidden sm:!block"
+        />
+      </ReactFlow>
+    </FullDetail.Provider>
   );
 }
 

@@ -35,6 +35,7 @@ from app.models.media import MediaFile, MediaPerson
 from app.models.person import Person, PersonName
 from app.models.place import Place
 from app.models.relationship import ParentChild, Partnership
+from app.models.share import ShareLink
 from app.models.sources import Citation, Source, SourceMedia
 from app.models.stories import Story, StoryMedia, StoryPerson
 from app.models.tree import Tree, TreeMembership
@@ -82,6 +83,7 @@ __all__ = [
     "RefreshToken",
     "ResearchStatus",
     "Script",
+    "ShareLink",
     "Source",
     "SourceMedia",
     "SourceType",

@@ -286,7 +286,9 @@
     "integrity_check_running": "A check is already running.",
     "integrity_run_not_found": "Check not found.",
     "job_queue_unavailable": "The background worker is not available. Please try again later.",
-    "no_user_with_email": "No user with this email exists. Check the address, or ask an administrator to invite them."
+    "no_user_with_email": "No user with this email exists. Check the address, or ask an administrator to invite them.",
+    "share_link_invalid": "This link has expired or was revoked.",
+    "share_link_not_found": "Link not found."
   },
   "dates": {
     "approx": "about {{date}}",
@@ -1180,5 +1182,38 @@
     "title": "What's new",
     "dontShow": "Don't show news when I sign in",
     "ok": "Got it"
+  },
+  "gedcomExport": {
+    "title": "Export to GEDCOM",
+    "intro": "Download the whole tree as a GEDCOM 5.5.1 file: people with all their names, life events, places, families and sources. MyHeritage, Ancestry, Gramps, FamilySearch and most other genealogy programs can open it.",
+    "notIncluded": "Photos and documents are not included (a GEDCOM file holds text only).",
+    "hideLiving": "Leave out the details of living people (they appear as “Living” with their surname only)",
+    "download": "Download .ged"
+  },
+  "shareLinks": {
+    "title": "Anyone with the link can view",
+    "hint": "For relatives without an account: the link opens this tree read-only. Anyone who has it can see everything in the tree, including living people — choose an expiry and revoke it when it is no longer needed.",
+    "label": "Name (optional)",
+    "labelPlaceholder": "e.g. For the reunion",
+    "expires": "Valid for",
+    "expiry": {
+      "7": "7 days",
+      "30": "30 days",
+      "365": "1 year",
+      "never": "No expiry"
+    },
+    "create": "Create link",
+    "created": "Copy the link now — it will not be shown again.",
+    "unnamed": "Link",
+    "until": "Until {{date}}",
+    "noExpiry": "No expiry",
+    "opened_one": "opened {{count}} time",
+    "opened_other": "opened {{count}} times",
+    "revoke": "Revoke",
+    "guestBadge": "Shared view",
+    "signIn": "Sign in",
+    "opening": "Opening the shared tree…",
+    "invalidTitle": "This link no longer works",
+    "invalidHint": "It has expired or was revoked. Ask whoever sent it for a new one."
   }
 }

@@ -64,7 +64,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Audit log of every change (who, when, before/after) with filters — global and per tree
 - ✅ Profile: display name, interface language (synced across devices), password change
 - ✅ Welcome guide at sign-in for new users (until "Don't show again") and "What's new" with the changes since the last visit (can be turned off); both also in the footer
-- 📋 Read-only share links (revocable, expiring) — phase 10
+- ✅ Read-only share links for people without an account ("Share" → "Anyone with the link can view"): optional name, expiry or none, how often opened, revoke at any time; visitors can only view that one tree
 - 📋 Sign-up by email (optional, off by default): register, confirm the address by a link, then wait for an admin to grant access to a tree
 - 📋 Sign in with Google (OAuth / OpenID Connect), linked to an existing account by verified email; password and 2FA stay available
 - ✅ Moderation queue for contributors' suggestions and stories (see below)
@@ -95,7 +95,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Search by any name variant (Cyrillic ↔ Latin), place (incl. historical names) or year; the result is centred and opened
 - ✅ Focus mode: 1–6 generations around a person, markers for hidden ancestors/descendants; large trees (>150 people) open in focus mode
 - ✅ Works on tablet and mobile (touch pan/zoom, full-width panel)
-- ✅ Smooth with 2,000+ people (viewport culling; layout in worker)
+- ✅ Smooth with 2,000+ people (viewport culling, layout in a worker, simplified cards when zoomed out); measured with `make perf`, see [docs/performance.md](docs/performance.md)
 - ✅ Gallery, documents, audio/video on the person page; sources, stories, research questions and comments
 - ✅ Relationship calculator: "how is B related to A?" with the kinship term in Ukrainian (двоюрідний, троюрідний…; тесть / свекор…), English (first cousin once removed…) or Polish, half / adoptive notes, the closest common ancestors and the path through the tree
 - ✅ Family map (OpenStreetMap): places of birth, life, marriage, migration, death and burial (graves at their own GPS point); filters by event type and person, with the person's life path drawn in order
@@ -150,7 +150,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - 📋 Family archive ZIP: offline static website, JSON + GEDCOM, Markdown, original media with manifest, README (uk / en)
 - 📋 Printable PDF family book
 - ✅ Download the tree view as an image (PNG) or a one-page PDF: the whole tree (not only what is on screen), with the tree's name and date on top, in the current theme and style
-- 📋 GEDCOM export; option to hide living persons
+- ✅ GEDCOM 5.5.1 export ("GEDCOM" in the tree's Download box, any member): people with all names, life events, places with coordinates, families with marriage / divorce / adoptive links, sources and citations; optionally without the details of living people; files read back into Korinnia and other programs (photos are not part of a GEDCOM)
 
 ### Optional (after all phases)
 - 📋 Letters to descendants (sealed until a date); duplicate detection & merge; PWA
@@ -283,4 +283,5 @@ Korinnia uses open-source components under their own licences; their notices are
 - [docs/decisions.md](docs/decisions.md): architecture decision log
 - [docs/data-schema.md](docs/data-schema.md): data schema and conventions
 - [docs/backup-restore.md](docs/backup-restore.md): backup and restore procedure
+- [docs/performance.md](docs/performance.md): performance measurements on large trees (`make perf`)
 - [docs/user-guide.md](docs/user-guide.md): user guide

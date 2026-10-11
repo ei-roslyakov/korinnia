@@ -1,11 +1,12 @@
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import { memo } from "react";
+import { Handle, Position, useStore, type Node, type NodeProps } from "@xyflow/react";
+import { memo, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/features/person/Avatar";
 import { formatPartialDate, lifeYears } from "@/lib/dates";
 import type { PersonSummary, RelativeRelation } from "@/lib/genealogy";
 
+import { DETAIL_ZOOM, FullDetail } from "./detail";
 import { FAMILY_SIZE, PERSON_HEIGHT, PERSON_WIDTH } from "./familyGraph";
 import { BRANCH, GROUND_HEIGHT, seeded, TRUNK_REACH, type TreeStyle } from "./treeStyle";
 
@@ -29,20 +30,42 @@ const ACCENT: Record<string, string> = {
   unknown: "border-l-stone-400",
 };
 
+const farSelector = (s: { transform: [number, number, number] }) => s.transform[2] < DETAIL_ZOOM;
+
 export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { person, highlighted, hiddenUp, hiddenDown, onAdd } = data;
+  const zoomedOut = useStore(farSelector);
+  const fullDetail = useContext(FullDetail);
+  const far = zoomedOut && !fullDetail;
+  // The hover preview is only built while the pointer is over the card.
+  const [hover, setHover] = useState(false);
   const ring = highlighted || selected ? "ring-2 ring-leaf-600" : "";
   const died = Boolean(person.death) || !person.is_living;
-  const dates = [
-    person.birth && `${t("person.born")}: ${formatPartialDate(person.birth, t, i18n.language)}`,
-    person.death && `${t("person.died")}: ${formatPartialDate(person.death, t, i18n.language)}`,
-  ].filter(Boolean);
+  const frame = `border-bark-100 bg-surface relative flex cursor-pointer items-center rounded-lg border border-l-4 shadow-sm ${ACCENT[person.gender] ?? ACCENT.unknown} ${ring}`;
+  if (far) {
+    return (
+      <div
+        style={{ width: PERSON_WIDTH, height: PERSON_HEIGHT }}
+        className={`${frame} px-3`}
+        data-testid="person-card"
+        title={person.display_name}
+      >
+        <Handle type="target" position={Position.Bottom} className={hidden} isConnectable={false} />
+        <div className="line-clamp-2 font-serif text-xl leading-tight font-semibold">
+          {person.display_name}
+        </div>
+        <Handle type="source" position={Position.Top} className={hidden} isConnectable={false} />
+      </div>
+    );
+  }
   return (
     <div
       style={{ width: PERSON_WIDTH, height: PERSON_HEIGHT }}
-      className={`group border-bark-100 bg-surface relative flex cursor-pointer items-center gap-2.5 rounded-lg border border-l-4 pr-2 pl-2 shadow-sm transition-shadow hover:shadow-md ${ACCENT[person.gender] ?? ACCENT.unknown} ${ring}`}
+      className={`group ${frame} gap-2.5 pr-2 pl-2 transition-shadow hover:shadow-md`}
       data-testid="person-card"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
       {/* The tree grows upwards: the link from the parents arrives at the bottom of a card,
           links to the person's own family leave from the top. */}
@@ -59,19 +82,7 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
           )}
         </div>
       </div>
-      {/* Hover preview with the full name, dates and birthplace. */}
-      <div
-        role="tooltip"
-        className="border-bark-100 bg-surface pointer-events-none invisible absolute top-full left-1/2 z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border p-3 text-left opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100"
-      >
-        <div className="font-serif text-sm font-semibold">{person.display_name}</div>
-        {dates.map((d) => (
-          <div key={d as string} className="text-bark-700 text-xs">
-            {d}
-          </div>
-        ))}
-        {person.birth_place && <div className="text-bark-700 text-xs">📍 {person.birth_place}</div>}
-      </div>
+      {hover && <Preview person={person} />}
       {onAdd && <AddButtons personId={person.id} onAdd={onAdd} />}
       {!onAdd && hiddenUp && (
         <span
@@ -93,6 +104,29 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
     </div>
   );
 });
+
+/** Hover preview with the full name, dates and birthplace. */
+function Preview({ person }: { person: PersonSummary }) {
+  const { t, i18n } = useTranslation();
+  const dates = [
+    person.birth && `${t("person.born")}: ${formatPartialDate(person.birth, t, i18n.language)}`,
+    person.death && `${t("person.died")}: ${formatPartialDate(person.death, t, i18n.language)}`,
+  ].filter(Boolean);
+  return (
+    <div
+      role="tooltip"
+      className="border-bark-100 bg-surface pointer-events-none absolute top-full left-1/2 z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border p-3 text-left shadow-lg"
+    >
+      <div className="font-serif text-sm font-semibold">{person.display_name}</div>
+      {dates.map((d) => (
+        <div key={d as string} className="text-bark-700 text-xs">
+          {d}
+        </div>
+      ))}
+      {person.birth_place && <div className="text-bark-700 text-xs">📍 {person.birth_place}</div>}
+    </div>
+  );
+}
 
 const ADD_POSITIONS: Record<RelativeRelation, string> = {
   // Ancestors are below, descendants above.

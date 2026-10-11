@@ -290,7 +290,9 @@
     "integrity_check_running": "Sprawdzenie już trwa.",
     "integrity_run_not_found": "Nie znaleziono sprawdzenia.",
     "job_queue_unavailable": "Proces w tle jest niedostępny. Spróbuj później.",
-    "no_user_with_email": "Nie ma użytkownika z takim adresem e-mail. Sprawdź adres lub poproś administratora o wysłanie zaproszenia."
+    "no_user_with_email": "Nie ma użytkownika z takim adresem e-mail. Sprawdź adres lub poproś administratora o wysłanie zaproszenia.",
+    "share_link_invalid": "Link wygasł lub został odwołany.",
+    "share_link_not_found": "Nie znaleziono linku."
   },
   "dates": {
     "approx": "ok. {{date}}",
@@ -1244,5 +1246,40 @@
     "title": "Co nowego",
     "dontShow": "Nie pokazuj nowości przy logowaniu",
     "ok": "Rozumiem"
+  },
+  "gedcomExport": {
+    "title": "Eksport do GEDCOM",
+    "intro": "Pobierz całe drzewo jako plik GEDCOM 5.5.1: osoby ze wszystkimi imionami, wydarzenia, miejsca, rodziny i źródła. Otworzą go MyHeritage, Ancestry, Gramps, FamilySearch i większość innych programów genealogicznych.",
+    "notIncluded": "Zdjęcia i dokumenty nie są dołączane (plik GEDCOM zawiera tylko tekst).",
+    "hideLiving": "Pomiń dane żyjących osób (pojawią się jako „Living” tylko z nazwiskiem)",
+    "download": "Pobierz .ged"
+  },
+  "shareLinks": {
+    "title": "Każdy z linkiem może przeglądać",
+    "hint": "Dla bliskich bez konta: link otwiera to drzewo tylko do odczytu. Kto ma link, widzi wszystko w drzewie, także żyjące osoby — wybierz termin ważności i odwołaj link, gdy nie będzie potrzebny.",
+    "label": "Nazwa (opcjonalnie)",
+    "labelPlaceholder": "np. Na zjazd rodzinny",
+    "expires": "Ważny",
+    "expiry": {
+      "7": "7 dni",
+      "30": "30 dni",
+      "365": "1 rok",
+      "never": "Bez terminu"
+    },
+    "create": "Utwórz link",
+    "created": "Skopiuj link teraz — nie zostanie pokazany ponownie.",
+    "unnamed": "Link",
+    "until": "Do {{date}}",
+    "noExpiry": "Bez terminu",
+    "opened_one": "otwarty {{count}} raz",
+    "opened_few": "otwarty {{count}} razy",
+    "opened_many": "otwarty {{count}} razy",
+    "opened_other": "otwarty {{count}} raza",
+    "revoke": "Odwołaj",
+    "guestBadge": "Podgląd przez link",
+    "signIn": "Zaloguj się",
+    "opening": "Otwieramy drzewo…",
+    "invalidTitle": "Ten link już nie działa",
+    "invalidHint": "Wygasł lub został odwołany. Poproś osobę, która go wysłała, o nowy."
   }
 }

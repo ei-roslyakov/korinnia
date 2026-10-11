@@ -12,6 +12,7 @@ import { SystemPage } from "@/features/admin/SystemPage";
 import { AdminTreesPage } from "@/features/admin/AdminTreesPage";
 import { UsersPage } from "@/features/admin/UsersPage";
 import { AcceptInvitePage } from "@/features/auth/AcceptInvitePage";
+import { OpenSharedLinkPage } from "@/features/share/OpenSharedLinkPage";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { ProfilePage } from "@/features/auth/ProfilePage";
 import { RequireAuth } from "@/features/auth/RequireAuth";
@@ -45,6 +46,7 @@ export function App() {
           {/* Public */}
           <Route path="login" element={<LoginPage />} />
           <Route path="invite/:token" element={<AcceptInvitePage />} />
+          <Route path="s/:token" element={<OpenSharedLinkPage />} />
           <Route path="reset-password/:token" element={<ResetPasswordPage />} />
 
           {/* Signed-in users */}

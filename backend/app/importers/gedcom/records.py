@@ -384,7 +384,9 @@ class _Reader:
                     )
                 continue
             if tag in INDIVIDUAL_EVENTS:
-                title = child.value.strip() if tag in ("OCCU", "EDUC", "GRAD") else None
+                title = (
+                    child.value.strip() if tag in ("OCCU", "EDUC", "GRAD") else child.text("TYPE")
+                )
                 if tag == "CREM":
                     title = "Cremation"
                 p.events.append(self.event(child, INDIVIDUAL_EVENTS[tag], title))

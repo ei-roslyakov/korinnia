@@ -2,8 +2,9 @@ import type { Language } from "@/lib/types";
 
 /**
  * "What's new", newest first. Add an entry when users get something they will notice; the
- * id is its date (ids are compared as strings, so keep the YYYY-MM-DD form). Users see the
- * entries newer than the last one they saw, once, at sign-in.
+ * id is its date, YYYY-MM-DD, with ".2", ".3"… for a later entry on the same day (ids are
+ * compared as strings). Users see the entries newer than the last one they saw, once, at
+ * sign-in.
  */
 export interface ChangelogEntry {
   id: string;
@@ -11,6 +12,37 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    id: "2026-10-11.3",
+    items: {
+      en: [
+        "Share links: in “Share”, create a link that lets relatives without an account view the tree (read-only). Choose how long it works and revoke it at any time.",
+        "Large trees are faster: when zoomed far out, cards show just the name.",
+      ],
+      uk: [
+        "Посилання для перегляду: у «Поділитися» створіть посилання, за яким рідні без облікового запису бачать родовід (лише перегляд). Оберіть, скільки воно діє, і відкличте будь-коли.",
+        "Великі родоводи працюють швидше: при сильному віддаленні картки показують лише ім'я.",
+      ],
+      pl: [
+        "Linki do podglądu: w „Udostępnij” utwórz link, przez który bliscy bez konta zobaczą drzewo (tylko podgląd). Wybierz, jak długo działa, i odwołaj go w każdej chwili.",
+        "Duże drzewa działają szybciej: przy dużym oddaleniu karty pokazują tylko imię.",
+      ],
+    },
+  },
+  {
+    id: "2026-10-11.2",
+    items: {
+      en: [
+        "Export a tree to GEDCOM: “GEDCOM” in the tree's Download box gives a file that MyHeritage, Ancestry, Gramps and other programs can read — optionally without the details of living people.",
+      ],
+      uk: [
+        "Експорт родоводу в GEDCOM: кнопка «GEDCOM» у полі «Завантажити» на дереві дає файл, який читають MyHeritage, Ancestry, Gramps та інші програми — за бажанням без даних живих людей.",
+      ],
+      pl: [
+        "Eksport drzewa do GEDCOM: przycisk „GEDCOM” w polu „Pobierz” na drzewie daje plik, który odczytają MyHeritage, Ancestry, Gramps i inne programy — opcjonalnie bez danych żyjących osób.",
+      ],
+    },
+  },
   {
     id: "2026-10-11",
     items: {

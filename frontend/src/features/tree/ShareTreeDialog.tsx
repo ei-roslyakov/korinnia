@@ -5,6 +5,8 @@ import { Link } from "react-router";
 import { Alert, Badge, Button, Dialog, ErrorAlert, Field, Input, Select } from "@/components/ui";
 import type { Role, Tree } from "@/lib/types";
 
+import { ShareLinksSection } from "@/features/share/ShareLinksSection";
+
 import { useAddMember, useMembers } from "./api";
 
 const ROLES: Role[] = ["viewer", "contributor", "editor", "admin"];
@@ -81,6 +83,8 @@ export function ShareTreeDialog({
           </Button>
         </div>
       </form>
+
+      <ShareLinksSection treeId={tree.id} />
 
       {members.data && members.data.members.length > 0 && (
         <section className="border-bark-100 mt-5 border-t pt-4">

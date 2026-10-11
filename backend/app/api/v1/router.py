@@ -12,6 +12,7 @@ from app.api.v1 import (
     auth,
     collaboration,
     events,
+    exports,
     history,
     imports,
     insights,
@@ -19,6 +20,7 @@ from app.api.v1 import (
     persons,
     places,
     relationships,
+    share,
     sources,
     stories,
     trees,
@@ -42,6 +44,8 @@ for genealogy in (
     collaboration,
     insights,
     imports,
+    exports,
+    share,
 ):
     api_router.include_router(genealogy.router)
 

@@ -4,6 +4,7 @@
 - refresh: httpOnly, only sent to /api/v1/auth (refresh/logout), long-lived
 - mfa:     httpOnly, only /api/v1/auth, minutes — proves the password step of a 2FA login
 - csrf:    readable by JS (double-submit pattern), echoed in the X-CSRF-Token header
+- share:   httpOnly, /api, the token of a share link opened here (read-only access, D98)
 """
 
 from __future__ import annotations
@@ -18,6 +19,8 @@ ACCESS_COOKIE = "korinnia_access"
 REFRESH_COOKIE = "korinnia_refresh"
 MFA_COOKIE = "korinnia_mfa"
 CSRF_COOKIE = "korinnia_csrf"
+# A share link opened in this browser (its token): read-only access to one tree, /api only.
+SHARE_COOKIE = "korinnia_share"
 CSRF_HEADER = "x-csrf-token"
 
 ACCESS_PATH = "/api"
@@ -78,3 +81,11 @@ def clear_auth_cookies(response: Response) -> None:
 def csrf_cookie_header(token: str) -> str:
     secure = "; Secure" if get_settings().cookie_secure else ""
     return f"{CSRF_COOKIE}={token}; Path=/; SameSite=Lax{secure}"
+
+
+def set_share_cookie(response: Response, token: str, *, max_age: timedelta) -> None:
+    _set(response, SHARE_COOKIE, token, path=ACCESS_PATH, max_age=max_age)
+
+
+def clear_share_cookie(response: Response) -> None:
+    response.delete_cookie(SHARE_COOKIE, path=ACCESS_PATH)

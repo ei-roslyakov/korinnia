@@ -107,6 +107,14 @@ test-e2e: .env ## End-to-end tests (Playwright) on a throwaway production-build 
 	$$E2E down -v --remove-orphans >/dev/null 2>&1; \
 	exit $$status
 
+.PHONY: perf
+perf: .env ## Performance check on a large synthetic tree (PEOPLE=2000) on a throwaway prod stack
+	PEOPLE=$(or $(PEOPLE),2000) sh scripts/perf.sh
+
+.PHONY: perf-tree
+perf-tree: ## Add a large synthetic tree to the dev stack: make perf-tree people=2000
+	$(COMPOSE) exec backend python -m app.perf --people $(or $(people),2000)
+
 .PHONY: lint
 lint: .env ## Lint + format check + type check (backend & frontend)
 	$(COMPOSE) run --rm --no-deps backend sh -c "ruff check . && ruff format --check . && mypy ."

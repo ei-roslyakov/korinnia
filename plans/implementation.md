@@ -31,6 +31,7 @@ backend/app/
   importers/gedcom/  GEDCOM reader (parser, ANSEL, dates, records → plain data)
   exporters/         placeholder for phase 11
   seed.py, cli.py         demo family seeding; operator CLI (create-superadmin, disable-2fa)
+  perf.py                 synthetic large trees for `make perf`
 backend/alembic/  migrations (run automatically on backend start)
 frontend/src/
   features/      admin, auth, builder, collab, imports, insights, map, media, person, sources,
@@ -40,7 +41,7 @@ frontend/src/
   lib/           api client (CSRF), types, dates, kinship terms, hooks, version
 frontend/e2e/     Playwright specs
 deploy/           nginx image, Helm chart, Argo CD Application, backup/restore scripts
-scripts/          third-party-notices.sh (make notices)
+scripts/          third-party-notices.sh (make notices), perf.sh + perf/browser.mjs (make perf)
 docs/             decisions, data schema, backup/restore, user guide (stub)
 plans/            this folder
 ```

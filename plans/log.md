@@ -4,6 +4,25 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-11
 
+- **Phase 10: share links (D98)** — `share_links` table (migration 0010), service
+  `services/share_links.py`, API `/trees/{id}/share-links` (admins) + `/share/{token}/open`,
+  `/share/session`, `/share/leave`; `tree_access` accepts the `korinnia_share` cookie for GET
+  (guest user, viewer role; also for signed-in non-members). Frontend: `/s/:token` page,
+  `RequireAuth` lets link visitors into that tree, header "Shared view" + "Sign in", link
+  management in the Share dialog; GEDCOM button hidden for visitors. Tests: backend 3 new,
+  frontend 4 new, E2E `share.spec.ts`. (commit "GEDCOM export, performance test, share links")
+- **Phase 10: performance test (D97)** — `python -m app.perf` (synthetic tree generator),
+  `make perf` (throwaway prod stack, API + Playwright timings), `make perf-tree`;
+  `docs/performance.md`. Fixes: simplified cards below 45 % zoom + lazy hover preview (whole
+  2,000-person tree 2.4 → 1.5 s, longest task 764 → 284 ms); GEDCOM export no longer quadratic
+  (5,000 people 6.3 → 0.43 s). (commit "GEDCOM export, performance test, share links")
+- **GEDCOM export (D96)** — `app/exporters/gedcom.py` + `GET /trees/{id}/export/gedcom`
+  (`living=false` hides living people's details; audited `tree.export`); "GEDCOM" in the canvas
+  Download box with a small dialog. Importer now reads an event's TYPE as its title for all
+  events. Round-trip test: demo family → GEDCOM → import into an empty tree = same people,
+  links, couples. Changelog entry `2026-10-11.2` (same-day ids get ".2"; the news dialog
+  dates entries by their first 10 characters — fixed a crash this would have caused).
+  Tests: backend 314, frontend 152, E2E 23. (commit "GEDCOM export, performance test, share links")
 - **Welcome guide + "What's new" (D95)** — popups at sign-in with "don't show again" /
   "don't show news" checkboxes; footer links "Getting started" / "What's new". Migration 0009
   (`users.welcome_dismissed`, `changelog_seen`, `show_changelog`; existing users skip the
