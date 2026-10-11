@@ -56,8 +56,13 @@ export function useLogout() {
 export function useUpdateMe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { display_name?: string; preferred_language?: Language }) =>
-      api.patch<Me>("/api/v1/auth/me", body),
+    mutationFn: (body: {
+      display_name?: string;
+      preferred_language?: Language;
+      welcome_dismissed?: boolean;
+      changelog_seen?: string;
+      show_changelog?: boolean;
+    }) => api.patch<Me>("/api/v1/auth/me", body),
     onSuccess: (me) => qc.setQueryData(ME_KEY, me),
   });
 }

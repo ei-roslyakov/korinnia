@@ -25,6 +25,11 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     is_superadmin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Onboarding: the welcome guide is shown at sign-in until dismissed for good; the newest
+    # "What's new" entry the user has seen, and whether news may pop up at sign-in.
+    welcome_dismissed: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    changelog_seen: Mapped[str | None] = mapped_column(String(32))
+    show_changelog: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
     # Tokens issued before this moment are rejected (password change, deactivation, "log out
     # everywhere"). Stored with second precision to match JWT `iat`.
     sessions_valid_after: Mapped[datetime] = utcnow_column()

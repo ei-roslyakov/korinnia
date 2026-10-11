@@ -63,6 +63,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Tree member management by tree admins (add existing users, invite new ones, change roles, remove)
 - ✅ Audit log of every change (who, when, before/after) with filters — global and per tree
 - ✅ Profile: display name, interface language (synced across devices), password change
+- ✅ Welcome guide at sign-in for new users (until "Don't show again") and "What's new" with the changes since the last visit (can be turned off); both also in the footer
 - 📋 Read-only share links (revocable, expiring) — phase 10
 - 📋 Sign-up by email (optional, off by default): register, confirm the address by a link, then wait for an admin to grant access to a tree
 - 📋 Sign in with Google (OAuth / OpenID Connect), linked to an existing account by verified email; password and 2FA stay available

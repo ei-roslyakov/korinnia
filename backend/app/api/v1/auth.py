@@ -53,6 +53,9 @@ async def build_me(session: SessionDep, user: User) -> Me:
         is_superadmin=user.is_superadmin,
         totp_enabled=user.totp_enabled,
         trees=[MeTree(id=t.id, name=t.name, role=role) for t, role in trees],
+        welcome_dismissed=user.welcome_dismissed,
+        changelog_seen=user.changelog_seen,
+        show_changelog=user.show_changelog,
     )
 
 
@@ -130,6 +133,13 @@ async def update_me(body: UpdateMeRequest, session: SessionDep, actor: ActorDep)
         user.display_name = body.display_name.strip()
     if body.preferred_language is not None:
         user.preferred_language = body.preferred_language
+    # Onboarding preferences: not audited (they change nothing in the archive).
+    if body.welcome_dismissed is not None:
+        user.welcome_dismissed = body.welcome_dismissed
+    if body.changelog_seen is not None:
+        user.changelog_seen = body.changelog_seen
+    if body.show_changelog is not None:
+        user.show_changelog = body.show_changelog
     after = audit.snapshot(user, USER_AUDIT_FIELDS)
     if before != after:
         b, a = audit.diff_only(before, after)

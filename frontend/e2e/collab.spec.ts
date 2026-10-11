@@ -1,5 +1,11 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 
+import { closeSignInPopups } from "./popups";
+
+test.beforeEach(async ({ page }) => {
+  await closeSignInPopups(page);
+});
+
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? "admin@example.com";
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "change-me-now-please";
 
@@ -42,6 +48,7 @@ async function setup(browser: Browser, admin: Page, tag: string) {
     })
   ).json();
   const page = await (await browser.newContext()).newPage();
+  await closeSignInPopups(page);
   await login(page, email, password);
   return { contributor: page, personUrl: `/trees/${tree.id}/people/${person.id}` };
 }

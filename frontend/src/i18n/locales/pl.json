@@ -1014,7 +1014,9 @@
   "footer": {
     "rights": "Wszelkie prawa zastrzeżone",
     "thirdParty": "Licencje komponentów zewnętrznych",
-    "version": "Wersja aplikacji"
+    "version": "Wersja aplikacji",
+    "guide": "Jak zacząć",
+    "news": "Co nowego"
   },
   "imports": {
     "link": "Import GEDCOM",
@@ -1205,5 +1207,42 @@
     "done": "Drzewo jest teraz udostępnione dla {{name}}.",
     "who": "Kto ma dostęp",
     "manage": "Zarządzaj członkami i zaproszeniami"
+  },
+  "welcome": {
+    "title": "Witamy w Korinnia",
+    "intro": "Korinnia przechowuje historię Twojej rodziny w jednym miejscu: drzewo, historie życia, zdjęcia i dokumenty. Na początek:",
+    "steps": {
+      "trees": {
+        "title": "Twoje drzewa.",
+        "text": "„Drzewa rodzinne” to drzewa, które możesz otworzyć. Masz też własną rodzinę demonstracyjną do swobodnego przeglądania i zmieniania."
+      },
+      "explore": {
+        "title": "Przeglądaj.",
+        "text": "Przeciągaj drzewo, by je przesuwać, przewijaj lub szczypaj, by przybliżać, kliknij osobę, by przeczytać jej historię. Wyszukiwarka znajduje imiona w dowolnej pisowni."
+      },
+      "builder": {
+        "title": "Buduj.",
+        "text": "Przełącz tryb z „Podgląd” na „Edycja” i przyciskami + na karcie dodawaj rodziców, dzieci lub partnerów. Przeciągaj karty, by uporządkować drzewo."
+      },
+      "archive": {
+        "title": "Dbaj o archiwum.",
+        "text": "Na stronie osoby dodawaj zdjęcia i skany dokumentów, oznaczaj twarze, podawaj źródła i zapisuj wspomnienia."
+      },
+      "discover": {
+        "title": "Odkrywaj.",
+        "text": "Oś czasu, Mapa, Pokrewieństwo i Statystyki pokazują rodzinę z nowych stron."
+      },
+      "share": {
+        "title": "Udostępniaj.",
+        "text": "„Udostępnij” daje bliskim dostęp po adresie e-mail; „Import GEDCOM” przenosi drzewo z innego programu; drzewo można pobrać jako PNG lub PDF."
+      }
+    },
+    "dontShow": "Nie pokazuj więcej",
+    "start": "Zaczynamy"
+  },
+  "news": {
+    "title": "Co nowego",
+    "dontShow": "Nie pokazuj nowości przy logowaniu",
+    "ok": "Rozumiem"
   }
 }

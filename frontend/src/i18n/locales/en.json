@@ -990,7 +990,9 @@
   "footer": {
     "rights": "All rights reserved",
     "thirdParty": "Third-party licences",
-    "version": "App version"
+    "version": "App version",
+    "guide": "Getting started",
+    "news": "What's new"
   },
   "imports": {
     "link": "Import GEDCOM",
@@ -1141,5 +1143,42 @@
     "done": "The tree is now shared with {{name}}.",
     "who": "Who has access",
     "manage": "Manage members and invitations"
+  },
+  "welcome": {
+    "title": "Welcome to Korinnia",
+    "intro": "Korinnia keeps your family's history in one place: a family tree, life stories, photos and documents. A few things to start with:",
+    "steps": {
+      "trees": {
+        "title": "Your trees.",
+        "text": "“Family trees” lists the trees you can open. You also have your own demo family to explore and change freely."
+      },
+      "explore": {
+        "title": "Explore.",
+        "text": "Drag the tree to move it, scroll or pinch to zoom, and click a person to read their story. Search finds names in any spelling."
+      },
+      "builder": {
+        "title": "Build.",
+        "text": "Switch “View” to “Builder”, then use the + buttons on a card to add parents, children or partners. Drag cards to arrange the tree."
+      },
+      "archive": {
+        "title": "Keep the archive.",
+        "text": "On a person's page add photos and scanned documents, tag faces, cite sources and write memories."
+      },
+      "discover": {
+        "title": "Discover.",
+        "text": "Timeline, Map, Relationship and Statistics show the family from new angles."
+      },
+      "share": {
+        "title": "Share.",
+        "text": "“Share” gives relatives access by email; “Import GEDCOM” brings in a tree from another program; download the tree as PNG or PDF."
+      }
+    },
+    "dontShow": "Don't show this again",
+    "start": "Let's start"
+  },
+  "news": {
+    "title": "What's new",
+    "dontShow": "Don't show news when I sign in",
+    "ok": "Got it"
   }
 }

@@ -422,3 +422,32 @@ async def test_purge_expired_auth_records(session: AsyncSession, make_user: Make
     )
     await session.commit()
     assert await purge_expired(session) == (1, 1)
+
+
+async def test_onboarding_preferences(
+    make_user: MakeUser, client: ApiClient, session: AsyncSession
+) -> None:
+    await make_user("new@example.com")
+    me = (await client.login("new@example.com"))["user"]
+    # A new account: the welcome guide and news are due.
+    assert (me["welcome_dismissed"], me["changelog_seen"], me["show_changelog"]) == (
+        False,
+        None,
+        True,
+    )
+    resp = await client.patch(
+        "/api/v1/auth/me",
+        json={"welcome_dismissed": True, "changelog_seen": "2026-10-11", "show_changelog": False},
+    )
+    assert resp.status_code == 200
+    me = (await client.get("/api/v1/auth/me")).json()
+    assert (me["welcome_dismissed"], me["changelog_seen"], me["show_changelog"]) == (
+        True,
+        "2026-10-11",
+        False,
+    )
+    # Not something to audit; and only plain ids are accepted.
+    actions = (await session.scalars(select(AuditLog.action))).all()
+    assert "user.update" not in actions
+    bad = await client.patch("/api/v1/auth/me", json={"changelog_seen": "<script>"})
+    assert bad.status_code == 422

@@ -18,6 +18,10 @@ export interface Me {
   is_superadmin: boolean;
   totp_enabled: boolean;
   trees: MeTree[];
+  /** Onboarding: welcome guide dismissed for good; newest "What's new" entry seen. */
+  welcome_dismissed: boolean;
+  changelog_seen: string | null;
+  show_changelog: boolean;
 }
 
 export interface LoginResponse {

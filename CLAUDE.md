@@ -13,6 +13,9 @@ Self-hosted family archive and interactive family tree (FastAPI + PostgreSQL + R
   why, the commit hash if committed, and anything left open.
 - If the task finishes a feature, adds an idea, or uncovers a problem, update `plans/roadmap.md` in
   the same change. Structural changes also go into `plans/implementation.md`.
+- When a change is visible to users, add a dated entry (en / uk / pl) at the top of
+  `frontend/src/features/onboarding/changelog.ts` — users see it in "What's new" at sign-in.
+  If it changes how the app is used, check the welcome guide (`welcome.*` strings) too.
 - Keep the existing docs current too: README feature statuses (✅ / 🚧 / 📋), a new D-number in
   `docs/decisions.md` for design decisions, `docs/data-schema.md` for schema changes.
 

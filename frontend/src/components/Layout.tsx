@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useMatch, useNavigate } from "react-router";
 
 import { useLogout, useMe } from "@/features/auth/api";
+import { Onboarding, type OnboardingView } from "@/features/onboarding/Onboarding";
 import { hadStoredLanguage } from "@/i18n";
 import { getMeta } from "@/lib/api";
 
@@ -24,6 +25,7 @@ export function Layout() {
   const preferred = me.data?.preferred_language;
   // The tree canvas uses the full viewport below the header.
   const fullBleed = useMatch("/trees/:treeId") !== null;
+  const [guide, setGuide] = useState<OnboardingView>(null);
 
   // Apply the user's saved language once their profile is known.
   useEffect(() => {
@@ -108,7 +110,25 @@ export function Layout() {
             <span>
               © {COPYRIGHT_YEARS} Yevhenii Rosliakov · {t("app.name")} · {t("footer.rights")}
             </span>
-            <span className="flex items-center gap-3">
+            <span className="flex flex-wrap items-center gap-3">
+              {me.data && (
+                <>
+                  <button
+                    type="button"
+                    className="hover:text-bark-900 underline"
+                    onClick={() => setGuide("welcome")}
+                  >
+                    {t("footer.guide")}
+                  </button>
+                  <button
+                    type="button"
+                    className="hover:text-bark-900 underline"
+                    onClick={() => setGuide("news")}
+                  >
+                    {t("footer.news")}
+                  </button>
+                </>
+              )}
               <span title={t("footer.version")} className="tabular-nums">
                 {versionLabel()}
               </span>
@@ -119,6 +139,7 @@ export function Layout() {
           </div>
         </footer>
       )}
+      <Onboarding view={guide} onView={setGuide} />
     </div>
   );
 }

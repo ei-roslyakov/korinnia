@@ -4,12 +4,18 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-11
 
+- **Welcome guide + "What's new" (D95)** — popups at sign-in with "don't show again" /
+  "don't show news" checkboxes; footer links "Getting started" / "What's new". Migration 0009
+  (`users.welcome_dismissed`, `changelog_seen`, `show_changelog`; existing users skip the
+  guide). Changelog in `frontend/src/features/onboarding/changelog.ts` — CLAUDE.md now asks to
+  add an entry for every user-visible change. E2E closes the popups via `e2e/popups.ts`.
+  Tests: backend 309, frontend 151, E2E 23. (commit "Welcome guide and What's new")
 - **Share a tree by email (D94)** — "Share" next to Rename/Delete (tree cards and builder
   toolbar, tree admins): email + access level, list of who has access, link to Members.
   `POST /trees/{id}/members` got `invite` (default true); `invite: false` → 404
   `no_user_with_email` ("No user with this email exists") and no invitation. Tests: backend
   308, frontend 146, E2E 23; tried in the dev app (unknown email, then sharing with
-  demo@demo.com as editor; that share was removed again). (commit "Share a tree by email")
+  demo@demo.com as editor; that share was removed again). (68837fa, v0.0.14)
 
 ## 2026-10-09
 

@@ -33,6 +33,9 @@ class Me(Schema):
     is_superadmin: bool
     totp_enabled: bool
     trees: list[MeTree]
+    welcome_dismissed: bool = False
+    changelog_seen: str | None = None
+    show_changelog: bool = True
 
 
 class LoginResponse(BaseModel):
@@ -47,6 +50,10 @@ class CsrfResponse(BaseModel):
 class UpdateMeRequest(BaseModel):
     display_name: DisplayName | None = None
     preferred_language: Language | None = None
+    # Onboarding (see Me).
+    welcome_dismissed: bool | None = None
+    changelog_seen: str | None = Field(default=None, max_length=32, pattern=r"^[\w.-]+$")
+    show_changelog: bool | None = None
 
 
 class ChangePasswordRequest(BaseModel):

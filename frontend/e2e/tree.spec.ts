@@ -1,5 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { closeSignInPopups } from "./popups";
+
+test.beforeEach(async ({ page }) => {
+  await closeSignInPopups(page);
+});
+
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? "admin@example.com";
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "change-me-now-please";
 const DEMO_TREE = "Родина Коваленків (демо)"; // created by `python -m app.seed`

@@ -34,4 +34,8 @@ export const ME = {
   is_superadmin: false,
   totp_enabled: false,
   trees: [{ id: "t1", name: "Родина", role: "viewer" }],
+  // Has seen the welcome guide and all news (onboarding has its own tests).
+  welcome_dismissed: true,
+  changelog_seen: "9999-12-31",
+  show_changelog: true,
 };
