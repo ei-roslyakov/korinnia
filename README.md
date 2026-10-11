@@ -59,6 +59,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Admin panel: create / deactivate / delete users, superadmin rights, password-reset links, reset 2FA
 - ✅ Renaming and deleting a tree by its admins, from the tree list or tree settings (deletion is a soft delete); the admin panel lists every tree, deletes any of them and restores deleted ones
 - ✅ Invitations via one-time, expiring links (to a tree with a role, or as superadmin)
+- ✅ Share a tree with another user by email ("Share" on the tree card and in the builder): choose view / suggest / edit / administer; an email without an account is reported as "no such user" instead of being invited
 - ✅ Tree member management by tree admins (add existing users, invite new ones, change roles, remove)
 - ✅ Audit log of every change (who, when, before/after) with filters — global and per tree
 - ✅ Profile: display name, interface language (synced across devices), password change

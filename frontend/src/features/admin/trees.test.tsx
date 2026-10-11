@@ -185,3 +185,66 @@ describe("admin trees", () => {
     expect(await screen.findByRole("heading", { name: "Родоводи" })).toBeInTheDocument();
   });
 });
+
+describe("sharing a tree", () => {
+  it("shares with an existing user and explains an unknown email", async () => {
+    const sent: unknown[] = [];
+    let members = [
+      {
+        user_id: "u1",
+        email: "me@example.com",
+        display_name: "Я",
+        role: "admin",
+        is_active: true,
+        created_at: "2026-10-01T00:00:00Z",
+      },
+    ];
+    mockApi({
+      "GET /api/v1/auth/me": () => json(ME),
+      "GET /api/v1/trees": () =>
+        json([{ id: "t1", name: "Родина", description: null, my_role: "admin", person_count: 3 }]),
+      "GET /api/v1/trees/t1/members": () => json({ members, invitations: [] }),
+      "POST /api/v1/trees/t1/members": (init) => {
+        const body = JSON.parse(String(init.body)) as { email: string; role: string };
+        sent.push(body);
+        if (body.email !== "olena@example.com") return json({ code: "no_user_with_email" }, 404);
+        const member = {
+          ...members[0]!,
+          user_id: "u2",
+          email: body.email,
+          display_name: "Олена",
+          role: body.role,
+        };
+        members = [...members, member];
+        return json({ kind: "member", member, invitation: null, url: null }, 201);
+      },
+    });
+    renderWithProviders(<App />, { route: "/" });
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Поділитися родоводом «Родина»" }),
+    );
+    const dialog = within(await screen.findByRole("dialog"));
+    expect(await dialog.findByText("me@example.com")).toBeInTheDocument();
+
+    await userEvent.type(
+      dialog.getByRole("textbox", { name: "Електронна пошта" }),
+      "nobody@example.com",
+    );
+    await userEvent.click(dialog.getByRole("button", { name: "Поділитися" }));
+    expect(await dialog.findByRole("alert")).toHaveTextContent(
+      "Користувача з такою адресою не існує.",
+    );
+
+    const email = dialog.getByRole("textbox", { name: "Електронна пошта" });
+    await userEvent.clear(email);
+    await userEvent.type(email, "olena@example.com");
+    await userEvent.selectOptions(dialog.getByRole("combobox", { name: "Доступ" }), "editor");
+    await userEvent.click(dialog.getByRole("button", { name: "Поділитися" }));
+    expect(await dialog.findByText("Тепер родовід доступний для Олена.")).toBeInTheDocument();
+    expect(await dialog.findByText("olena@example.com")).toBeInTheDocument();
+    expect(sent).toEqual([
+      { email: "nobody@example.com", role: "viewer", invite: false },
+      { email: "olena@example.com", role: "editor", invite: false },
+    ]);
+  });
+});

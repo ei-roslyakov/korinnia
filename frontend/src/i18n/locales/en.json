@@ -23,7 +23,8 @@
     "previous": "Previous",
     "next": "Next",
     "range": "{{from}}–{{to}} of {{total}}",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "close": "Close"
   },
   "status": {
     "title": "System status",
@@ -284,7 +285,8 @@
     "import_not_found": "Import not found.",
     "integrity_check_running": "A check is already running.",
     "integrity_run_not_found": "Check not found.",
-    "job_queue_unavailable": "The background worker is not available. Please try again later."
+    "job_queue_unavailable": "The background worker is not available. Please try again later.",
+    "no_user_with_email": "No user with this email exists. Check the address, or ask an administrator to invite them."
   },
   "dates": {
     "approx": "about {{date}}",
@@ -1122,5 +1124,22 @@
       "hash_mismatch": "Content changed",
       "unreadable": "Unreadable"
     }
+  },
+  "share": {
+    "button": "Share",
+    "named": "Share the tree “{{name}}”",
+    "title": "Share “{{name}}”",
+    "hint": "Give another user access to this tree. They need an account on this site; they will see the tree in their list right away.",
+    "access": "Access",
+    "roles": {
+      "viewer": "Can view",
+      "contributor": "Can view and suggest changes",
+      "editor": "Can edit",
+      "admin": "Can edit and manage access"
+    },
+    "submit": "Share",
+    "done": "The tree is now shared with {{name}}.",
+    "who": "Who has access",
+    "manage": "Manage members and invitations"
   }
 }

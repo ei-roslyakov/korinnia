@@ -7,9 +7,10 @@ import { useErrorMessage } from "@/lib/hooks";
 import type { Tree } from "@/lib/types";
 
 import { useDeleteTree, useUpdateTree } from "./api";
+import { ShareTreeDialog } from "./ShareTreeDialog";
 
 /**
- * Rename and Delete for a tree's admins (on the tree list and in builder mode). Deleting is
+ * Share, Rename and Delete for a tree's admins (on the tree list and in builder mode). Deleting is
  * a soft delete; `leaveTo` is where to go afterwards when the tree itself is open.
  */
 export function TreeActions({
@@ -28,6 +29,7 @@ export function TreeActions({
   const del = useDeleteTree(tree.id);
   const errorMessage = useErrorMessage();
   const [renaming, setRenaming] = useState(false);
+  const [sharing, setSharing] = useState(false);
   if (tree.my_role !== "admin") return null;
 
   return (
@@ -37,6 +39,14 @@ export function TreeActions({
           {errorMessage(del.error)}
         </span>
       )}
+      <Button
+        variant="ghost"
+        className={buttonClassName}
+        aria-label={t("share.named", { name: tree.name })}
+        onClick={() => setSharing(true)}
+      >
+        {t("share.button")}
+      </Button>
       <Button
         variant="ghost"
         className={buttonClassName}
@@ -62,6 +72,7 @@ export function TreeActions({
         {t("common.delete")}
       </Button>
       {renaming && <RenameTreeDialog tree={tree} onClose={() => setRenaming(false)} />}
+      {sharing && <ShareTreeDialog tree={tree} onClose={() => setSharing(false)} />}
     </div>
   );
 }

@@ -23,7 +23,8 @@
     "previous": "Poprzednia",
     "next": "Następna",
     "range": "{{from}}–{{to}} z {{total}}",
-    "loading": "Ładowanie…"
+    "loading": "Ładowanie…",
+    "close": "Zamknij"
   },
   "status": {
     "title": "Stan systemu",
@@ -288,7 +289,8 @@
     "import_not_found": "Nie znaleziono importu.",
     "integrity_check_running": "Sprawdzenie już trwa.",
     "integrity_run_not_found": "Nie znaleziono sprawdzenia.",
-    "job_queue_unavailable": "Proces w tle jest niedostępny. Spróbuj później."
+    "job_queue_unavailable": "Proces w tle jest niedostępny. Spróbuj później.",
+    "no_user_with_email": "Nie ma użytkownika z takim adresem e-mail. Sprawdź adres lub poproś administratora o wysłanie zaproszenia."
   },
   "dates": {
     "approx": "ok. {{date}}",
@@ -1186,5 +1188,22 @@
       "hash_mismatch": "Zmieniona zawartość",
       "unreadable": "Nieczytelny"
     }
+  },
+  "share": {
+    "button": "Udostępnij",
+    "named": "Udostępnij drzewo „{{name}}”",
+    "title": "Udostępnij „{{name}}”",
+    "hint": "Daj innemu użytkownikowi dostęp do tego drzewa. Musi mieć konto na tej stronie; drzewo od razu pojawi się na jego liście.",
+    "access": "Dostęp",
+    "roles": {
+      "viewer": "Może przeglądać",
+      "contributor": "Może przeglądać i proponować zmiany",
+      "editor": "Może edytować",
+      "admin": "Może edytować i zarządzać dostępem"
+    },
+    "submit": "Udostępnij",
+    "done": "Drzewo jest teraz udostępnione dla {{name}}.",
+    "who": "Kto ma dostęp",
+    "manage": "Zarządzaj członkami i zaproszeniami"
   }
 }

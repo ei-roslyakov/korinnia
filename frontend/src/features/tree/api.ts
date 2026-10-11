@@ -86,7 +86,8 @@ export interface AddMemberResponse {
 export function useAddMember(treeId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { email: string; role: Role }) =>
+    // invite: false — only existing users (404 `no_user_with_email` otherwise).
+    mutationFn: (body: { email: string; role: Role; invite?: boolean }) =>
       api.post<AddMemberResponse>(`/api/v1/trees/${treeId}/members`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: membersKey(treeId) }),
   });

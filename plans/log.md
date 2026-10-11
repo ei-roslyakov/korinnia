@@ -2,6 +2,15 @@
 
 Newest first. One entry per finished task: what changed, why, commit, anything left open.
 
+## 2026-10-11
+
+- **Share a tree by email (D94)** — "Share" next to Rename/Delete (tree cards and builder
+  toolbar, tree admins): email + access level, list of who has access, link to Members.
+  `POST /trees/{id}/members` got `invite` (default true); `invite: false` → 404
+  `no_user_with_email` ("No user with this email exists") and no invitation. Tests: backend
+  308, frontend 146, E2E 23; tried in the dev app (unknown email, then sharing with
+  demo@demo.com as editor; that share was removed again). (commit "Share a tree by email")
+
 ## 2026-10-09
 
 - **Couple link on the canvas (D93)** — rings + wedding year (marriage), dashed line + heart

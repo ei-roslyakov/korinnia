@@ -56,6 +56,9 @@ class MembersResponse(BaseModel):
 class AddMemberRequest(BaseModel):
     email: Email
     role: TreeRole
+    # False ("share with a user"): an email without an account is an error (404
+    # `no_user_with_email`) instead of creating an invitation link.
+    invite: bool = True
 
 
 class AddMemberResponse(BaseModel):

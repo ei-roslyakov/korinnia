@@ -129,8 +129,10 @@ async def list_members(access: TreeAdmin, session: SessionDep) -> MembersRespons
 async def add_member(
     body: AddMemberRequest, access: TreeAdmin, session: SessionDep, actor: ActorDep
 ) -> AddMemberResponse:
+    """Share the tree with a user by email. With `invite` (default) an email without an
+    account gets an invitation link; without it, that is a 404 `no_user_with_email`."""
     membership, user, inv, url = await tree_service.add_member_or_invite(
-        session, access.tree, email=body.email, role=body.role, actor=actor
+        session, access.tree, email=body.email, role=body.role, actor=actor, invite=body.invite
     )
     if membership is not None and user is not None:
         return AddMemberResponse(kind="member", member=member_out(membership, user))

@@ -282,3 +282,47 @@ async def test_restore_demo_tree_when_owner_has_a_new_one(
     resp = await sa.post(f"/api/v1/admin/trees/{old.id}/restore")
     assert resp.status_code == 409
     assert resp.json()["code"] == "demo_tree_exists"
+
+
+async def test_share_with_an_existing_user_only(
+    make_user: MakeUser,
+    make_client: MakeClient,
+    session: AsyncSession,
+    make_tree: Callable[..., Awaitable[Tree]],
+    add_member: Callable[..., Awaitable[Any]],
+) -> None:
+    owner = await make_user("owner@example.com")
+    tree = await make_tree(owner)
+    cousin = await make_user("cousin@example.com", name="Cousin")
+    oc = await make_client()
+    await oc.login("owner@example.com")
+    base = f"/api/v1/trees/{tree.id}/members"
+
+    # Nobody has this email: an error, and no invitation is created.
+    resp = await oc.post(
+        base, json={"email": "nobody@example.com", "role": "viewer", "invite": False}
+    )
+    assert (resp.status_code, resp.json()["code"]) == (404, "no_user_with_email")
+    assert (await oc.get(base)).json()["invitations"] == []
+
+    resp = await oc.post(
+        base, json={"email": "Cousin@Example.com", "role": "editor", "invite": False}
+    )
+    assert resp.status_code == 201
+    assert resp.json()["kind"] == "member"
+    assert resp.json()["member"]["display_name"] == "Cousin"
+    cc = await make_client()
+    await cc.login("cousin@example.com")
+    assert (await cc.get(f"/api/v1/trees/{tree.id}")).json()["my_role"] == "editor"
+
+    # Sharing again, or with yourself, says so.
+    resp = await oc.post(
+        base, json={"email": "cousin@example.com", "role": "viewer", "invite": False}
+    )
+    assert resp.json()["code"] == "already_member"
+    # Only the tree's admins can share it.
+    assert cousin.id
+    resp = await cc.post(
+        base, json={"email": "owner@example.com", "role": "viewer", "invite": False}
+    )
+    assert resp.status_code == 403

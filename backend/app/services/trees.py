@@ -209,10 +209,19 @@ async def _ensure_not_last_admin(session: AsyncSession, membership: TreeMembersh
 
 
 async def add_member_or_invite(
-    session: AsyncSession, tree: Tree, *, email: str, role: TreeRole, actor: Actor
+    session: AsyncSession,
+    tree: Tree,
+    *,
+    email: str,
+    role: TreeRole,
+    actor: Actor,
+    invite: bool = True,
 ) -> tuple[TreeMembership | None, User | None, Invitation | None, str | None]:
-    """Add an existing user to the tree, or create an invitation for a new email."""
+    """Add an existing user to the tree, or (with `invite`) create an invitation for an
+    email that has no account yet."""
     user = await get_user_by_email(session, email)
+    if user is None and not invite:
+        raise NotFoundError("no_user_with_email")
     if user is None:
         inv, url = await create_invitation(
             session, email=email, tree=tree, role=role, is_superadmin=False, actor=actor
