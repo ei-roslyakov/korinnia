@@ -86,7 +86,7 @@ plans/            this folder
 
 - Tree drawn growing upwards: generation rows, couples side by side, trunk and roots; drag a whole
   branch in any direction, Alt-drag one card; lineage highlight; generation labels. (D74, D76, D83)
-- Themes light / dark / archive (sepia); tree styles Simple / Oak / Spring; logo per theme. (D77, D84)
+- Themes light / dark / archive (sepia) and glass Night (blurred backdrop on `<html>`, frosted `.bg-surface`, solid cards on the canvas); tree styles Simple / Oak / Spring; logo per theme. (D77, D84, D104)
 - English by default (`DEFAULT_LANGUAGE`), remembered per user. (D81)
 - Demo family for every new user (66 people, 7 generations, several root families, biographies,
   illustrated portraits); `make seed` grows older copies into the current version. (D91)

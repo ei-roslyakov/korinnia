@@ -1015,7 +1015,8 @@
     "system": "Systemowy",
     "light": "Jasny",
     "dark": "Ciemny",
-    "sepia": "Archiwalny"
+    "sepia": "Archiwalny",
+    "night": "Noc (szkło)"
   },
   "footer": {
     "rights": "Wszelkie prawa zastrzeżone",

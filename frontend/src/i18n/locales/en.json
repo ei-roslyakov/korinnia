@@ -991,7 +991,8 @@
     "system": "System",
     "light": "Light",
     "dark": "Dark",
-    "sepia": "Archive"
+    "sepia": "Archive",
+    "night": "Night (glass)"
   },
   "footer": {
     "rights": "All rights reserved",

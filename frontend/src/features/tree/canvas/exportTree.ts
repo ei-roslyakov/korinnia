@@ -64,7 +64,7 @@ export async function exportTree({
   out.width = tree.width;
   out.height = Math.round((height + HEADER) * ratio);
   const ctx = out.getContext("2d")!;
-  ctx.fillStyle = cssVar(root, "--k-surface") || "#ffffff";
+  ctx.fillStyle = cssVar(root, "--k-surface-solid") || cssVar(root, "--k-surface") || "#ffffff";
   ctx.fillRect(0, 0, out.width, out.height);
   ctx.scale(ratio, ratio);
   ctx.fillStyle = cssVar(root, "--k-bark-900") || "#2a251c";
@@ -75,7 +75,7 @@ export async function exportTree({
   ctx.fillText(subtitle, PADDING, 60);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const top = Math.round(HEADER * ratio);
-  const stops = gradientStops(cssVar(root, "--k-canvas"));
+  const stops = gradientStops(cssVar(root, "--k-canvas-solid") || cssVar(root, "--k-canvas"));
   if (stops.length) {
     const sky = ctx.createLinearGradient(0, top, 0, out.height);
     for (const [color, at] of stops) sky.addColorStop(at, color);

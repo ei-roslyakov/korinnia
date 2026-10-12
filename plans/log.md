@@ -4,6 +4,12 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-12
 
+- **Night (glass) theme (D104)** — owner asked for more themes with a blurred background;
+  Meadow and Sky were built too, but only Night was kept. CSS only (`index.css`): blurred radial-gradient backdrop on a fixed layer, frosted
+  `.bg-surface` panels, solid cards inside `.react-flow`; exports use `--k-surface-solid` /
+  `--k-canvas-solid`; `isDarkTheme()` for canvas colour mode and map tiles. Checked with
+  screenshots of the tree list and canvas. Guide (uk/en), changelog
+  `2026-10-12.3`.
 - **Every user creates their own trees (D103)** — owner's request: "user should create his own
   tree, he is an admin in his space; superadmin is admin across admins". `POST /trees` open to
   any user allowed by `may_create_trees` (superadmin, or `USERS_CAN_CREATE_TREES` and

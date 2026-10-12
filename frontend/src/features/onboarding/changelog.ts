@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-12.3",
+    items: {
+      en: [
+        "A new theme, “Night (glass)”: a deep blue sky with soft northern lights behind frosted panels. Choose it under “Theme” at the top.",
+      ],
+      uk: [
+        "Нова тема «Ніч (скло)»: глибоке синє небо з м'яким північним сяйвом за матовими панелями. Оберіть угорі в «Тема».",
+      ],
+      pl: [
+        "Nowy motyw „Noc (szkło)”: głębokie niebieskie niebo z miękką zorzą polarną za matowymi panelami. Wybierz u góry w „Motyw”.",
+      ],
+    },
+  },
+  {
     id: "2026-10-12.2",
     items: {
       en: [

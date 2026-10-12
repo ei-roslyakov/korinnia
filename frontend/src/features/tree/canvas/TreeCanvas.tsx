@@ -20,7 +20,7 @@ import { Button, Spinner } from "@/components/ui";
 import type { RelativeRelation, TreeGraph } from "@/lib/genealogy";
 import { useMe } from "@/features/auth/api";
 import { formatPartialDate } from "@/lib/dates";
-import { useTheme } from "@/lib/theme";
+import { isDarkTheme, useTheme } from "@/lib/theme";
 import { useToast } from "@/lib/toast";
 
 import {
@@ -665,7 +665,7 @@ function CanvasInner({
         ref={rootRef}
         // Sky above, meadow towards the ground (per theme).
         style={{ background: "var(--k-canvas)" }}
-        colorMode={theme === "dark" ? "dark" : "light"}
+        colorMode={isDarkTheme(theme) ? "dark" : "light"}
         nodes={nodes}
         edges={edges}
         edgeTypes={edgeTypes}

@@ -9,7 +9,8 @@ walks through everything you can do. Buttons and menu names are written **like t
 - Sign in with your email and password. There is no public sign-up: an administrator creates
   your account or sends you an invitation link. Forgot your password? Ask an administrator for
   a reset link.
-- **Theme** (light, dark, archive / sepia, or follow your device) and **Language** (English,
+- **Theme** (light, dark, archive / sepia, Night (glass: a soft blurred colour background behind
+  frosted panels), or follow your device) and **Language** (English,
   Українська, Polski) are in the top bar. Your language is remembered on every device.
 - Your name at the top right opens **Your profile**: display name, interface language,
   **Change password** (this signs you out on your other devices) and **Two-step verification**.

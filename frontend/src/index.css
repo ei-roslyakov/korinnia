@@ -90,6 +90,12 @@
   --k-logo-leaf-light: #84b53a;
   --k-logo-trunk: #7a5638;
   --k-logo-ground: #a3b86c;
+
+  /* Night only: a blurred colour backdrop behind see-through cards. Pictures (PNG /
+     PDF export) and the tree's own cards use the solid colours. */
+  --k-backdrop: none;
+  --k-surface-solid: var(--k-surface);
+  --k-canvas-solid: var(--k-canvas);
 }
 
 /* Dark: warm charcoal, light text, a brighter leaf green with dark text on it. */
@@ -164,6 +170,98 @@
   --k-logo-ground: #9c8a4e;
 }
 
+/* --- Night (glass): soft blurred colour behind frosted, see-through panels ------------ */
+
+/* Night: a deep blue sky with northern lights. */
+:root[data-theme="night"] {
+  color-scheme: dark;
+  --k-bark-50: rgb(10 14 26 / 0.35);
+  --k-bark-100: rgb(170 190 230 / 0.16);
+  --k-bark-700: #a9b4c8;
+  --k-bark-900: #e6ebf5;
+  --k-leaf-600: #7fd0aa;
+  --k-leaf-700: #69bf98;
+  --k-surface: rgb(20 26 42 / 0.58);
+  --k-surface-solid: #161c2c;
+  --k-on-leaf: #0b1a14;
+  --k-backdrop-base: #0b1020;
+  --k-backdrop:
+    radial-gradient(circle at 18% 15%, #1d6a70 0, transparent 40%),
+    radial-gradient(circle at 82% 20%, #4a2c84 0, transparent 38%),
+    radial-gradient(circle at 65% 88%, #1b3f7a 0, transparent 42%),
+    radial-gradient(circle at 10% 85%, #2b5a4a 0, transparent 30%);
+  --k-canvas: linear-gradient(
+    to bottom,
+    rgb(12 18 32 / 0.35) 0%,
+    rgb(14 20 30 / 0.3) 70%,
+    rgb(18 30 24 / 0.5) 100%
+  );
+  --k-canvas-solid: linear-gradient(to bottom, #0f1626 0%, #121a24 70%, #16211a 100%);
+  --k-canvas-dots: rgb(170 190 230 / 0.12);
+  --k-branch: #b08a62;
+  --k-grass: #3f6b4a;
+  --k-soil: #5e4a36;
+  --k-logo-leaf: #69bf98;
+  --k-logo-leaf-light: #a5e3c4;
+  --k-logo-trunk: #c49a6c;
+  --k-logo-ground: #3f6b4a;
+}
+
+/* Night shares the dark theme's status colours (pale text on deep backgrounds). */
+:root[data-theme="night"] {
+  --k-green-50: #16261a;
+  --k-green-100: #1d3322;
+  --k-green-200: #2b4a31;
+  --k-green-700: #7fd18f;
+  --k-green-800: #9be0a8;
+  --k-red-50: #2e1717;
+  --k-red-100: #3d1d1d;
+  --k-red-200: #5c2a2a;
+  --k-red-700: #f08b8b;
+  --k-red-800: #f6a3a3;
+  --k-amber-50: #2d2414;
+  --k-amber-100: #3b2f17;
+  --k-amber-200: #5a4620;
+  --k-amber-700: #f2bf63;
+  --k-amber-800: #f6cd80;
+  --k-sky-100: #183041;
+  --k-sky-800: #a5d8f5;
+  --k-rose-100: #3d1d26;
+  --k-rose-800: #f7b3c2;
+  --k-violet-100: #2c2346;
+  --k-violet-800: #cbbcf7;
+  --k-stone-200: #3a3a44;
+  --k-stone-800: #e2e4ec;
+}
+
+:root[data-theme="night"] {
+  background: var(--k-backdrop-base);
+
+  /* The blurred colour layer, fixed behind everything. */
+  & body::before {
+    content: "";
+    position: fixed;
+    inset: -15%;
+    z-index: -1;
+    background: var(--k-backdrop);
+    filter: blur(70px);
+    pointer-events: none;
+  }
+
+  /* Frosted panels: header, cards, dialogs. */
+  & .bg-surface {
+    backdrop-filter: blur(18px) saturate(1.4);
+  }
+
+  /* On the tree, hundreds of frosted cards would be slow: cards there are solid. */
+  & .react-flow {
+    --k-surface: var(--k-surface-solid);
+  }
+  & .react-flow .bg-surface {
+    backdrop-filter: none;
+  }
+}
+
 html,
 body,
 #root {
@@ -172,6 +270,8 @@ body,
 
 body {
   @apply bg-bark-50 text-bark-900 antialiased;
+  /* Night paints its backdrop on <html>; it shows through the see-through body. */
+  isolation: isolate;
 }
 
 @keyframes toast-in {
@@ -194,6 +294,6 @@ body {
 }
 
 /* Darker map tiles in the dark theme. */
-:root[data-theme="dark"] .leaflet-tile {
+:root:is([data-theme="dark"], [data-theme="night"]) .leaflet-tile {
   filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
 }

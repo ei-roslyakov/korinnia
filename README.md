@@ -44,7 +44,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ UI in English (default, configurable with `DEFAULT_LANGUAGE`), Ukrainian and Polish; each user's choice is remembered
 - ✅ Tree logo in the header and on the sign-in page, coloured per theme; self-hosted Lora and Inter fonts (with Cyrillic); illustrated empty states, loading placeholders, toast notifications
 - ✅ Tree list with portrait covers, people count and years covered; stories shown magazine-style (cover, reading time, drop cap)
-- ✅ Themes: light, dark and archive (sepia), or follow the device setting; remembered per device
+- ✅ Themes: light, dark, archive (sepia) and a "glass" Night theme (blurred colour background, frosted panels), or follow the device setting; remembered per device
 - ✅ GitHub Actions CI, pre-commit hooks
 - ✅ Basic manual backup / restore scripts (database + media)
 

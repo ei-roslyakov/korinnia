@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import i18n from "@/i18n";
-import { applyTheme, readTheme } from "@/lib/theme";
+import { applyTheme, isDarkTheme, readTheme } from "@/lib/theme";
 
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
@@ -23,6 +23,7 @@ describe("themes", () => {
       "Світла",
       "Темна",
       "Архівна",
+      "Ніч (скло)",
     ]);
 
     await userEvent.selectOptions(select, "dark");
@@ -31,6 +32,11 @@ describe("themes", () => {
 
     await userEvent.selectOptions(select, "sepia");
     expect(document.documentElement.dataset.theme).toBe("sepia");
+
+    await userEvent.selectOptions(select, "night");
+    expect(document.documentElement.dataset.theme).toBe("night");
+    expect(isDarkTheme("night")).toBe(true);
+    expect(isDarkTheme("sepia")).toBe(false);
 
     // "System" forgets the choice and follows the device (light in jsdom).
     await userEvent.selectOptions(select, "system");

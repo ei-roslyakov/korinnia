@@ -1,7 +1,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 
 /** "system" follows the device's light / dark setting. */
-export const THEME_CHOICES = ["system", "light", "dark", "sepia"] as const;
+export const THEME_CHOICES = ["system", "light", "dark", "sepia", "night"] as const;
 export type ThemeChoice = (typeof THEME_CHOICES)[number];
 export type Theme = Exclude<ThemeChoice, "system">;
 
@@ -20,6 +20,11 @@ export function readTheme(): ThemeChoice {
   } catch {
     return "system";
   }
+}
+
+/** Themes with light text on a dark background (the tree canvas and map adapt to them). */
+export function isDarkTheme(theme: Theme): boolean {
+  return theme === "dark" || theme === "night";
 }
 
 export function resolveTheme(choice: ThemeChoice): Theme {
