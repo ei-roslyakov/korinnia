@@ -16,6 +16,8 @@ export interface Me {
   display_name: string;
   preferred_language: Language;
   is_superadmin: boolean;
+  /** May start trees ("New tree", "Import GEDCOM"); they become the tree's admin. */
+  can_create_trees: boolean;
   totp_enabled: boolean;
   trees: MeTree[];
   /** Onboarding: welcome guide dismissed for good; newest "What's new" entry seen. */
@@ -43,6 +45,7 @@ export interface User {
   preferred_language: Language;
   is_superadmin: boolean;
   is_active: boolean;
+  can_create_trees: boolean;
   totp_enabled: boolean;
   created_at: string;
   last_login_at: string | null;

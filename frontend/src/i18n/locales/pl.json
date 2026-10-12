@@ -100,7 +100,7 @@
     "title": "Drzewa rodzinne",
     "create": "Nowe drzewo",
     "empty": "Nie masz jeszcze dostępu do żadnego drzewa. Poproś administratora o zaproszenie.",
-    "emptyAdmin": "Nie ma jeszcze żadnych drzew. Utwórz pierwsze.",
+    "emptyAdmin": "Nie ma jeszcze drzew. Utwórz własne drzewo (będziesz jego administratorem) lub zaimportuj plik GEDCOM.",
     "name": "Nazwa",
     "description": "Opis",
     "yourRole": "Twoja rola:",
@@ -191,7 +191,10 @@
     "revokeSuperadmin": "Odbierz superadministratora",
     "deactivate": "Dezaktywuj",
     "activate": "Aktywuj",
-    "confirmDelete": "Trwale usunąć konto {{name}}? Wprowadzone przez nie dane pozostaną w archiwum. Zwykle lepiej je dezaktywować."
+    "confirmDelete": "Trwale usunąć konto {{name}}? Wprowadzone przez nie dane pozostaną w archiwum. Zwykle lepiej je dezaktywować.",
+    "cannotCreateTrees": "Nie tworzy drzew",
+    "allowTrees": "Zezwól na tworzenie drzew",
+    "forbidTrees": "Zablokuj tworzenie drzew"
   },
   "audit": {
     "title": "Historia zmian",
@@ -292,7 +295,8 @@
     "job_queue_unavailable": "Proces w tle jest niedostępny. Spróbuj później.",
     "no_user_with_email": "Nie ma użytkownika z takim adresem e-mail. Sprawdź adres lub poproś administratora o wysłanie zaproszenia.",
     "share_link_invalid": "Link wygasł lub został odwołany.",
-    "share_link_not_found": "Nie znaleziono linku."
+    "share_link_not_found": "Nie znaleziono linku.",
+    "cannot_create_trees": "Nie możesz tworzyć drzew w tej witrynie. Poproś administratora."
   },
   "dates": {
     "approx": "ok. {{date}}",
@@ -1217,7 +1221,7 @@
     "steps": {
       "trees": {
         "title": "Twoje drzewa.",
-        "text": "„Drzewa rodzinne” to drzewa, które możesz otworzyć. Masz też własną rodzinę demonstracyjną do swobodnego przeglądania i zmieniania."
+        "text": "„Drzewa rodzinne” to drzewa, które możesz otworzyć. Masz też własną rodzinę demonstracyjną do swobodnego przeglądania i zmieniania, a „Nowe drzewo” rozpocznie Twoją własną rodzinę."
       },
       "explore": {
         "title": "Przeglądaj.",

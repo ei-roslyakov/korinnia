@@ -32,6 +32,7 @@ export const ME = {
   display_name: "Галина",
   preferred_language: "uk",
   is_superadmin: false,
+  can_create_trees: false,
   totp_enabled: false,
   trees: [{ id: "t1", name: "Родина", role: "viewer" }],
   // Has seen the welcome guide and all news (onboarding has its own tests).

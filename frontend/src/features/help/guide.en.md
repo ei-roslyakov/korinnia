@@ -26,8 +26,11 @@ years covered. Your role in each tree is shown on its card.
 
 - Everyone gets their own **Demo** family (66 invented people over seven generations) to explore
   and change freely; it can be deleted like any tree.
-- Site administrators can start a **New tree** or **Import GEDCOM** (a tree made from a file —
-  see _Import and export_).
+- Start your own family with **New tree**, or **Import GEDCOM** (a tree made from a file — see
+  _Import and export_). You are the administrator of every tree you start: you decide who sees
+  it and who may edit it. Nobody else sees your tree unless you share it (site administrators
+  can see every tree to help with problems). On some sites only administrators create trees;
+  then the buttons are missing and an administrator makes the tree for you.
 - On the cards of trees you administer: **Share**, **Rename** and **Delete**. A deleted tree
   disappears for everyone, but nothing is destroyed: a site administrator can restore it.
 
@@ -198,7 +201,8 @@ Every tree has members, each with a role:
 **Administration** (site administrators only):
 
 - **Users** — create accounts, reset passwords (a link to send), turn off two-step verification
-  for someone who lost their phone, deactivate or delete accounts, grant administrator rights.
+  for someone who lost their phone, deactivate or delete accounts, grant administrator rights,
+  **Stop creating trees** / **Allow creating trees** for one person.
 - **Trees** — every tree on the site: delete, or restore deleted ones.
 - **Invitations** — invitation links to the site or to a tree.
 - **Change history** — every change on the site, with filters.

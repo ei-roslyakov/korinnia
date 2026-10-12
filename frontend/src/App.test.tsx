@@ -78,7 +78,7 @@ describe("App", () => {
 
   it("shows admin navigation and member management to a superadmin", async () => {
     mockApi({
-      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true }),
+      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true, can_create_trees: true }),
       "GET /api/v1/trees/t1": () =>
         json({ id: "t1", name: "Родина", description: "Полтава", my_role: "admin" }),
       "GET /api/v1/trees/t1/graph": () => json({ persons: [], parent_child: [], partnerships: [] }),
@@ -99,6 +99,22 @@ describe("App", () => {
     renderWithProviders(<App />, { route: "/trees/t1" });
     expect(await screen.findByRole("heading", { name: "Родина" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Учасники" })).not.toBeInTheDocument();
+  });
+
+  it("lets a regular user start their own tree, unless that is turned off", async () => {
+    mockApi({
+      "GET /api/v1/auth/me": () => json({ ...ME, can_create_trees: true }),
+      "GET /api/v1/trees": () => json([]),
+    });
+    const { unmount } = renderWithProviders(<App />);
+    expect(await screen.findByText(/Створіть власний/)).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Новий родовід" }).length).toBeGreaterThan(0);
+    unmount();
+
+    mockApi({ "GET /api/v1/auth/me": () => json(ME), "GET /api/v1/trees": () => json([]) });
+    renderWithProviders(<App />);
+    expect(await screen.findByText(/Попросіть адміністратора/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Новий родовід" })).not.toBeInTheDocument();
   });
 
   it("keeps non-superadmins out of the admin area", async () => {

@@ -4,6 +4,14 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-12
 
+- **Every user creates their own trees (D103)** — owner's request: "user should create his own
+  tree, he is an admin in his space; superadmin is admin across admins". `POST /trees` open to
+  any user allowed by `may_create_trees` (superadmin, or `USERS_CAN_CREATE_TREES` and
+  `users.can_create_trees`, migration 0012); creator becomes owner + admin; `owner_id` for
+  someone else stays superadmin-only. `/auth/me` returns `can_create_trees`; tree list shows
+  "New tree" / "Import GEDCOM" by it; Admin → Users "Stop / Allow creating trees". Guide (uk/en),
+  welcome text, changelog `2026-10-12.2`. Tests: backend +2 (permissions matrix updated),
+  frontend +1.
 - **Phase 10 finished: code splitting, trusted proxies, TOTP encryption (D100–D102)**
   - Trusted proxies: uvicorn believed `X-Forwarded-For` from anyone and took the leftmost
     (client-written) entry, so the per-IP login limit could be dodged. Now
@@ -16,7 +24,7 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
   - Code splitting: every page except sign-in / tree list / not found is `React.lazy`; main
     script 1,312 → 450 kB (gzip 400 → 143 kB). `vite:preloadError` reloads once after a deploy.
     Fixed a share-link race it exposed (stale session check overwrote the new session).
-  - Changelog `2026-10-12`. Tests: backend 322, frontend 159, E2E 25 (×3 repeat green).
+  - Changelog `2026-10-12`. Tests: backend 322, frontend 159, E2E 25 (×3 repeat green). (6b05c38)
   - Production after deploy: migration 0011 runs on start; nothing to configure. Before ever
     rotating `SECRET_KEY`, set `DATA_ENCRYPTION_KEY` (else 2FA codes stop working).
 - **Roadmap**: agreed design for "You are in a family tree" (next task).

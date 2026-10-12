@@ -34,8 +34,15 @@ export function useCreateUser() {
 export function useUpdateUser() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id: string; is_active?: boolean; is_superadmin?: boolean }) =>
-      api.patch<User>(`/api/v1/admin/users/${id}`, body),
+    mutationFn: ({
+      id,
+      ...body
+    }: {
+      id: string;
+      is_active?: boolean;
+      is_superadmin?: boolean;
+      can_create_trees?: boolean;
+    }) => api.patch<User>(`/api/v1/admin/users/${id}`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: usersKey }),
   });
 }

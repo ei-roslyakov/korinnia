@@ -31,6 +31,8 @@ class Me(Schema):
     display_name: str
     preferred_language: Language
     is_superadmin: bool
+    # Whether "New tree" / "Import GEDCOM" are available (superadmin, or allowed for this user).
+    can_create_trees: bool = False
     totp_enabled: bool
     trees: list[MeTree]
     welcome_dismissed: bool = False

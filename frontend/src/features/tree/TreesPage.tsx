@@ -33,7 +33,7 @@ export function TreesPage() {
       <PageHeader
         title={t("trees.title")}
         actions={
-          me.data?.is_superadmin && (
+          me.data?.can_create_trees && (
             <>
               <NewTreeImport />
               <Button onClick={() => setCreating(true)}>{t("trees.create")}</Button>
@@ -46,9 +46,9 @@ export function TreesPage() {
       {trees.data?.length === 0 && (
         <EmptyState
           title={t("trees.emptyTitle")}
-          hint={me.data?.is_superadmin ? t("trees.emptyAdmin") : t("trees.empty")}
+          hint={me.data?.can_create_trees ? t("trees.emptyAdmin") : t("trees.empty")}
           action={
-            me.data?.is_superadmin && (
+            me.data?.can_create_trees && (
               <div className="flex flex-wrap justify-center gap-2">
                 <Button onClick={() => setCreating(true)}>{t("trees.create")}</Button>
                 <NewTreeImport />

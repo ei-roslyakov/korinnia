@@ -37,7 +37,7 @@ describe("admin trees", () => {
     const calls: string[] = [];
     let live = [row("t1", "Коваленки"), row("t2", "Ткачуки")];
     mockApi({
-      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true }),
+      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true, can_create_trees: true }),
       "GET /api/v1/admin/trees": ({ url }) => {
         calls.push(url);
         const deleted = url.includes("deleted=true");

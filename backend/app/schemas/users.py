@@ -16,6 +16,7 @@ class UserOut(Schema):
     preferred_language: Language
     is_superadmin: bool
     is_active: bool
+    can_create_trees: bool
     totp_enabled: bool
     created_at: datetime
     last_login_at: datetime | None
@@ -35,6 +36,7 @@ class UpdateUserRequest(BaseModel):
     preferred_language: Language | None = None
     is_active: bool | None = None
     is_superadmin: bool | None = None
+    can_create_trees: bool | None = None
 
 
 class LinkResponse(BaseModel):

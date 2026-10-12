@@ -100,7 +100,7 @@
     "title": "Family trees",
     "create": "New tree",
     "empty": "You don't have access to any family tree yet. Ask an administrator to invite you.",
-    "emptyAdmin": "There are no trees yet. Create the first one.",
+    "emptyAdmin": "No trees yet. Start your own family tree (you will be its administrator) or import a GEDCOM file.",
     "name": "Name",
     "description": "Description",
     "yourRole": "Your role:",
@@ -187,7 +187,10 @@
     "revokeSuperadmin": "Remove superadmin",
     "deactivate": "Deactivate",
     "activate": "Activate",
-    "confirmDelete": "Permanently delete the account of {{name}}? Their contributions stay in the archive. Deactivating is usually the better choice."
+    "confirmDelete": "Permanently delete the account of {{name}}? Their contributions stay in the archive. Deactivating is usually the better choice.",
+    "cannotCreateTrees": "Can't create trees",
+    "allowTrees": "Allow creating trees",
+    "forbidTrees": "Stop creating trees"
   },
   "audit": {
     "title": "Change history",
@@ -288,7 +291,8 @@
     "job_queue_unavailable": "The background worker is not available. Please try again later.",
     "no_user_with_email": "No user with this email exists. Check the address, or ask an administrator to invite them.",
     "share_link_invalid": "This link has expired or was revoked.",
-    "share_link_not_found": "Link not found."
+    "share_link_not_found": "Link not found.",
+    "cannot_create_trees": "You cannot create trees on this site. Ask an administrator."
   },
   "dates": {
     "approx": "about {{date}}",
@@ -1153,7 +1157,7 @@
     "steps": {
       "trees": {
         "title": "Your trees.",
-        "text": "“Family trees” lists the trees you can open. You also have your own demo family to explore and change freely."
+        "text": "“Family trees” lists the trees you can open. You also have your own demo family to explore and change freely, and you can start your own family with “New tree”."
       },
       "explore": {
         "title": "Explore.",

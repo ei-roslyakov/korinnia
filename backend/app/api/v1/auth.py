@@ -51,6 +51,7 @@ async def build_me(session: SessionDep, user: User) -> Me:
         display_name=user.display_name,
         preferred_language=user.preferred_language,
         is_superadmin=user.is_superadmin,
+        can_create_trees=user_service.may_create_trees(user),
         totp_enabled=user.totp_enabled,
         trees=[MeTree(id=t.id, name=t.name, role=role) for t, role in trees],
         welcome_dismissed=user.welcome_dismissed,

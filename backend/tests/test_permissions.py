@@ -146,13 +146,14 @@ CASES: dict[str, tuple[Call, dict[str, int]]] = {
         },
     ),
     "create tree": (
+        # Every user may start their own tree (D103).
         lambda c, w: c.post("/api/v1/trees", json={"name": "Another"}),
         {
-            "outsider": 403,
-            "viewer": 403,
-            "contributor": 403,
-            "editor": 403,
-            "admin": 403,
+            "outsider": 201,
+            "viewer": 201,
+            "contributor": 201,
+            "editor": 201,
+            "admin": 201,
             "superadmin": 201,
         },
     ),

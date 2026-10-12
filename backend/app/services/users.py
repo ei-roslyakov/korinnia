@@ -34,6 +34,7 @@ USER_AUDIT_FIELDS = (
     "preferred_language",
     "is_superadmin",
     "is_active",
+    "can_create_trees",
     "totp_enabled",
 )
 INVITATION_AUDIT_FIELDS = ("email", "tree_id", "role", "is_superadmin", "expires_at")
@@ -122,6 +123,14 @@ async def _active_superadmins(session: AsyncSession) -> int:
     return count or 0
 
 
+def may_create_trees(user: User) -> bool:
+    """Superadmins always; others when the installation allows it and it is not turned off
+    for them."""
+    if user.is_superadmin:
+        return True
+    return get_settings().users_can_create_trees and user.can_create_trees
+
+
 async def update_user(
     session: AsyncSession,
     target: User,
@@ -131,6 +140,7 @@ async def update_user(
     is_active: bool | None,
     is_superadmin: bool | None,
     actor: Actor,
+    can_create_trees: bool | None = None,
 ) -> User:
     is_self = actor.user is not None and actor.user.id == target.id
     losing_superadmin = (is_active is False or is_superadmin is False) and target.is_superadmin
@@ -146,6 +156,8 @@ async def update_user(
         target.preferred_language = preferred_language
     if is_superadmin is not None:
         target.is_superadmin = is_superadmin
+    if can_create_trees is not None:
+        target.can_create_trees = can_create_trees
     if is_active is not None and is_active != target.is_active:
         target.is_active = is_active
         if not is_active:

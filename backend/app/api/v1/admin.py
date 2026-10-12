@@ -92,6 +92,7 @@ async def update_user(
         preferred_language=body.preferred_language,
         is_active=body.is_active,
         is_superadmin=body.is_superadmin,
+        can_create_trees=body.can_create_trees,
         actor=actor,
     )
     return UserOut.model_validate(user)

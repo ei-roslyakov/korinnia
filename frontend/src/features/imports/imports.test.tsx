@@ -160,7 +160,7 @@ describe("integrity card", () => {
   it("shows the last check, its problems and starts a new one", async () => {
     let started = false;
     mockApi({
-      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true }),
+      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true, can_create_trees: true }),
       "GET /api/v1/meta": () => json({ name: "Korinnia", version: "dev", environment: "dev" }),
       "GET /api/readyz": () => json({ status: "ok", checks: { database: "ok", storage: "ok" } }),
       "GET /api/v1/admin/integrity": () =>
@@ -219,7 +219,7 @@ describe("import into a new tree", () => {
   it("creates a tree named after the file and opens its import", async () => {
     let created: unknown = null;
     mockApi({
-      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true }),
+      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true, can_create_trees: true }),
       "GET /api/v1/trees": () => json([]),
       "POST /api/v1/trees": ({ body }) => {
         created = JSON.parse(String(body));
@@ -241,7 +241,7 @@ describe("import into a new tree", () => {
   it("removes the new tree when the file is refused", async () => {
     let deleted = false;
     mockApi({
-      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true }),
+      "GET /api/v1/auth/me": () => json({ ...ME, is_superadmin: true, can_create_trees: true }),
       "GET /api/v1/trees": () => json([]),
       "POST /api/v1/trees": () =>
         json({ id: "t9", name: "Page", description: null, my_role: "admin" }),

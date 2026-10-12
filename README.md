@@ -56,6 +56,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Login throttling per email and per IP (PostgreSQL-backed)
 - ✅ First superadmin bootstrapped from environment variables; operator CLI for lock-out recovery
 - ✅ Multiple trees; per-tree roles: viewer, contributor, editor, admin (enforced on every endpoint, covered by tests)
+- ✅ Every user can start their own trees and is their admin; a superadmin can turn this off per user, or for the whole site with `USERS_CAN_CREATE_TREES=false`
 - ✅ Admin panel: create / deactivate / delete users, superadmin rights, password-reset links, reset 2FA
 - ✅ Renaming and deleting a tree by its admins, from the tree list or tree settings (deletion is a soft delete); the admin panel lists every tree, deletes any of them and restores deleted ones
 - ✅ Invitations via one-time, expiring links (to a tree with a role, or as superadmin)

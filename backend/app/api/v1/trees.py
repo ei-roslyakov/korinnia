@@ -12,12 +12,11 @@ from app.api.deps import (
     CurrentUser,
     PageParams,
     SessionDep,
-    Superadmin,
     TreeAdmin,
     TreeViewer,
 )
 from app.api.v1.admin import invitation_out
-from app.core.errors import NotFoundError
+from app.core.errors import NotFoundError, PermissionDeniedError
 from app.models import Tree, TreeMembership, TreeRole, User
 from app.schemas.audit import AuditEntryOut, AuditQuery
 from app.schemas.common import Page
@@ -76,8 +75,14 @@ async def list_trees(user: CurrentUser, session: SessionDep) -> list[TreeOut]:
 
 @router.post("", response_model=TreeOut, status_code=status.HTTP_201_CREATED)
 async def create_tree(
-    body: CreateTreeRequest, session: SessionDep, actor: ActorDep, _: Superadmin
+    body: CreateTreeRequest, session: SessionDep, actor: ActorDep, user: CurrentUser
 ) -> TreeOut:
+    """Any user allowed to create trees starts one and becomes its admin; only a superadmin
+    may make it for someone else (`owner_id`)."""
+    if not user_service.may_create_trees(user):
+        raise PermissionDeniedError("cannot_create_trees")
+    if body.owner_id and body.owner_id != user.id and not user.is_superadmin:
+        raise PermissionDeniedError()
     assert actor.user is not None
     owner = await user_service.get_user(session, body.owner_id) if body.owner_id else actor.user
     tree = await tree_service.create_tree(

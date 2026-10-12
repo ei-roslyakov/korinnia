@@ -55,6 +55,56 @@ async def test_create_update_delete_tree(
     assert (await session.get(Tree, tree["id"])) is not None  # soft delete only
 
 
+async def test_users_create_their_own_trees(
+    make_user: MakeUser, make_client: MakeClient, monkeypatch: Any
+) -> None:
+    user = await make_user("own@example.com")
+    other = await make_user("other@example.com")
+    c = await make_client()
+    me = await c.login("own@example.com")
+    assert me["user"]["can_create_trees"] is True
+
+    resp = await c.post("/api/v1/trees", json={"name": "Моя родина"})
+    assert resp.status_code == 201
+    assert resp.json()["owner_id"] == str(user.id)
+    assert resp.json()["my_role"] == "admin"
+    # Only a superadmin makes a tree for someone else.
+    resp = await c.post("/api/v1/trees", json={"name": "X", "owner_id": str(other.id)})
+    assert resp.status_code == 403
+
+    # A superadmin turns it off for this user…
+    sa = await _superadmin(make_user, make_client)
+    resp = await sa.patch(f"/api/v1/admin/users/{user.id}", json={"can_create_trees": False})
+    assert resp.status_code == 200
+    assert resp.json()["can_create_trees"] is False
+    resp = await c.post("/api/v1/trees", json={"name": "Ще одна"})
+    assert resp.status_code == 403
+    assert resp.json()["code"] == "cannot_create_trees"
+    assert (await c.get("/api/v1/auth/me")).json()["can_create_trees"] is False
+    # …but the trees they already have stay theirs.
+    assert len((await c.get("/api/v1/trees")).json()) == 1
+
+
+async def test_installation_can_reserve_tree_creation_for_superadmins(
+    make_user: MakeUser, make_client: MakeClient, monkeypatch: Any
+) -> None:
+    from app.core.config import get_settings
+
+    monkeypatch.setenv("USERS_CAN_CREATE_TREES", "false")
+    get_settings.cache_clear()
+    try:
+        await make_user("plain@example.com")
+        c = await make_client()
+        me = await c.login("plain@example.com")
+        assert me["user"]["can_create_trees"] is False
+        assert (await c.post("/api/v1/trees", json={"name": "X"})).status_code == 403
+        sa = await _superadmin(make_user, make_client)
+        assert (await sa.post("/api/v1/trees", json={"name": "X"})).status_code == 201
+    finally:
+        monkeypatch.undo()
+        get_settings.cache_clear()
+
+
 async def test_create_tree_with_unknown_owner(make_user: MakeUser, make_client: MakeClient) -> None:
     sa = await _superadmin(make_user, make_client)
     resp = await sa.post(

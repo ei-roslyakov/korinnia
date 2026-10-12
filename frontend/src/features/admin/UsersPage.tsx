@@ -171,6 +171,9 @@ function UserRow({ user }: { user: User }) {
             {user.is_active ? t("users.active") : t("users.inactive")}
           </Badge>
           {user.totp_enabled && <Badge>2FA</Badge>}
+          {!user.can_create_trees && !user.is_superadmin && (
+            <Badge>{t("users.cannotCreateTrees")}</Badge>
+          )}
         </div>
       </td>
       <td className="text-bark-700 px-3 py-2">{formatDate(user.last_login_at)}</td>
@@ -202,6 +205,16 @@ function UserRow({ user }: { user: User }) {
               >
                 {user.is_superadmin ? t("users.revokeSuperadmin") : t("users.makeSuperadmin")}
               </Button>
+              {!user.is_superadmin && (
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    update.mutate({ id: user.id, can_create_trees: !user.can_create_trees })
+                  }
+                >
+                  {user.can_create_trees ? t("users.forbidTrees") : t("users.allowTrees")}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 onClick={() => update.mutate({ id: user.id, is_active: !user.is_active })}

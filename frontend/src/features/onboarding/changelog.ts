@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-12.2",
+    items: {
+      en: [
+        "Everyone can now start their own family tree: “New tree” or “Import GEDCOM” on the tree list. You are the administrator of the trees you start, and nobody else sees them unless you share them.",
+      ],
+      uk: [
+        "Тепер кожен може почати власний родовід: «Новий родовід» або «Імпорт GEDCOM» у списку родоводів. Ви адміністратор родоводів, які створили, і ніхто інший їх не бачить, доки ви ними не поділитеся.",
+      ],
+      pl: [
+        "Każdy może teraz założyć własne drzewo rodzinne: „Nowe drzewo” lub „Import GEDCOM” na liście drzew. Jesteś administratorem drzew, które założysz, i nikt inny ich nie widzi, dopóki ich nie udostępnisz.",
+      ],
+    },
+  },
+  {
     id: "2026-10-12",
     items: {
       en: [

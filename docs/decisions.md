@@ -87,7 +87,7 @@ Invitations (7 days) and password resets (24 h) are one-time links. The database
 ### D23. Role model and authorization
 - Roles are cumulative: viewer < contributor < editor < admin. A superadmin acts as admin in every tree.
 - All tree endpoints use one dependency, `tree_access(min_role)`. Non-members get **404** so a tree's existence isn't revealed; members with too low a role get **403**.
-- Only a superadmin creates trees. A tree admin manages members, can rename the tree and can delete it (see D86).
+- Only a superadmin creates trees (changed by D103: every user may). A tree admin manages members, can rename the tree and can delete it (see D86).
 - Safety rails: a tree keeps at least one active admin, the installation keeps at least one active superadmin, and you cannot deactivate, demote or delete yourself.
 - "Add member" takes an email. An existing user is added directly; a new email creates an invitation. This gives tree admins one simple form, at the cost of revealing to a tree admin whether an email has an account. That is acceptable within a family.
 
@@ -430,3 +430,9 @@ A TOTP secret is as good as the second factor itself, so a database dump or back
 ### D102. Route-level code splitting
 
 The frontend shipped as one 1.3 MB script (400 kB gzipped), including React Flow, Leaflet (through the place picker in the editor), the Markdown guide and every admin page, before the sign-in form appeared. Now every page except sign-in, the tree list and "not found" is loaded with `React.lazy` on first visit; the layout and the admin layout show a spinner while a page loads. The first load is 450 kB (143 kB gzipped); the tree canvas (233 kB), Leaflet (149 kB) and the guide come separately. After a deploy, a tab opened earlier may request page files that no longer exist; Vite's `vite:preloadError` event then reloads the page once (guarded per path in sessionStorage). The change exposed a race in opening a share link (a share-session check still waiting for a failed token refresh overwrote the new session); opening a link now cancels that check first.
+
+### D103. Every user starts their own trees; the superadmin is the site's administrator
+
+The first design assumed one installation per family: the superadmin created the trees and handed out roles. korinnia.app has unrelated families, so that turned the superadmin into a gatekeeper. Now every user can create a tree ("New tree" or "Import GEDCOM" on the tree list) and becomes its owner and admin, with all tree-admin powers: members, roles, share links, rename, delete. Only a superadmin may create a tree for someone else (`owner_id`). The superadmin stays the administrator of the whole site: users, every tree, restore, system status.
+
+Two switches keep the old behaviour possible. `USERS_CAN_CREATE_TREES=false` reserves tree creation for superadmins (a private family installation). `users.can_create_trees` (migration 0012, default true; Admin → Users "Stop / Allow creating trees", audited with the other user fields) turns it off for one person, for example someone who should only take part in a relative's tree. Turning it off does not touch trees the person already has. The API reports the effective permission as `can_create_trees` in `/auth/me`, which decides whether the buttons show. Other people's trees stay invisible: a tree is listed only to its members (and superadmins).

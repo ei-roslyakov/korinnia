@@ -74,6 +74,11 @@ class Settings(BaseSettings):
     # Give every new account its own copy of the fictional demo family to explore.
     demo_tree_for_new_users: bool = True
 
+    # --- Trees --------------------------------------------------------------------
+    # Every user may start their own trees (unless a superadmin turned it off for them).
+    # false: only superadmins create trees and hand them out (a single-family installation).
+    users_can_create_trees: bool = True
+
     # --- Uploads / media ----------------------------------------------------------
     max_upload_size_mb: int = 2048
     # Hand file downloads to nginx (X-Accel-Redirect to its internal /_media/ location) for

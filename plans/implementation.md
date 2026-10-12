@@ -78,6 +78,9 @@ plans/            this folder
    `TRUSTED_PROXIES` via `ProxyHeadersMiddleware` in `app/main.py` (D100), TOTP secrets
    encrypted with Fernet in `core/security.py` (`encrypt_secret` / `decrypt_secret`, D101),
    every page lazy-loaded from `App.tsx` with `Suspense` in the layouts (D102).
+- **Tree creation** — any user (`services/users.may_create_trees`: superadmin, or
+  `USERS_CAN_CREATE_TREES` and `users.can_create_trees`) creates trees and becomes their admin;
+  the superadmin administers the whole site. (D103)
 
 ## After phase 8 (polish and operations)
 

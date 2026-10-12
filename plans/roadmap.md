@@ -19,6 +19,7 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 | 8 | Map, timeline, relationship calculator, statistics, "On this day" | ✅ done |
 | — | Post-phase-8 polish: tree drawn growing upwards, themes, tree styles, demo family, licence, deploy to Kubernetes, tree rename/delete, tree export to PNG / PDF | ✅ done |
 | — | After phase 9: bigger demo family (66 people, D91), cards never overlap (D92), couple links (D93), share a tree by email (D94), welcome guide + What's new (D95), GEDCOM export (D96) | ✅ done |
+| — | After phase 10: every user creates their own trees (D103) | ✅ done |
 | 9 | GEDCOM import, integrity checks of stored files (backups: infrastructure) | ✅ done |
 | 10 | Hardening and user guide | ✅ done (awaiting deploy) |
 | 11 | Exports (family archive) | 📋 planned |
