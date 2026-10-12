@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 
 import { Button, Checkbox, Dialog } from "@/components/ui";
 import { useMe, useUpdateMe } from "@/features/auth/api";
@@ -94,6 +95,11 @@ function WelcomeDialog({ dismissed, onClose }: { dismissed: boolean; onClose: ()
             </li>
           ))}
         </ol>
+        <p>
+          <Link to="/help" onClick={close} className="text-leaf-700 underline">
+            {t("welcome.fullGuide")}
+          </Link>
+        </p>
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           <Checkbox
             label={t("welcome.dontShow")}

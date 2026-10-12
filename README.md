@@ -63,6 +63,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Tree member management by tree admins (add existing users, invite new ones, change roles, remove)
 - ✅ Audit log of every change (who, when, before/after) with filters — global and per tree
 - ✅ Profile: display name, interface language (synced across devices), password change
+- ✅ User guide in the app (`/help`, Ukrainian and English, linked from the footer and the welcome guide)
 - ✅ Welcome guide at sign-in for new users (until "Don't show again") and "What's new" with the changes since the last visit (can be turned off); both also in the footer
 - ✅ Read-only share links for people without an account ("Share" → "Anyone with the link can view"): optional name, expiry or none, how often opened, revoke at any time; visitors can only view that one tree
 - 📋 Sign-up by email (optional, off by default): register, confirm the address by a link, then wait for an admin to grant access to a tree
@@ -284,4 +285,4 @@ Korinnia uses open-source components under their own licences; their notices are
 - [docs/data-schema.md](docs/data-schema.md): data schema and conventions
 - [docs/backup-restore.md](docs/backup-restore.md): backup and restore procedure
 - [docs/performance.md](docs/performance.md): performance measurements on large trees (`make perf`)
-- [docs/user-guide.md](docs/user-guide.md): user guide
+- [docs/user-guide.md](docs/user-guide.md): where the user guide lives (in the app at `/help`, Ukrainian and English)

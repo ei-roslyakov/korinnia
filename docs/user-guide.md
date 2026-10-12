@@ -1,11 +1,13 @@
 # User guide
 
-The full user guide (in Ukrainian and English) is written in phase 10, once the main features exist. This page will cover:
+The user guide is part of the app: open **User guide** in the footer of any page, or go to
+`/help`. It is shown in Ukrainian or English (Polish users get the English text for now).
 
-- signing in and choosing the interface language (Українська / English / Polski)
-- browsing the family tree: moving, zooming, searching and opening a person
-- adding and editing people, names, dates, places and life events
-- uploading photos, documents and recordings, and tagging people in photos
-- writing stories and citing sources
-- roles (viewer, contributor, editor, admin) and the moderation queue
-- exporting the family archive for future generations
+The texts live next to the code they describe, so they change together:
+
+- English: [`frontend/src/features/help/guide.en.md`](../frontend/src/features/help/guide.en.md)
+- Українська: [`frontend/src/features/help/guide.uk.md`](../frontend/src/features/help/guide.uk.md)
+
+Both have the same sections (a test checks it). When a change alters how the app is used,
+update both guides in the same change, and add a "What's new" entry
+(`frontend/src/features/onboarding/changelog.ts`).

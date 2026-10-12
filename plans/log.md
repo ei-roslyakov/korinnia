@@ -4,6 +4,12 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-11
 
+- **Phase 10: user guide (D99)** — `/help` page (public) rendering
+  `frontend/src/features/help/guide.uk.md` / `guide.en.md` (12 sections: sign-in, trees,
+  exploring, builder, media, sources, stories, discovery, roles & sharing, import/export,
+  administration, tips) with a table of contents; footer "User guide", link in the welcome
+  guide; Polish → English with a note. `docs/user-guide.md` points to the files; CLAUDE.md asks
+  to update both guides with user-visible changes. Tests: frontend 159. (commit "User guide in the app")
 - **Phase 10: share links (D98)** — `share_links` table (migration 0010), service
   `services/share_links.py`, API `/trees/{id}/share-links` (admins) + `/share/{token}/open`,
   `/share/session`, `/share/leave`; `tree_access` accepts the `korinnia_share` cookie for GET

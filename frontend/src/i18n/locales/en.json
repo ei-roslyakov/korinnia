@@ -994,7 +994,8 @@
     "thirdParty": "Third-party licences",
     "version": "App version",
     "guide": "Getting started",
-    "news": "What's new"
+    "news": "What's new",
+    "help": "User guide"
   },
   "imports": {
     "link": "Import GEDCOM",
@@ -1176,7 +1177,8 @@
       }
     },
     "dontShow": "Don't show this again",
-    "start": "Let's start"
+    "start": "Let's start",
+    "fullGuide": "Read the full user guide"
   },
   "news": {
     "title": "What's new",
@@ -1215,5 +1217,9 @@
     "opening": "Opening the shared tree…",
     "invalidTitle": "This link no longer works",
     "invalidHint": "It has expired or was revoked. Ask whoever sent it for a new one."
+  },
+  "help": {
+    "contents": "Contents",
+    "englishOnly": "The guide is not yet available in Polish; here it is in English."
   }
 }

@@ -415,3 +415,7 @@ A tree's admins create links in the Share dialog ("Anyone with the link can view
 
 Living people are shown to link visitors exactly as to viewers. The dialog says so plainly and recommends an expiry; hiding living people from link visitors is a possible follow-up.
 
+### D99. The user guide lives in the app, written in Markdown next to the code
+
+The full guide is a page at `/help` (footer "User guide", and a link in the welcome guide), open without signing in. It is two Markdown files in the frontend (`features/help/guide.uk.md`, `guide.en.md`) imported as text and rendered with a table of contents from the `##` headings (ids that work for Cyrillic headings too). Keeping it in the repository next to the features means a change and its documentation land together (CLAUDE.md asks for it), and a test checks that both languages have the same sections. Polish users see the English text with a note until a translation exists. `docs/user-guide.md` only points to the files.
+

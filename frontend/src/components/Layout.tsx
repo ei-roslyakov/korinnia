@@ -141,6 +141,9 @@ export function Layout() {
                   </button>
                 </>
               )}
+              <Link to="/help" className="hover:text-bark-900 underline">
+                {t("footer.help")}
+              </Link>
               <span title={t("footer.version")} className="tabular-nums">
                 {versionLabel()}
               </span>

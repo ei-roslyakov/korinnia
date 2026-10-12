@@ -1018,7 +1018,8 @@
     "thirdParty": "Licencje komponentów zewnętrznych",
     "version": "Wersja aplikacji",
     "guide": "Jak zacząć",
-    "news": "Co nowego"
+    "news": "Co nowego",
+    "help": "Przewodnik"
   },
   "imports": {
     "link": "Import GEDCOM",
@@ -1240,7 +1241,8 @@
       }
     },
     "dontShow": "Nie pokazuj więcej",
-    "start": "Zaczynamy"
+    "start": "Zaczynamy",
+    "fullGuide": "Przeczytaj pełny przewodnik"
   },
   "news": {
     "title": "Co nowego",
@@ -1281,5 +1283,9 @@
     "opening": "Otwieramy drzewo…",
     "invalidTitle": "Ten link już nie działa",
     "invalidHint": "Wygasł lub został odwołany. Poproś osobę, która go wysłała, o nowy."
+  },
+  "help": {
+    "contents": "Spis treści",
+    "englishOnly": "Przewodnik nie jest jeszcze dostępny po polsku; oto wersja angielska."
   }
 }

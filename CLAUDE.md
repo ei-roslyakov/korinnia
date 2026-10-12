@@ -15,7 +15,8 @@ Self-hosted family archive and interactive family tree (FastAPI + PostgreSQL + R
   the same change. Structural changes also go into `plans/implementation.md`.
 - When a change is visible to users, add a dated entry (en / uk / pl) at the top of
   `frontend/src/features/onboarding/changelog.ts` — users see it in "What's new" at sign-in.
-  If it changes how the app is used, check the welcome guide (`welcome.*` strings) too.
+  If it changes how the app is used, update the user guide (`frontend/src/features/help/guide.uk.md`
+  and `guide.en.md`, same sections) and check the welcome guide (`welcome.*` strings).
 - Keep the existing docs current too: README feature statuses (✅ / 🚧 / 📋), a new D-number in
   `docs/decisions.md` for design decisions, `docs/data-schema.md` for schema changes.
 

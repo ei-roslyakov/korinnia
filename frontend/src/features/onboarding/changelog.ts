@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-11.4",
+    items: {
+      en: [
+        "A full user guide: “User guide” at the bottom of every page explains everything from the first sign-in to imports, sharing and administration.",
+      ],
+      uk: [
+        "Повний посібник користувача: «Посібник» унизу кожної сторінки пояснює все — від першого входу до імпорту, спільного доступу й адміністрування.",
+      ],
+      pl: [
+        "Pełny przewodnik użytkownika: „Przewodnik” na dole każdej strony (na razie po angielsku) wyjaśnia wszystko — od pierwszego logowania po import, udostępnianie i administrację.",
+      ],
+    },
+  },
+  {
     id: "2026-10-11.3",
     items: {
       en: [
