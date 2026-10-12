@@ -30,7 +30,7 @@ Media files are stored as plain files under the media root (`/data/media`). The 
 ### Phase 2: users and access
 | Table | Purpose | Key columns |
 |---|---|---|
-| `users` | Accounts | `email` (unique, case-insensitive), `password_hash` (argon2id), `display_name`, `preferred_language` (`uk`/`en`/`pl`), `is_superadmin`, `is_active`, `last_login_at`, `sessions_valid_after`, `totp_secret`, `totp_enabled`, `totp_last_counter`, `welcome_dismissed`, `changelog_seen` (id of the newest "What's new" entry seen), `show_changelog` |
+| `users` | Accounts | `email` (unique, case-insensitive), `password_hash` (argon2id), `display_name`, `preferred_language` (`uk`/`en`/`pl`), `is_superadmin`, `is_active`, `last_login_at`, `sessions_valid_after`, `totp_secret` (encrypted: `enc1:` + Fernet token, D101), `totp_enabled`, `totp_last_counter`, `welcome_dismissed`, `changelog_seen` (id of the newest "What's new" entry seen), `show_changelog` |
 | `recovery_codes` | 2FA recovery codes | `user_id`, `code_hash` (SHA-256), `used_at` |
 | `refresh_tokens` | Server-side session records | `id` (= JWT `jti`), `user_id`, `family_id`, `expires_at`, `revoked_at`, `replaced_by_id`, `user_agent`, `ip_address` |
 | `login_attempts` | Sign-in throttling | `email`, `ip_address`, `success`, `created_at` |

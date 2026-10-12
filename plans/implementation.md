@@ -73,6 +73,11 @@ plans/            this folder
 9. **Data safety** — GEDCOM import (preview, duplicate merge, one transaction, undo) and weekly /
    on-demand integrity checks of stored originals; backups are left to the infrastructure.
    (D89–D90)
+10. **Hardening and user guide** — read-only share links (D98), performance test `make perf`
+   with simplified cards when zoomed out (D97), user guide at `/help` (D99), client IPs only from
+   `TRUSTED_PROXIES` via `ProxyHeadersMiddleware` in `app/main.py` (D100), TOTP secrets
+   encrypted with Fernet in `core/security.py` (`encrypt_secret` / `decrypt_secret`, D101),
+   every page lazy-loaded from `App.tsx` with `Suspense` in the layouts (D102).
 
 ## After phase 8 (polish and operations)
 

@@ -2,6 +2,25 @@
 
 Newest first. One entry per finished task: what changed, why, commit, anything left open.
 
+## 2026-10-12
+
+- **Phase 10 finished: code splitting, trusted proxies, TOTP encryption (D100–D102)**
+  - Trusted proxies: uvicorn believed `X-Forwarded-For` from anyone and took the leftmost
+    (client-written) entry, so the per-IP login limit could be dodged. Now
+    `ProxyHeadersMiddleware` in `app/main.py` with `TRUSTED_PROXIES` (default loopback + private
+    networks); uvicorn runs with `--no-proxy-headers`. Checked production first: real public IPs
+    reach the audit log through ingress → nginx (pod IPs 10.244.x), which the default covers.
+  - TOTP secrets: `enc1:` + Fernet, key from `DATA_ENCRYPTION_KEY` or derived from
+    `SECRET_KEY` (HKDF); migration 0011 encrypts existing secrets (round-tripped up/down on dev
+    data). New dependency `cryptography` (uv.lock, notices regenerated).
+  - Code splitting: every page except sign-in / tree list / not found is `React.lazy`; main
+    script 1,312 → 450 kB (gzip 400 → 143 kB). `vite:preloadError` reloads once after a deploy.
+    Fixed a share-link race it exposed (stale session check overwrote the new session).
+  - Changelog `2026-10-12`. Tests: backend 322, frontend 159, E2E 25 (×3 repeat green).
+  - Production after deploy: migration 0011 runs on start; nothing to configure. Before ever
+    rotating `SECRET_KEY`, set `DATA_ENCRYPTION_KEY` (else 2FA codes stop working).
+- **Roadmap**: agreed design for "You are in a family tree" (next task).
+
 ## 2026-10-11
 
 - **Phase 10: user guide (D99)** — `/help` page (public) rendering

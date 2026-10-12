@@ -4382,6 +4382,11 @@ croniter
 MIT
 https://github.com/pallets-eco/croniter
 
+cryptography
+50.0.2
+Apache-2.0 OR BSD-3-Clause
+https://github.com/pyca/cryptography
+
 distlib
 0.4.3
 Python Software Foundation License

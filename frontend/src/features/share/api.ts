@@ -46,7 +46,12 @@ export function useOpenShareLink() {
   return useMutation({
     mutationFn: (token: string) =>
       api.post<ShareSession>(`/api/v1/share/${encodeURIComponent(token)}/open`),
-    onSuccess: (session) => qc.setQueryData(SESSION_KEY, session),
+    // A session check still in flight (it waits for a failed token refresh) would otherwise
+    // land after this and overwrite the new session with "none".
+    onSuccess: async (session) => {
+      await qc.cancelQueries({ queryKey: SESSION_KEY });
+      qc.setQueryData(SESSION_KEY, session);
+    },
   });
 }
 

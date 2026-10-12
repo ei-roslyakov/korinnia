@@ -13,6 +13,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-12",
+    items: {
+      en: [
+        "The app opens faster: each page now loads only when you first visit it.",
+        "Two-step verification keys are now stored encrypted.",
+      ],
+      uk: [
+        "Застосунок відкривається швидше: кожна сторінка тепер завантажується, лише коли ви вперше на неї заходите.",
+        "Ключі двоетапної перевірки тепер зберігаються зашифрованими.",
+      ],
+      pl: [
+        "Aplikacja otwiera się szybciej: każda strona ładuje się dopiero przy pierwszej wizycie.",
+        "Klucze weryfikacji dwuetapowej są teraz przechowywane w postaci zaszyfrowanej.",
+      ],
+    },
+  },
+  {
     id: "2026-10-11.4",
     items: {
       en: [

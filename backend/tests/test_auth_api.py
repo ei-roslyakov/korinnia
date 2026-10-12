@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import pytest
+from httpx import ASGITransport
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -71,6 +72,41 @@ async def test_login_failures(
     resp = await client.post("/api/v1/auth/login", json={"email": email, "password": password})
     assert resp.status_code == 401
     assert resp.json()["code"] == code
+
+
+@pytest.mark.parametrize(
+    ("peer", "forwarded_for", "expected"),
+    [
+        # Through trusted proxies: the rightmost address that is not a proxy is the client;
+        # whatever the client wrote further left is ignored.
+        ("127.0.0.1", "6.6.6.6, 203.0.113.7", "203.0.113.7"),
+        ("10.244.2.201", "6.6.6.6, 203.0.113.7, 10.244.1.228", "203.0.113.7"),
+        # Straight from the internet: forwarded headers are not believed.
+        ("198.51.100.1", "203.0.113.7", "198.51.100.1"),
+    ],
+)
+async def test_client_ip_from_trusted_proxies(
+    app: Any,
+    make_user: MakeUser,
+    session: AsyncSession,
+    peer: str,
+    forwarded_for: str,
+    expected: str,
+) -> None:
+    await make_user("ip@example.com")
+    c = ApiClient(transport=ASGITransport(app=app, client=(peer, 5000)), base_url="http://test")
+    async with c:
+        await c.prime_csrf()
+        resp = await c.post(
+            "/api/v1/auth/login",
+            json={"email": "ip@example.com", "password": PASSWORD},
+            headers={"X-Forwarded-For": forwarded_for},
+        )
+    assert resp.status_code == 200
+    ips = (
+        await session.scalars(select(AuditLog.ip_address).where(AuditLog.action == "auth.login"))
+    ).all()
+    assert ips == [expected]
 
 
 async def test_login_inactive_user(client: ApiClient, make_user: MakeUser) -> None:
@@ -248,11 +284,18 @@ async def _enable_2fa(client: ApiClient) -> tuple[str, list[str]]:
     return setup["secret"], resp.json()["recovery_codes"]
 
 
-async def test_totp_login_flow(make_client: MakeClient, make_user: MakeUser) -> None:
-    await make_user("2fa@example.com")
+async def test_totp_login_flow(
+    make_client: MakeClient, make_user: MakeUser, session: AsyncSession
+) -> None:
+    user = await make_user("2fa@example.com")
     c = await make_client()
     await c.login("2fa@example.com")
     secret, codes = await _enable_2fa(c)
+    # Stored encrypted, never as the secret itself.
+    await session.refresh(user)
+    assert user.totp_secret is not None
+    assert user.totp_secret.startswith("enc1:")
+    assert secret not in user.totp_secret
     assert (await c.post("/api/v1/auth/2fa/setup")).json()["code"] == "totp_already_enabled"
     assert (await c.get("/api/v1/auth/me")).json()["totp_enabled"] is True
 

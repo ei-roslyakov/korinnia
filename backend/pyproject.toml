@@ -24,6 +24,7 @@ dependencies = [
     "pillow-heif>=1.8.0",
     "filetype>=1.2.0",
     "python-multipart>=0.0.32",
+    "cryptography>=46",
 ]
 
 [dependency-groups]

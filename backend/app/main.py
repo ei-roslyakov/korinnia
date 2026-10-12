@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.api.csrf import CSRFMiddleware
 from app.api.health import router as health_router
@@ -44,6 +45,8 @@ def create_app() -> FastAPI:
     app.include_router(api_router, prefix="/api/v1")
     install_error_handlers(app)
     app.add_middleware(CSRFMiddleware)
+    # Added last, so it runs first: client IP and scheme from X-Forwarded-* of trusted proxies.
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=settings.trusted_proxies)
     return app
 
 

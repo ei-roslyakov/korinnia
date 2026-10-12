@@ -4,7 +4,7 @@
 
 Korinnia's mission is long-term preservation: to collect *everything* about every family member — names in every spelling, life events, biographies, photos, documents, recordings, stories and sources — in one place, so that future generations can still read it decades from now. Every design decision favours data durability, completeness and open formats, and the archive must stay readable even if this application no longer runs.
 
-> **Status:** Phases 1–9 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media; sources, stories and collaboration; map, timeline, relationship calculator, statistics and "On this day"; GEDCOM import and integrity checks). Hardening and the user guide (phase 10) are next. See [Features](#features) for what works today.
+> **Status:** Phases 1–10 of 11 are complete (scaffolding; users and roles; core family data; tree canvas; builder; media; sources, stories and collaboration; map, timeline, relationship calculator, statistics and "On this day"; GEDCOM import and integrity checks; hardening, share links and the user guide). Exports (phase 11) are next. See [Features](#features) for what works today.
 
 ---
 
@@ -13,7 +13,7 @@ Korinnia's mission is long-term preservation: to collect *everything* about ever
 | Area | Technology |
 |---|---|
 | Backend | Python 3.12, FastAPI 0.142, Pydantic 2.13 + pydantic-settings, Uvicorn 0.54, uv (package manager) |
-| Auth & security | argon2id password hashing (argon2-cffi), JWT (PyJWT) in httpOnly cookies, CSRF double-submit cookie, TOTP 2FA (pyotp, QR codes via segno) |
+| Auth & security | argon2id password hashing (argon2-cffi), JWT (PyJWT) in httpOnly cookies, CSRF double-submit cookie, TOTP 2FA (pyotp, QR codes via segno; secrets encrypted with `cryptography`), client IPs only from trusted proxies |
 | Database | PostgreSQL 16, SQLAlchemy 2.1 (async, psycopg 3.3 driver), Alembic 1.20 migrations |
 | File storage | Local filesystem behind a `Storage` abstraction, on a Docker volume / Kubernetes PVC at `/data/media` |
 | Background jobs | procrastinate 3.10 — PostgreSQL-backed job queue (no Redis) |
@@ -52,7 +52,7 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 - ✅ Email + password login (argon2id); no public self-registration
 - ✅ Sessions: short-lived access + rotating refresh JWTs in httpOnly cookies, refresh-token reuse detection, "sign out everywhere" on password change
 - ✅ CSRF protection (double-submit cookie + SameSite)
-- ✅ Optional TOTP two-step verification with one-time recovery codes (any user; recommended for admins)
+- ✅ Optional TOTP two-step verification with one-time recovery codes (any user; recommended for admins); secrets encrypted at rest
 - ✅ Login throttling per email and per IP (PostgreSQL-backed)
 - ✅ First superadmin bootstrapped from environment variables; operator CLI for lock-out recovery
 - ✅ Multiple trees; per-tree roles: viewer, contributor, editor, admin (enforced on every endpoint, covered by tests)

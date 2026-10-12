@@ -1,5 +1,8 @@
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router";
+
+import { Spinner } from "@/components/ui";
 
 export function AdminLayout() {
   const { t } = useTranslation();
@@ -24,7 +27,9 @@ export function AdminLayout() {
           {t("status.title")}
         </NavLink>
       </nav>
-      <Outlet />
+      <Suspense fallback={<Spinner />}>
+        <Outlet />
+      </Suspense>
     </div>
   );
 }

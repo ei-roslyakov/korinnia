@@ -34,8 +34,8 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     # everywhere"). Stored with second precision to match JWT `iat`.
     sessions_valid_after: Mapped[datetime] = utcnow_column()
 
-    # TOTP two-factor authentication
-    totp_secret: Mapped[str | None] = mapped_column(String(64))
+    # TOTP two-factor authentication. The secret is encrypted (core.security.encrypt_secret).
+    totp_secret: Mapped[str | None] = mapped_column(String(255))
     totp_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     # Last accepted TOTP time-step: prevents replaying a code within its validity window.
     totp_last_counter: Mapped[int | None] = mapped_column(Integer)

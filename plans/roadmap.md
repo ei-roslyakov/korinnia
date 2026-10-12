@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-11 (phase 10 in progress: share links, performance test, user guide done)_
+_Last updated: 2026-10-12 (phase 10 done; next: "You are in a family tree")_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -20,7 +20,7 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 | — | Post-phase-8 polish: tree drawn growing upwards, themes, tree styles, demo family, licence, deploy to Kubernetes, tree rename/delete, tree export to PNG / PDF | ✅ done |
 | — | After phase 9: bigger demo family (66 people, D91), cards never overlap (D92), couple links (D93), share a tree by email (D94), welcome guide + What's new (D95), GEDCOM export (D96) | ✅ done |
 | 9 | GEDCOM import, integrity checks of stored files (backups: infrastructure) | ✅ done |
-| 10 | Hardening and user guide | 🚧 in progress (share links, performance test, user guide done) |
+| 10 | Hardening and user guide | ✅ done (awaiting deploy) |
 | 11 | Exports (family archive) | 📋 planned |
 
 ## Live deployment
@@ -49,7 +49,7 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   the media folder); fill missing facts of a merged person from the file; email the admin when
   an integrity check finds problems.
 
-## Now: phase 10 — hardening and user guide
+## Phase 10 — hardening and user guide (done 2026-10-12)
 
 - ✅ Read-only share links (revocable, expiring) — D98. Possible follow-up: hide living people
   from link visitors.
@@ -57,10 +57,26 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   `docs/performance.md`; simplified cards when zoomed out, faster GEDCOM export — D97.
 - ✅ Full user guide in Ukrainian and English, in the app at `/help` — D99. Possible follow-up:
   a Polish translation.
-- 📋 Route-level code splitting in the frontend (first load).
-- 📋 Trusted-proxy configuration for client IPs (`X-Forwarded-For` only from known proxies).
-- 📋 Encrypt TOTP secrets at rest.
+- ✅ Route-level code splitting: first load 1.3 MB → 450 kB (gzip 400 → 143 kB) — D102.
+- ✅ Trusted proxies: `X-Forwarded-For` believed only from `TRUSTED_PROXIES` (default private
+  networks) — D100.
+- ✅ TOTP secrets encrypted at rest (migration 0011, optional `DATA_ENCRYPTION_KEY`) — D101.
 - (Already done early: couple-aware layout, D74.)
+
+## Now: "You are in a family tree" (agreed 2026-10-12)
+
+The owner's request: a user should learn that they appear as a person in some tree, with a
+permanent notice on the main page. Agreed design (no automatic name matching — it guesses wrong
+and reveals other families' trees):
+
+1. A tree editor links a person to a user account ("This person is andrii@example.com").
+2. That user sees a permanent notice on the tree list: "You appear in *Kovalenko family* as
+   Andrii Kovalenko, added by Halyna".
+3. Not a member yet → **Request access**; the tree's admins approve (choosing a role) or decline;
+   nothing of the tree is visible before that. Already a member → "This is you" with a link to
+   the card.
+4. Bonus: a "You" marker on the linked card; the tree can open centred on you; "How am I
+   related to…" from your own card.
 
 ## Phase 11: exports (planned)
 

@@ -41,6 +41,12 @@ class Settings(BaseSettings):
 
     # --- Security -----------------------------------------------------------------
     secret_key: SecretStr = SecretStr("change-me-in-production")
+    # Encrypts secrets stored in the database (two-step verification keys). When unset, a key
+    # derived from SECRET_KEY is used; set it to rotate SECRET_KEY without losing those secrets.
+    data_encryption_key: SecretStr | None = None
+    # Proxies whose X-Forwarded-For / X-Forwarded-Proto headers are believed (addresses or
+    # networks, comma-separated). The client IP is the rightmost address not in this list.
+    trusted_proxies: str = "127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7"
     # Public URL of the app, used to build invitation / password-reset links.
     public_base_url: str = "http://localhost:8080"
     # Secure cookies need HTTPS (set false only for plain-HTTP local development).

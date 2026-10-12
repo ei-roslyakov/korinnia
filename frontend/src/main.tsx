@@ -16,6 +16,20 @@ import { applyTheme } from "./lib/theme";
 // Before the first render, so the page never flashes in the wrong colours.
 applyTheme();
 
+// Pages load as separate files. After a new version is deployed, a tab opened earlier may ask
+// for files that no longer exist: reload once to get the new version instead of failing.
+window.addEventListener("vite:preloadError", (event) => {
+  const key = "korinnia.reloaded-for-update";
+  try {
+    if (sessionStorage.getItem(key) === location.pathname) return;
+    sessionStorage.setItem(key, location.pathname);
+  } catch {
+    return;
+  }
+  event.preventDefault();
+  location.reload();
+});
+
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
 });

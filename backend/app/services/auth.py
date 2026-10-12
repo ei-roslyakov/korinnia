@@ -20,6 +20,8 @@ from app.core.security import (
     TokenError,
     create_token,
     decode_token,
+    decrypt_secret,
+    encrypt_secret,
     generate_recovery_codes,
     generate_totp_secret,
     hash_password,
@@ -157,7 +159,8 @@ async def complete_mfa(
 async def verify_second_factor(session: AsyncSession, user: User, code: str) -> bool:
     """Accept a current TOTP code or an unused recovery code (which is then consumed)."""
     if user.totp_secret:
-        counter = verify_totp(user.totp_secret, code, last_counter=user.totp_last_counter)
+        secret = decrypt_secret(user.totp_secret)
+        counter = verify_totp(secret, code, last_counter=user.totp_last_counter)
         if counter is not None:
             user.totp_last_counter = counter
             return True
@@ -321,11 +324,12 @@ async def change_password(
 async def totp_setup(session: AsyncSession, user: User) -> tuple[str, str, str]:
     if user.totp_enabled:
         raise ConflictError("totp_already_enabled")
-    user.totp_secret = generate_totp_secret()
+    secret = generate_totp_secret()
+    user.totp_secret = encrypt_secret(secret)
     user.totp_last_counter = None
     await session.commit()
-    uri = totp_provisioning_uri(user.totp_secret, user.email)
-    return user.totp_secret, uri, totp_qr_svg(uri)
+    uri = totp_provisioning_uri(secret, user.email)
+    return secret, uri, totp_qr_svg(uri)
 
 
 async def _replace_recovery_codes(session: AsyncSession, user: User) -> list[str]:
@@ -340,7 +344,7 @@ async def totp_enable(session: AsyncSession, user: User, code: str, actor: Actor
         raise ConflictError("totp_already_enabled")
     if not user.totp_secret:
         raise AppError("totp_not_set_up")
-    counter = verify_totp(user.totp_secret, code, last_counter=None)
+    counter = verify_totp(decrypt_secret(user.totp_secret), code, last_counter=None)
     if counter is None:
         raise AppError("invalid_code")
     user.totp_enabled = True

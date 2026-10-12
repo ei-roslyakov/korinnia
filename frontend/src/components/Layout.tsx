@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useMatch, useNavigate } from "react-router";
 
@@ -12,6 +12,7 @@ import { getMeta } from "@/lib/api";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { Logo } from "./Logo";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { Spinner } from "./ui";
 import { versionLabel } from "@/lib/version";
 
 const FIRST_YEAR = 2026;
@@ -114,7 +115,9 @@ export function Layout() {
           fullBleed ? "flex min-h-0 flex-1 flex-col" : "mx-auto w-full max-w-6xl flex-1 px-4 py-8"
         }
       >
-        <Outlet />
+        <Suspense fallback={<Spinner />}>
+          <Outlet />
+        </Suspense>
       </main>
       {!fullBleed && (
         <footer className="border-bark-100 text-bark-700 border-t print:hidden">

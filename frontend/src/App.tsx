@@ -1,42 +1,59 @@
-import { lazy, Suspense } from "react";
+import { lazy, type ComponentType } from "react";
 import { Navigate, Route, Routes } from "react-router";
 
 import { Layout } from "@/components/Layout";
-import { AdminLayout } from "@/features/admin/AdminLayout";
-import { PersonEditorPage } from "@/features/builder/PersonEditorPage";
-import { TrashPage } from "@/features/builder/TrashPage";
-import { ImportPage } from "@/features/imports/ImportPage";
-import { AuditLogPage } from "@/features/admin/AuditLogPage";
-import { InvitationsPage } from "@/features/admin/InvitationsPage";
-import { SystemPage } from "@/features/admin/SystemPage";
-import { AdminTreesPage } from "@/features/admin/AdminTreesPage";
-import { UsersPage } from "@/features/admin/UsersPage";
-import { AcceptInvitePage } from "@/features/auth/AcceptInvitePage";
-import { OpenSharedLinkPage } from "@/features/share/OpenSharedLinkPage";
-import { HelpPage } from "@/features/help/HelpPage";
 import { LoginPage } from "@/features/auth/LoginPage";
-import { ProfilePage } from "@/features/auth/ProfilePage";
 import { RequireAuth } from "@/features/auth/RequireAuth";
-import { ResetPasswordPage } from "@/features/auth/ResetPasswordPage";
-import { ModerationPage } from "@/features/collab/ModerationPage";
-import { QualityPage } from "@/features/collab/QualityPage";
-import { OnThisDayPage } from "@/features/insights/OnThisDayPage";
-import { RelationshipPage } from "@/features/insights/RelationshipPage";
-import { StatsPage } from "@/features/insights/StatsPage";
-import { TimelinePage } from "@/features/insights/TimelinePage";
-import { PersonPage } from "@/features/person/PersonPage";
-import { SourcesPage } from "@/features/sources/SourcesPage";
-import { StoriesPage } from "@/features/stories/StoriesPage";
-import { StoryEditorPage } from "@/features/stories/StoryEditorPage";
-import { StoryPage } from "@/features/stories/StoryPage";
-import { MembersPage } from "@/features/tree/MembersPage";
-import { TreeViewPage } from "@/features/tree/TreeViewPage";
 import { TreesPage } from "@/features/tree/TreesPage";
-import { Spinner } from "@/components/ui";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ToastProvider } from "@/components/Toast";
 
-// Leaflet and the map page load only when the map is opened.
+// Pages load on first visit (route-level code splitting): the first load carries only the
+// shell, sign-in and the tree list; the canvas (React Flow), Leaflet, the editors and the
+// admin pages come as separate files.
+function page<K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) {
+  return lazy(() => load().then((m) => ({ default: m[name] })));
+}
+
+const AdminLayout = page(() => import("@/features/admin/AdminLayout"), "AdminLayout");
+const PersonEditorPage = page(
+  () => import("@/features/builder/PersonEditorPage"),
+  "PersonEditorPage",
+);
+const TrashPage = page(() => import("@/features/builder/TrashPage"), "TrashPage");
+const ImportPage = page(() => import("@/features/imports/ImportPage"), "ImportPage");
+const AuditLogPage = page(() => import("@/features/admin/AuditLogPage"), "AuditLogPage");
+const InvitationsPage = page(() => import("@/features/admin/InvitationsPage"), "InvitationsPage");
+const SystemPage = page(() => import("@/features/admin/SystemPage"), "SystemPage");
+const AdminTreesPage = page(() => import("@/features/admin/AdminTreesPage"), "AdminTreesPage");
+const UsersPage = page(() => import("@/features/admin/UsersPage"), "UsersPage");
+const AcceptInvitePage = page(() => import("@/features/auth/AcceptInvitePage"), "AcceptInvitePage");
+const OpenSharedLinkPage = page(
+  () => import("@/features/share/OpenSharedLinkPage"),
+  "OpenSharedLinkPage",
+);
+const HelpPage = page(() => import("@/features/help/HelpPage"), "HelpPage");
+const ProfilePage = page(() => import("@/features/auth/ProfilePage"), "ProfilePage");
+const ResetPasswordPage = page(
+  () => import("@/features/auth/ResetPasswordPage"),
+  "ResetPasswordPage",
+);
+const ModerationPage = page(() => import("@/features/collab/ModerationPage"), "ModerationPage");
+const QualityPage = page(() => import("@/features/collab/QualityPage"), "QualityPage");
+const OnThisDayPage = page(() => import("@/features/insights/OnThisDayPage"), "OnThisDayPage");
+const RelationshipPage = page(
+  () => import("@/features/insights/RelationshipPage"),
+  "RelationshipPage",
+);
+const StatsPage = page(() => import("@/features/insights/StatsPage"), "StatsPage");
+const TimelinePage = page(() => import("@/features/insights/TimelinePage"), "TimelinePage");
+const PersonPage = page(() => import("@/features/person/PersonPage"), "PersonPage");
+const SourcesPage = page(() => import("@/features/sources/SourcesPage"), "SourcesPage");
+const StoriesPage = page(() => import("@/features/stories/StoriesPage"), "StoriesPage");
+const StoryEditorPage = page(() => import("@/features/stories/StoryEditorPage"), "StoryEditorPage");
+const StoryPage = page(() => import("@/features/stories/StoryPage"), "StoryPage");
+const MembersPage = page(() => import("@/features/tree/MembersPage"), "MembersPage");
+const TreeViewPage = page(() => import("@/features/tree/TreeViewPage"), "TreeViewPage");
 const MapPage = lazy(() => import("@/features/map/MapPage"));
 
 export function App() {
@@ -160,9 +177,7 @@ export function App() {
             path="trees/:treeId/map"
             element={
               <RequireAuth>
-                <Suspense fallback={<Spinner />}>
-                  <MapPage />
-                </Suspense>
+                <MapPage />
               </RequireAuth>
             }
           />

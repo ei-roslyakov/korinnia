@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 import secrets
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from functools import lru_cache
 from typing import Any, Literal
 
 import jwt
@@ -15,6 +17,9 @@ import pyotp
 import segno
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
+from cryptography.fernet import Fernet, InvalidToken, MultiFernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from app.core.config import get_settings
 
@@ -190,3 +195,53 @@ def verify_totp(
         if hmac.compare_digest(totp.generate_otp(counter), code):
             return counter
     return None
+
+
+# --- Encryption at rest -----------------------------------------------------------------
+
+# Stored values carry a version prefix; a value without it is legacy plaintext.
+ENCRYPTED_PREFIX = "enc1:"
+
+
+class DecryptionError(Exception):
+    """A stored secret cannot be decrypted with the configured keys."""
+
+
+def _derived_key(secret: str) -> bytes:
+    raw = HKDF(
+        algorithm=hashes.SHA256(), length=32, salt=None, info=b"korinnia/data-encryption"
+    ).derive(secret.encode())
+    return base64.urlsafe_b64encode(raw)
+
+
+@lru_cache(maxsize=4)
+def _fernet(data_key: str | None, secret_key: str) -> MultiFernet:
+    # DATA_ENCRYPTION_KEY (when set) encrypts; the key derived from SECRET_KEY still decrypts,
+    # so setting DATA_ENCRYPTION_KEY later keeps existing secrets readable.
+    keys = [_derived_key(data_key)] if data_key else []
+    keys.append(_derived_key(secret_key))
+    return MultiFernet([Fernet(k) for k in keys])
+
+
+def _current_fernet() -> MultiFernet:
+    settings = get_settings()
+    data_key = settings.data_encryption_key
+    return _fernet(
+        data_key.get_secret_value() if data_key else None, settings.secret_key.get_secret_value()
+    )
+
+
+def encrypt_secret(plain: str) -> str:
+    token = _current_fernet().encrypt(plain.encode()).decode()
+    return ENCRYPTED_PREFIX + token
+
+
+def decrypt_secret(stored: str) -> str:
+    if not stored.startswith(ENCRYPTED_PREFIX):
+        return stored
+    try:
+        return _current_fernet().decrypt(stored[len(ENCRYPTED_PREFIX) :].encode()).decode()
+    except InvalidToken as exc:
+        raise DecryptionError(
+            "stored secret cannot be decrypted: SECRET_KEY or DATA_ENCRYPTION_KEY changed"
+        ) from exc

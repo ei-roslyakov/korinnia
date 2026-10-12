@@ -89,3 +89,36 @@ def test_totp_qr_svg() -> None:
     uri = security.totp_provisioning_uri(security.generate_totp_secret(), "a@b.c")
     assert uri.startswith("otpauth://totp/Korinnia:")
     assert security.totp_qr_svg(uri).startswith("<svg")
+
+
+def test_encrypt_secret_roundtrip_and_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.core.config import get_settings
+
+    secret = security.generate_totp_secret()
+    stored = security.encrypt_secret(secret)
+    assert stored.startswith(security.ENCRYPTED_PREFIX)
+    assert secret not in stored
+    assert security.encrypt_secret(secret) != stored  # random IV each time
+    assert security.decrypt_secret(stored) == secret
+    # Values stored before encryption existed are read as they are.
+    assert security.decrypt_secret(secret) == secret
+
+    try:
+        # Setting DATA_ENCRYPTION_KEY later keeps old values readable; new ones use it.
+        monkeypatch.setenv("DATA_ENCRYPTION_KEY", "a-separate-data-key")
+        get_settings.cache_clear()
+        assert security.decrypt_secret(stored) == secret
+        newer = security.encrypt_secret(secret)
+
+        # Without that key (or with another SECRET_KEY) the value cannot be read.
+        monkeypatch.delenv("DATA_ENCRYPTION_KEY")
+        get_settings.cache_clear()
+        with pytest.raises(security.DecryptionError):
+            security.decrypt_secret(newer)
+        monkeypatch.setenv("SECRET_KEY", "another-secret-key")
+        get_settings.cache_clear()
+        with pytest.raises(security.DecryptionError):
+            security.decrypt_secret(stored)
+    finally:
+        monkeypatch.undo()
+        get_settings.cache_clear()
