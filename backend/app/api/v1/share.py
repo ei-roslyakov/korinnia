@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request, Response, status
 from pydantic import BaseModel, Field
 
 from app.api.cookies import SHARE_COOKIE, clear_share_cookie, set_share_cookie
-from app.api.deps import ActorDep, SessionDep, TreeAdmin
+from app.api.deps import ActorDep, RealAccount, SessionDep, TreeAdmin
 from app.core.errors import NotAuthenticatedError
 from app.core.security import utcnow
 from app.models import ShareLink, User
@@ -77,7 +77,11 @@ async def list_links(access: TreeAdmin, session: SessionDep) -> list[ShareLinkOu
     status_code=status.HTTP_201_CREATED,
 )
 async def create_link(
-    body: ShareLinkCreate, access: TreeAdmin, session: SessionDep, actor: ActorDep
+    body: ShareLinkCreate,
+    access: TreeAdmin,
+    session: SessionDep,
+    actor: ActorDep,
+    _: RealAccount,
 ) -> CreatedShareLink:
     """A read-only link to this tree for people without an account."""
     link, token = await service.create_link(

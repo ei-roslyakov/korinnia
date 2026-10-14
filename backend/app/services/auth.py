@@ -14,6 +14,7 @@ from app.core.errors import (
     AppError,
     ConflictError,
     NotAuthenticatedError,
+    PermissionDeniedError,
     TooManyRequestsError,
 )
 from app.core.security import (
@@ -47,6 +48,7 @@ REFRESH_REUSE_GRACE = timedelta(seconds=30)
 class SessionTokens:
     access: str
     refresh: str
+    session_expires_at: datetime
 
 
 def _now_s() -> datetime:
@@ -183,12 +185,22 @@ async def verify_second_factor(session: AsyncSession, user: User, code: str) -> 
 # --- Sessions ---------------------------------------------------------------------------
 
 
-def _new_refresh_row(user: User, family_id: uuid.UUID, actor: Actor) -> RefreshToken:
+def session_timeout(user: User) -> timedelta:
+    s = get_settings()
+    minutes = s.demo_session_timeout_minutes if user.is_sandbox else s.session_timeout_minutes
+    return timedelta(minutes=minutes)
+
+
+def _new_refresh_row(
+    user: User, family_id: uuid.UUID, actor: Actor, session_expires_at: datetime | None = None
+) -> RefreshToken:
+    now = _now_s()
     return RefreshToken(
         id=uuid.uuid4(),
         user_id=user.id,
         family_id=family_id,
-        expires_at=utcnow() + timedelta(days=get_settings().refresh_token_ttl_days),
+        expires_at=now + timedelta(days=get_settings().refresh_token_ttl_days),
+        session_expires_at=session_expires_at or now + session_timeout(user),
         user_agent=(actor.user_agent or "")[:500] or None,
         ip_address=actor.ip,
     )
@@ -196,20 +208,30 @@ def _new_refresh_row(user: User, family_id: uuid.UUID, actor: Actor) -> RefreshT
 
 def _tokens_for(user: User, row: RefreshToken) -> SessionTokens:
     s = get_settings()
+    end = row.session_expires_at
+    assert end is not None
     return SessionTokens(
-        access=create_token(user.id, "access", timedelta(minutes=s.access_token_ttl_minutes)),
+        access=create_token(
+            user.id,
+            "access",
+            timedelta(minutes=s.access_token_ttl_minutes),
+            session_expires_at=end,
+        ),
         refresh=create_token(
             user.id,
             "refresh",
             timedelta(days=s.refresh_token_ttl_days),
             jti=row.id,
             family_id=row.family_id,
+            session_expires_at=end,
         ),
+        session_expires_at=end,
     )
 
 
 async def start_session(session: AsyncSession, user: User, actor: Actor) -> SessionTokens:
-    """Called after successful authentication (password and, if enabled, 2FA)."""
+    """Called after successful authentication (password and, if enabled, 2FA). The session
+    ends after `session_timeout`; the user can extend it before then (`refresh_session`)."""
     row = _new_refresh_row(user, uuid.uuid4(), actor)
     session.add(row)
     user.last_login_at = utcnow()
@@ -220,8 +242,10 @@ async def start_session(session: AsyncSession, user: User, actor: Actor) -> Sess
 
 
 async def refresh_session(
-    session: AsyncSession, refresh_token: str | None, actor: Actor
+    session: AsyncSession, refresh_token: str | None, actor: Actor, *, extend: bool = False
 ) -> tuple[User, SessionTokens]:
+    """Rotate the refresh token. The session keeps its end time; `extend` moves it to a full
+    timeout from now (not for demo accounts). An ended session cannot be refreshed."""
     if not refresh_token:
         raise NotAuthenticatedError()
     try:
@@ -250,8 +274,17 @@ async def refresh_session(
     user = await session.get(User, row.user_id)
     if user is None or not user.is_active or session_revoked(user, payload.iat):
         raise NotAuthenticatedError("token_revoked")
+    # Sessions started before timeouts existed get one now.
+    end = row.session_expires_at or _now_s() + session_timeout(user)
+    if end <= now:
+        raise NotAuthenticatedError("session_expired")
+    if extend:
+        if user.is_sandbox:
+            raise PermissionDeniedError("demo_session_fixed")
+        end = _now_s() + session_timeout(user)
+        audit.record(session, Actor(user, actor.ip), "auth.session_extend", "user", user.id)
 
-    new_row = _new_refresh_row(user, row.family_id, actor)
+    new_row = _new_refresh_row(user, row.family_id, actor, end)
     session.add(new_row)
     if row.revoked_at is None:
         row.revoked_at = now

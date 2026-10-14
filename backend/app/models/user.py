@@ -27,6 +27,9 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     # May start their own trees (and becomes their admin); superadmins always may. Turned off
     # per user by a superadmin, or for everyone with USERS_CAN_CREATE_TREES=false.
     can_create_trees: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    # A throwaway account from the public demo login: hidden from the admin panel, limited
+    # (no sharing, 2FA or big uploads) and deleted with its trees when its session ends.
+    is_sandbox: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # Onboarding: the welcome guide is shown at sign-in until dismissed for good; the newest
     # "What's new" entry the user has seen, and whether news may pop up at sign-in.
@@ -78,6 +81,9 @@ class RefreshToken(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     replaced_by_id: Mapped[uuid.UUID | None] = mapped_column()
+    # End of the sign-in this token belongs to (same for the whole family; moved forward when
+    # the user extends the session). NULL only for tokens issued before session timeouts.
+    session_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     user_agent: Mapped[str | None] = mapped_column(String(500))
     ip_address: Mapped[str | None] = mapped_column(String(64))
 

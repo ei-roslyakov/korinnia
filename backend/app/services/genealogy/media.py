@@ -167,7 +167,10 @@ async def upload_media(
     person_id: uuid.UUID | None = None,
     allow_duplicate: bool = False,
 ) -> MediaFile:
-    limit = get_settings().max_upload_size_mb * 1024 * 1024
+    settings = get_settings()
+    limit = settings.max_upload_size_mb * 1024 * 1024
+    if actor.user is not None and actor.user.is_sandbox:
+        limit = min(limit, settings.demo_max_upload_mb * 1024 * 1024)
     if upload.size is not None and upload.size > limit:
         raise AppError("file_too_large", status_code=413)
     if person_id:

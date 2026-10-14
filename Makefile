@@ -97,6 +97,7 @@ test-e2e: .env ## End-to-end tests (Playwright) on a throwaway production-build 
 	@set -e; \
 	E2E="docker compose -p $(PROJECT)-e2e -f docker-compose.yml"; \
 	HTTP_PORT=$(E2E_PORT) ENVIRONMENT=production DEMO_TREE_FOR_NEW_USERS=false DEFAULT_LANGUAGE=uk \
+	  DEMO_LOGIN_ENABLED=true \
 	  $$E2E up -d --build --wait; \
 	$$E2E exec -T backend python -m app.seed; \
 	status=0; \

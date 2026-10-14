@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Request, Response, status
+from fastapi import APIRouter, Cookie, Depends, Request, Response, status
 
 from app.api.cookies import (
+    ACCESS_COOKIE,
     CSRF_COOKIE,
     MFA_COOKIE,
     REFRESH_COOKIE,
@@ -14,7 +16,10 @@ from app.api.cookies import (
     set_mfa_cookie,
     set_session_cookies,
 )
-from app.api.deps import ActorDep, AnonymousActor, CurrentUser, SessionDep
+from app.api.deps import ActorDep, AnonymousActor, CurrentUser, RealAccount, SessionDep
+from app.core.config import get_settings
+from app.core.errors import NotFoundError
+from app.core.security import TokenError, decode_token
 from app.models import User
 from app.schemas.auth import (
     AcceptInvitationRequest,
@@ -34,16 +39,28 @@ from app.schemas.auth import (
     TotpSetupResponse,
     UpdateMeRequest,
 )
-from app.services import audit
+from app.services import audit, demo_sessions
 from app.services import auth as auth_service
 from app.services import trees as tree_service
 from app.services import users as user_service
+from app.services.context import Actor
 from app.services.users import USER_AUDIT_FIELDS
+from app.storage import Storage, get_storage
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+StorageDep = Annotated[Storage, Depends(get_storage)]
 
 
-async def build_me(session: SessionDep, user: User) -> Me:
+def _session_end(request: Request) -> datetime | None:
+    try:
+        return decode_token(request.cookies.get(ACCESS_COOKIE) or "", "access").sx
+    except TokenError:
+        return None
+
+
+async def build_me(
+    session: SessionDep, user: User, session_expires_at: datetime | None = None
+) -> Me:
     trees = await tree_service.list_trees_for_user(session, user)
     return Me(
         id=user.id,
@@ -52,6 +69,8 @@ async def build_me(session: SessionDep, user: User) -> Me:
         preferred_language=user.preferred_language,
         is_superadmin=user.is_superadmin,
         can_create_trees=user_service.may_create_trees(user),
+        is_sandbox=user.is_sandbox,
+        session_expires_at=session_expires_at,
         totp_enabled=user.totp_enabled,
         trees=[MeTree(id=t.id, name=t.name, role=role) for t, role in trees],
         welcome_dismissed=user.welcome_dismissed,
@@ -69,8 +88,14 @@ async def csrf(request: Request) -> CsrfResponse:
 
 @router.post("/login", response_model=LoginResponse)
 async def login(
-    body: LoginRequest, response: Response, session: SessionDep, actor: AnonymousActor
+    body: LoginRequest,
+    response: Response,
+    session: SessionDep,
+    actor: AnonymousActor,
+    storage: StorageDep,
 ) -> LoginResponse:
+    if demo_sessions.is_demo_login(body.email, body.password):
+        return await _demo(response, session, actor, storage)
     user = await auth_service.authenticate(session, body.email, body.password, actor)
     if user.totp_enabled:
         await session.commit()  # persist a possible password rehash
@@ -78,7 +103,39 @@ async def login(
         return LoginResponse(status="mfa_required")
     tokens = await auth_service.start_session(session, user, actor)
     set_session_cookies(response, access=tokens.access, refresh=tokens.refresh)
-    return LoginResponse(status="ok", user=await build_me(session, user))
+    return LoginResponse(status="ok", user=await build_me(session, user, tokens.session_expires_at))
+
+
+async def _demo(
+    response: Response, session: SessionDep, actor: Actor, storage: Storage
+) -> LoginResponse:
+    user, tokens = await demo_sessions.start_demo(session, actor, storage=storage)
+    set_session_cookies(response, access=tokens.access, refresh=tokens.refresh)
+    return LoginResponse(status="ok", user=await build_me(session, user, tokens.session_expires_at))
+
+
+@router.post("/demo", response_model=LoginResponse)
+async def demo_login(
+    response: Response, session: SessionDep, actor: AnonymousActor, storage: StorageDep
+) -> LoginResponse:
+    """“Try the demo”: a fresh demo account with its own copy of the demo family (when
+    DEMO_LOGIN_ENABLED). Same as signing in with the published demo credentials."""
+    if not get_settings().demo_login_enabled:
+        raise NotFoundError()
+    return await _demo(response, session, actor, storage)
+
+
+@router.post("/session/extend", response_model=Me)
+async def extend_session(
+    response: Response,
+    session: SessionDep,
+    actor: AnonymousActor,
+    refresh_token: Annotated[str | None, Cookie(alias=REFRESH_COOKIE)] = None,
+) -> Me:
+    """Keep signed in: the session gets a full timeout from now (not for demo accounts)."""
+    user, tokens = await auth_service.refresh_session(session, refresh_token, actor, extend=True)
+    set_session_cookies(response, access=tokens.access, refresh=tokens.refresh)
+    return await build_me(session, user, tokens.session_expires_at)
 
 
 @router.post("/login/mfa", response_model=LoginResponse)
@@ -92,7 +149,7 @@ async def login_mfa(
     user = await auth_service.complete_mfa(session, mfa_token, body.code, actor)
     tokens = await auth_service.start_session(session, user, actor)
     set_session_cookies(response, access=tokens.access, refresh=tokens.refresh)
-    return LoginResponse(status="ok", user=await build_me(session, user))
+    return LoginResponse(status="ok", user=await build_me(session, user, tokens.session_expires_at))
 
 
 @router.post("/refresh", status_code=status.HTTP_204_NO_CONTENT)
@@ -121,12 +178,14 @@ async def logout(
 
 
 @router.get("/me", response_model=Me)
-async def me(user: CurrentUser, session: SessionDep) -> Me:
-    return await build_me(session, user)
+async def me(user: CurrentUser, session: SessionDep, request: Request) -> Me:
+    return await build_me(session, user, _session_end(request))
 
 
 @router.patch("/me", response_model=Me)
-async def update_me(body: UpdateMeRequest, session: SessionDep, actor: ActorDep) -> Me:
+async def update_me(
+    body: UpdateMeRequest, session: SessionDep, actor: ActorDep, request: Request
+) -> Me:
     user = actor.user
     assert user is not None
     before = audit.snapshot(user, USER_AUDIT_FIELDS)
@@ -146,12 +205,16 @@ async def update_me(body: UpdateMeRequest, session: SessionDep, actor: ActorDep)
         b, a = audit.diff_only(before, after)
         audit.record(session, actor, "user.update", "user", user.id, before=b, after=a)
     await session.commit()
-    return await build_me(session, user)
+    return await build_me(session, user, _session_end(request))
 
 
 @router.post("/me/password", status_code=status.HTTP_204_NO_CONTENT)
 async def change_password(
-    body: ChangePasswordRequest, response: Response, session: SessionDep, actor: ActorDep
+    body: ChangePasswordRequest,
+    response: Response,
+    session: SessionDep,
+    actor: ActorDep,
+    _: RealAccount,
 ) -> None:
     assert actor.user is not None
     tokens = await auth_service.change_password(
@@ -164,7 +227,7 @@ async def change_password(
 
 
 @router.post("/2fa/setup", response_model=TotpSetupResponse)
-async def totp_setup(user: CurrentUser, session: SessionDep) -> TotpSetupResponse:
+async def totp_setup(user: RealAccount, session: SessionDep) -> TotpSetupResponse:
     secret, uri, svg = await auth_service.totp_setup(session, user)
     return TotpSetupResponse(secret=secret, otpauth_uri=uri, qr_svg=svg)
 
@@ -226,7 +289,7 @@ async def accept_invitation(
     )
     tokens = await auth_service.start_session(session, user, actor)
     set_session_cookies(response, access=tokens.access, refresh=tokens.refresh)
-    return LoginResponse(status="ok", user=await build_me(session, user))
+    return LoginResponse(status="ok", user=await build_me(session, user, tokens.session_expires_at))
 
 
 @router.get("/password-reset/{token}", response_model=PasswordResetInfo)

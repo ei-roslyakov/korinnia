@@ -2,6 +2,30 @@
 
 Newest first. One entry per finished task: what changed, why, commit, anything left open.
 
+## 2026-10-14
+
+- **Session timeout + public demo login (D105, D106)** — owner's request: a shared demo login
+  (`demo@example.com` / `demo@example.com`) where every visitor gets a fresh state, a 30-minute
+  demo session, and a session-expired popup with a way to refresh the session for everyone.
+  - Sessions: `refresh_tokens.session_expires_at` (migration 0013), `SESSION_TIMEOUT_MINUTES`
+    (8 h); access tokens capped (`sx` claim); `POST /auth/session/extend`; frontend
+    `SessionWatch` (warning 2 min before with "Stay signed in", then a popup asking for the
+    password, page stays open; `RequireAuth` doesn't redirect meanwhile).
+  - Demo: `services/demo_sessions.py` — each demo sign-in creates a hidden `is_sandbox` account
+    with its own demo family; no extension; worker job `demo.purge_ended` every 5 min deletes
+    ended ones (trees, files, audit). Limits per IP / active count; no sharing, 2FA, password,
+    uploads > 20 MB; hidden from admin. "Try the demo" + credentials on the sign-in page (from
+    `/meta`), countdown badge in the header, "Start a new demo" when it ends.
+  - Speed: portraits cached per process and warmed at start-up; one `demo.portraits` job per new
+    demo copy instead of 132 (also for normal new users) — found because demo jobs delayed the
+    E2E photo upload. Demo sign-in ~0.9 s in dev.
+  - Fixed on the way: docker-compose did not pass `DATA_ENCRYPTION_KEY`, `TRUSTED_PROXIES`,
+    `USERS_CAN_CREATE_TREES` from `.env` (defaults applied); an empty `DATA_ENCRYPTION_KEY` now
+    counts as unset.
+  - Production: `DEMO_LOGIN_ENABLED: "true"` in the Argo CD values (goes live with the push).
+  - Tests: backend 330, frontend 165, E2E 27 (×2 green); `e2e/demo.spec.ts`.
+  - Open: existing sessions in production get their 8-hour end at their next refresh.
+
 ## 2026-10-12
 
 - **Night (glass) theme (D104)** — owner asked for more themes with a blurred background;

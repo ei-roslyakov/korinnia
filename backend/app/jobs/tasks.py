@@ -104,6 +104,50 @@ async def create_demo_tree(user_id: str) -> None:
         logger.info("demo tree created", extra={"user_id": user_id, "tree_id": str(tree.id)})
 
 
+@app.periodic(cron="*/5 * * * *")
+@app.task(name="demo.purge_ended", queue="maintenance", queueing_lock="demo.purge_ended")
+async def purge_ended_demo_sessions(timestamp: int) -> None:
+    """Every 5 minutes: delete public-demo accounts whose session has ended."""
+    from app.services import demo_sessions
+
+    async with get_sessionmaker()() as session:
+        count = await demo_sessions.purge_ended(session, get_storage())
+    if count:
+        logger.info("demo accounts deleted", extra={"count": count})
+
+
+@app.task(name="demo.portraits", queue="media", retry=2)
+async def process_demo_portraits(tree_id: str) -> None:
+    """Previews and portraits of a new demo copy, one after another in a single job."""
+    from app.models import Person
+
+    async with get_sessionmaker()() as session:
+        tid = uuid.UUID(tree_id)
+        media_ids = list(
+            await session.scalars(
+                select(MediaFile.id).where(
+                    MediaFile.tree_id == tid,
+                    MediaFile.processing_status == ProcessingStatus.pending,
+                    MediaFile.deleted_at.is_(None),
+                )
+            )
+        )
+        person_ids = list(
+            await session.scalars(
+                select(Person.id).where(
+                    Person.tree_id == tid,
+                    Person.primary_photo_id.is_not(None),
+                    Person.avatar_key.is_(None),
+                )
+            )
+        )
+        storage = get_storage()
+        for media_id in media_ids:
+            await media_service.process_media(session, storage, media_id)
+        for person_id in person_ids:
+            await media_service.make_avatar(session, storage, person_id)
+
+
 # --- Integrity of stored originals (phase 9) --------------------------------------------
 
 

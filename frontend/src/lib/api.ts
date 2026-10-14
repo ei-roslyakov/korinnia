@@ -6,6 +6,8 @@
  * - On 401 the client refreshes the session once (shared by concurrent requests) and retries.
  */
 
+import { setSessionExpired } from "./session";
+
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
@@ -74,6 +76,10 @@ export function refreshSession(): Promise<boolean> {
         credentials: "same-origin",
         headers: { "X-CSRF-Token": await csrfToken() },
       });
+      if (!resp.ok && resp.status === 401) {
+        const body = (await resp.json().catch(() => null)) as { code?: string } | null;
+        if (body?.code === "session_expired") setSessionExpired(true);
+      }
       return resp.ok;
     } catch {
       return false;
@@ -148,6 +154,8 @@ export interface MetaInfo {
   name: string;
   version: string;
   environment: string;
+  /** Public demo credentials, when the installation offers "Try the demo". */
+  demo_login?: { email: string; password: string } | null;
 }
 
 export type CheckStatus = "ok" | "error";

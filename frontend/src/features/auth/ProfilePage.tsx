@@ -33,8 +33,12 @@ export function ProfilePage() {
     <div className="max-w-2xl space-y-6">
       <PageHeader title={t("profile.title")} />
       <ProfileForm me={me.data} />
-      <PasswordForm />
-      <TwoFactorSection me={me.data} />
+      {!me.data.is_sandbox && (
+        <>
+          <PasswordForm />
+          <TwoFactorSection me={me.data} />
+        </>
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ Writes are atomic (temp file + rename) and fsync'ed.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import shutil
 import tempfile
@@ -95,6 +96,18 @@ class LocalStorage(Storage):
 
     async def delete(self, key: str) -> None:
         self._path(key).unlink(missing_ok=True)
+
+    async def delete_prefix(self, prefix: str) -> int:
+        count = await super().delete_prefix(prefix)
+        base = self._path(prefix.rstrip("/"))
+        if base.is_dir():
+            # Remove the emptied folders too (deepest first).
+            dirs = sorted((p for p in base.rglob("*") if p.is_dir()), key=lambda p: -len(p.parts))
+            for d in [*dirs, base]:
+                # Not empty: something was added meanwhile.
+                with contextlib.suppress(OSError):
+                    d.rmdir()
+        return count
 
     async def list_keys(self, prefix: str = "") -> AsyncIterator[str]:
         base = self.root / prefix if prefix else self.root

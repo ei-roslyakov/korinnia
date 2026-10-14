@@ -81,6 +81,10 @@ plans/            this folder
 - **Tree creation** — any user (`services/users.may_create_trees`: superadmin, or
   `USERS_CAN_CREATE_TREES` and `users.can_create_trees`) creates trees and becomes their admin;
   the superadmin administers the whole site. (D103)
+- **Sessions and demo** — every sign-in ends (`refresh_tokens.session_expires_at`, extend via
+  `/auth/session/extend`, frontend `features/auth/SessionWatch.tsx`); public demo in
+  `services/demo_sessions.py` (throwaway `is_sandbox` accounts, purged by `demo.purge_ended`).
+  (D105, D106)
 
 ## After phase 8 (polish and operations)
 

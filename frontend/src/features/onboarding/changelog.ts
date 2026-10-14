@@ -13,6 +13,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-14",
+    items: {
+      en: [
+        "Sessions now end after 8 hours. Two minutes before, you can choose “Stay signed in”; afterwards, enter your password in the window that appears and carry on where you were.",
+        "“Try the demo” on the sign-in page: anyone can explore Korinnia with their own copy of the demo family for 30 minutes.",
+      ],
+      uk: [
+        "Сеанс тепер завершується через 8 годин. За дві хвилини до цього можна обрати «Залишитися в системі»; після — введіть пароль у вікні, що з'явиться, і продовжуйте з того самого місця.",
+        "«Спробувати демо» на сторінці входу: будь-хто може ознайомитися з Корінням на власній копії демо-родини протягом 30 хвилин.",
+      ],
+      pl: [
+        "Sesja kończy się teraz po 8 godzinach. Dwie minuty wcześniej możesz wybrać „Pozostań zalogowany”; potem wpisz hasło w oknie, które się pojawi, i kontynuuj w tym samym miejscu.",
+        "„Wypróbuj demo” na stronie logowania: każdy może poznać Korinnię na własnej kopii rodziny demo przez 30 minut.",
+      ],
+    },
+  },
+  {
     id: "2026-10-12.3",
     items: {
       en: [

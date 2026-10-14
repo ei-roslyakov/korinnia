@@ -50,6 +50,8 @@ Legend: ✅ implemented · 🚧 in progress · 📋 planned
 
 ### Users & admin
 - ✅ Email + password login (argon2id); no public self-registration
+- ✅ Session timeout (`SESSION_TIMEOUT_MINUTES`, 8 h): "Stay signed in" two minutes before the end, then a popup that signs you in again without leaving the page
+- ✅ Public demo (`DEMO_LOGIN_ENABLED`): "Try the demo" or `demo@example.com` / `demo@example.com`; every sign-in gets its own throwaway account with a fresh demo family for `DEMO_SESSION_TIMEOUT_MINUTES` (30), deleted afterwards
 - ✅ Sessions: short-lived access + rotating refresh JWTs in httpOnly cookies, refresh-token reuse detection, "sign out everywhere" on password change
 - ✅ CSRF protection (double-submit cookie + SameSite)
 - ✅ Optional TOTP two-step verification with one-time recovery codes (any user; recommended for admins); secrets encrypted at rest

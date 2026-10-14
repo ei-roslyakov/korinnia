@@ -11,6 +11,7 @@ from app.api.deps import (
     ActorDep,
     CurrentUser,
     PageParams,
+    RealAccount,
     SessionDep,
     TreeAdmin,
     TreeViewer,
@@ -132,7 +133,11 @@ async def list_members(access: TreeAdmin, session: SessionDep) -> MembersRespons
 
 @router.post("/{tree_id}/members", response_model=AddMemberResponse, status_code=201)
 async def add_member(
-    body: AddMemberRequest, access: TreeAdmin, session: SessionDep, actor: ActorDep
+    body: AddMemberRequest,
+    access: TreeAdmin,
+    session: SessionDep,
+    actor: ActorDep,
+    _: RealAccount,
 ) -> AddMemberResponse:
     """Share the tree with a user by email. With `invite` (default) an email without an
     account gets an invitation link; without it, that is a 404 `no_user_with_email`."""

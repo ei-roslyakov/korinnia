@@ -9,6 +9,14 @@ walks through everything you can do. Buttons and menu names are written **like t
 - Sign in with your email and password. There is no public sign-up: an administrator creates
   your account or sends you an invitation link. Forgot your password? Ask an administrator for
   a reset link.
+- A sign-in lasts 8 hours (an administrator can change this). Two minutes before the end a
+  note offers **Stay signed in**; if you miss it, a window asks for your password again and
+  **Refresh session** brings you back to the same page.
+- Just looking around? **Try the demo** on the sign-in page (or sign in with
+  `demo@example.com` / `demo@example.com`, if the site offers it) gives you your own copy of
+  the demo family for 30 minutes. Nobody else sees your changes, and the copy is deleted when
+  the demo ends; **Start a new demo** gives you a fresh one. Sharing and two-step
+  verification are not available in the demo.
 - **Theme** (light, dark, archive / sepia, Night (glass: a soft blurred colour background behind
   frosted panels), or follow your device) and **Language** (English,
   Українська, Polski) are in the top bar. Your language is remembered on every device.

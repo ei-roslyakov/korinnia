@@ -1,12 +1,14 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 
 import { Logo } from "@/components/Logo";
 import { Button, Card, ErrorAlert, Field, Input } from "@/components/ui";
+import { getMeta } from "@/lib/api";
 import { safeNext } from "@/lib/nav";
 
-import { useLogin, useLoginMfa, useMe } from "./api";
+import { useDemoLogin, useLogin, useLoginMfa, useMe } from "./api";
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -15,6 +17,9 @@ export function LoginPage() {
   const me = useMe();
   const login = useLogin();
   const mfa = useLoginMfa();
+  const demo = useDemoLogin();
+  const meta = useQuery({ queryKey: ["meta"], queryFn: getMeta, staleTime: Infinity });
+  const demoLogin = meta.data?.demo_login;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -81,6 +86,22 @@ export function LoginPage() {
               {t("auth.signIn")}
             </Button>
             <p className="text-bark-700 text-xs">{t("auth.forgotHint")}</p>
+            {demoLogin && (
+              <div className="border-bark-100 space-y-2 border-t pt-4">
+                <ErrorAlert error={demo.error} />
+                <Button
+                  variant="secondary"
+                  className="w-full"
+                  busy={demo.isPending}
+                  onClick={() => demo.mutate(undefined, { onSuccess: () => void navigate("/") })}
+                >
+                  {demo.isPending ? t("auth.preparingDemo") : t("auth.tryDemo")}
+                </Button>
+                <p className="text-bark-700 text-xs">
+                  {t("auth.demoHint", { email: demoLogin.email, password: demoLogin.password })}
+                </p>
+              </div>
+            )}
           </form>
         ) : (
           <form onSubmit={onMfa} className="space-y-4">

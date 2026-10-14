@@ -30,6 +30,9 @@ spec:
           workerConcurrency: 2
           extraEnv:
             DEMO_TREE_FOR_NEW_USERS: "true"
+            # Public demo: demo@example.com / demo@example.com, 30-minute throwaway accounts.
+            DEMO_LOGIN_ENABLED: "true"
+            DEMO_SESSION_TIMEOUT_MINUTES: "30"
 
         database:
           host: infra-k8s-001-common-pg-db-rw.infra-k8s-001-db.svc.cluster.local

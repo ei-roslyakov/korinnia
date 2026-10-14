@@ -18,6 +18,10 @@ export interface Me {
   is_superadmin: boolean;
   /** May start trees ("New tree", "Import GEDCOM"); they become the tree's admin. */
   can_create_trees: boolean;
+  /** A throwaway account from the public demo login (30-minute session, then deleted). */
+  is_sandbox?: boolean;
+  /** When this sign-in ends (ISO time); a warning comes first, then "sign in again". */
+  session_expires_at?: string | null;
   totp_enabled: boolean;
   trees: MeTree[];
   /** Onboarding: welcome guide dismissed for good; newest "What's new" entry seen. */

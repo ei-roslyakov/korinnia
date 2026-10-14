@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet, useMatch, useNavigate } from "react-router";
 
 import { useLogout, useMe } from "@/features/auth/api";
+import { DemoBadge, SessionWatch } from "@/features/auth/SessionWatch";
 import { Onboarding, type OnboardingView } from "@/features/onboarding/Onboarding";
 import { useShareSession } from "@/features/share/api";
 import { hadStoredLanguage } from "@/i18n";
@@ -91,6 +92,7 @@ export function Layout() {
             )}
             {me.data && (
               <>
+                <DemoBadge me={me.data} />
                 <NavLink to="/profile" className={navClass}>
                   {me.data.display_name}
                 </NavLink>
@@ -118,6 +120,7 @@ export function Layout() {
         <Suspense fallback={<Spinner />}>
           <Outlet />
         </Suspense>
+        <SessionWatch me={me.data} />
       </main>
       {!fullBleed && (
         <footer className="border-bark-100 text-bark-700 border-t print:hidden">

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import functools
 import io
 import sys
 from collections.abc import Iterable
@@ -1232,6 +1233,29 @@ def _years(p: P) -> str:
 PORTRAIT_VERSION = 2
 
 
+# Portraits are the same in every copy: draw each once per process (a demo sign-in then
+# takes well under a second instead of three).
+_render_portrait = functools.lru_cache(maxsize=256)(render_portrait)
+
+
+def _portrait_bytes(index: int, p: P) -> bytes:
+    name = f"{p.first} {p.last}" if not p.latin_primary else " ".join(p.latin or ())
+    return _render_portrait(
+        name=name,
+        years=_years(p),
+        gender=p.gender,
+        birth_year=(p.born or {}).get("year"),
+        seed=index,
+        age=_portrait_age(p),
+    )
+
+
+def warm_portraits() -> None:
+    """Draw every portrait into the cache (at start-up when the public demo is on)."""
+    for i, p in enumerate(PEOPLE):
+        _portrait_bytes(i, p)
+
+
 def _portrait_file(p: P) -> str:
     return f"portrait-v{PORTRAIT_VERSION}-{p.key}.jpg"
 
@@ -1260,15 +1284,7 @@ async def _store_portrait(
     actor: Actor,
 ) -> Any:
     """Draw, store (like an upload) and set as the person's portrait; returns the media id."""
-    name = f"{p.first} {p.last}" if not p.latin_primary else " ".join(p.latin or ())
-    data = render_portrait(
-        name=name,
-        years=_years(p),
-        gender=p.gender,
-        birth_year=(p.born or {}).get("year"),
-        seed=index,
-        age=_portrait_age(p),
-    )
+    data = _portrait_bytes(index, p)
     media = await media_service.upload_media(
         session,
         storage,
@@ -1523,13 +1539,12 @@ async def seed(
     await _relations(session, tree.id, ids, places, actor)
 
     if portraits:
-        from app.jobs.queue import enqueue_avatar, enqueue_media_processing
+        from app.jobs.queue import enqueue_demo_portraits
 
-        for media_id, person_id in await _portraits(
-            session, storage or get_storage(), tree, ids, actor
-        ):
-            await enqueue_media_processing(media_id)
-            await enqueue_avatar(person_id)
+        await _portraits(session, storage or get_storage(), tree, ids, actor)
+        # One job for all 66 (not 132 separate ones), so a new copy never holds up other
+        # people's uploads in the worker.
+        await enqueue_demo_portraits(tree.id)
     return tree
 
 

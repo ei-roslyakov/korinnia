@@ -3,6 +3,7 @@ import { Navigate, useLocation, useParams } from "react-router";
 
 import { Spinner } from "@/components/ui";
 import { useShareSession } from "@/features/share/api";
+import { useSessionExpired } from "@/lib/session";
 
 import { useMe } from "./api";
 
@@ -16,6 +17,7 @@ export function RequireAuth({
   superadmin?: boolean;
 }) {
   const me = useMe();
+  const expired = useSessionExpired();
   const location = useLocation();
   const { treeId } = useParams();
   const anonymous = me.isSuccess && !me.data;
@@ -28,6 +30,8 @@ export function RequireAuth({
     );
   }
   if (!me.data) {
+    // The session-expired popup covers the page and signs in again without leaving it.
+    if (expired) return <>{children}</>;
     if (!superadmin && treeId && shared.data?.tree_id === treeId) return <>{children}</>;
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}`} replace />;

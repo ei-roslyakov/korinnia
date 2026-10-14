@@ -56,7 +56,10 @@
     "mfaTitle": "Two-step verification",
     "mfaHint": "Enter the 6-digit code from your authenticator app, or one of your recovery codes.",
     "code": "Code",
-    "verify": "Verify"
+    "verify": "Verify",
+    "tryDemo": "Try the demo",
+    "demoHint": "Or sign in with {{email}} / {{password}}. Every visitor gets their own copy of a demo family for 30 minutes; nobody else sees your changes.",
+    "preparingDemo": "Preparing your demo family…"
   },
   "invite": {
     "title": "Join the family archive",
@@ -292,7 +295,11 @@
     "no_user_with_email": "No user with this email exists. Check the address, or ask an administrator to invite them.",
     "share_link_invalid": "This link has expired or was revoked.",
     "share_link_not_found": "Link not found.",
-    "cannot_create_trees": "You cannot create trees on this site. Ask an administrator."
+    "cannot_create_trees": "You cannot create trees on this site. Ask an administrator.",
+    "not_in_demo": "This is not available in the demo.",
+    "demo_session_fixed": "Demo sessions cannot be extended.",
+    "demo_busy": "The demo is busy right now. Please try again in a few minutes.",
+    "session_expired": "Your session has expired. Please sign in again."
   },
   "dates": {
     "approx": "about {{date}}",
@@ -1226,5 +1233,17 @@
   "help": {
     "contents": "Contents",
     "englishOnly": "The guide is not yet available in Polish; here it is in English."
+  },
+  "session": {
+    "endsIn": "Your session ends in {{time}}.",
+    "staySignedIn": "Stay signed in",
+    "demoEndsIn": "The demo ends in {{time}}. Your changes will be discarded.",
+    "expiredTitle": "Your session has expired",
+    "expiredHint": "For your security, enter the password for {{email}} to continue. This page stays open.",
+    "refresh": "Refresh session",
+    "demoEndedTitle": "The demo has ended",
+    "demoEndedHint": "Demo sessions last 30 minutes. Your demo copy and the changes you made are discarded. Start a new demo to continue exploring.",
+    "newDemo": "Start a new demo",
+    "demoBadge": "Demo · {{time}} left"
   }
 }

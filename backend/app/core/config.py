@@ -61,6 +61,23 @@ class Settings(BaseSettings):
     login_window_minutes: int = 15
     login_max_failures_per_email: int = 5
     login_max_failures_per_ip: int = 20
+    # A sign-in lasts this long; shortly before the end the app offers to extend it, after it
+    # the user signs in again (the page stays open). Access tokens never outlive the session.
+    session_timeout_minutes: int = 8 * 60
+
+    # --- Public demo login ----------------------------------------------------------
+    # Signing in with DEMO_LOGIN_EMAIL / DEMO_LOGIN_PASSWORD (or "Try the demo") creates a
+    # throwaway account with its own fresh copy of the demo family. Its session cannot be
+    # extended; when it ends, the account and everything in it are deleted.
+    demo_login_enabled: bool = False
+    demo_login_email: str = "demo@example.com"
+    demo_login_password: SecretStr = SecretStr("demo@example.com")
+    demo_session_timeout_minutes: int = 30
+    # Abuse limits: demo sign-ins per client IP per hour, and demo accounts alive at once.
+    demo_logins_per_ip_per_hour: int = 20
+    demo_max_active: int = 200
+    # Largest file a demo account may upload.
+    demo_max_upload_mb: int = 20
 
     # --- Bootstrap ----------------------------------------------------------------
     superadmin_email: str | None = None

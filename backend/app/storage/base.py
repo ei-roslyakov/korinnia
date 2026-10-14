@@ -96,6 +96,13 @@ class Storage(ABC):
     async def delete(self, key: str) -> None:
         """Delete an object. Missing objects are ignored."""
 
+    async def delete_prefix(self, prefix: str) -> int:
+        """Delete every object under `prefix` (a folder such as `originals/<tree>/`)."""
+        keys = [key async for key in self.list_keys(prefix)]
+        for key in keys:
+            await self.delete(key)
+        return len(keys)
+
     @abstractmethod
     def list_keys(self, prefix: str = "") -> AsyncIterator[str]:
         """Iterate over keys under a prefix (used by integrity checks and backups)."""

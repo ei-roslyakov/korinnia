@@ -44,6 +44,17 @@ async def get_current_user(request: Request, session: SessionDep) -> User:
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+async def require_real_account(user: CurrentUser) -> User:
+    """Refuse demo accounts: nothing that reaches other people (sharing) or outlives the
+    demo (two-step verification, passwords)."""
+    if user.is_sandbox:
+        raise PermissionDeniedError("not_in_demo")
+    return user
+
+
+RealAccount = Annotated[User, Depends(require_real_account)]
+
+
 def get_actor(request: Request, user: CurrentUser) -> Actor:
     return Actor(user, client_ip(request), request.headers.get("user-agent"))
 

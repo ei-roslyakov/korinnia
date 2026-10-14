@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from anyio import to_thread
 from fastapi import FastAPI
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
@@ -20,9 +22,17 @@ from app.jobs.app import app as procrastinate_app
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    warming: asyncio.Task[None] | None = None
+    if get_settings().demo_login_enabled:
+        # Draw the demo portraits in the background, so the first demo sign-in is quick.
+        from app.seed import warm_portraits
+
+        warming = asyncio.create_task(to_thread.run_sync(warm_portraits))
     # The API only enqueues jobs (media processing); the worker runs them.
     async with procrastinate_app.open_async():
         yield
+    if warming is not None and not warming.done():
+        warming.cancel()
     await get_engine().dispose()
 
 

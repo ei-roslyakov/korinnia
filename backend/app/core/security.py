@@ -71,6 +71,8 @@ class TokenPayload:
     exp: datetime
     jti: uuid.UUID | None = None
     fam: uuid.UUID | None = None
+    # End of the sign-in session (access tokens).
+    sx: datetime | None = None
 
 
 def _secret() -> str:
@@ -85,14 +87,21 @@ def create_token(
     jti: uuid.UUID | None = None,
     family_id: uuid.UUID | None = None,
     now: datetime | None = None,
+    session_expires_at: datetime | None = None,
 ) -> str:
+    """`session_expires_at` caps the token's lifetime and is carried as the `sx` claim."""
     issued = (now or utcnow()).replace(microsecond=0)
+    expires = issued + ttl
+    if session_expires_at is not None:
+        expires = min(expires, session_expires_at)
     claims: dict[str, Any] = {
         "sub": str(user_id),
         "type": token_type,
         "iat": int(issued.timestamp()),
-        "exp": int((issued + ttl).timestamp()),
+        "exp": int(expires.timestamp()),
     }
+    if session_expires_at is not None:
+        claims["sx"] = int(session_expires_at.timestamp())
     if jti:
         claims["jti"] = str(jti)
     if family_id:
@@ -122,6 +131,7 @@ def decode_token(token: str, expected_type: TokenType) -> TokenPayload:
             exp=datetime.fromtimestamp(claims["exp"], UTC),
             jti=uuid.UUID(claims["jti"]) if "jti" in claims else None,
             fam=uuid.UUID(claims["fam"]) if "fam" in claims else None,
+            sx=datetime.fromtimestamp(claims["sx"], UTC) if "sx" in claims else None,
         )
     except (ValueError, TypeError) as exc:
         raise TokenError("token_invalid") from exc
@@ -226,8 +236,10 @@ def _fernet(data_key: str | None, secret_key: str) -> MultiFernet:
 def _current_fernet() -> MultiFernet:
     settings = get_settings()
     data_key = settings.data_encryption_key
+    # An empty value (unset in docker compose) means "not set".
     return _fernet(
-        data_key.get_secret_value() if data_key else None, settings.secret_key.get_secret_value()
+        (data_key.get_secret_value() if data_key else "") or None,
+        settings.secret_key.get_secret_value(),
     )
 
 

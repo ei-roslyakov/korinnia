@@ -14,6 +14,7 @@ from app.jobs.tasks import (
     check_integrity,
     create_demo_tree,
     make_person_avatar,
+    process_demo_portraits,
     process_media_file,
     undo_gedcom,
 )
@@ -53,6 +54,17 @@ async def enqueue_demo_tree(user_id: uuid.UUID) -> None:
         pass
     except Exception:
         logger.exception("could not enqueue demo tree", extra={"user_id": str(user_id)})
+
+
+async def enqueue_demo_portraits(tree_id: uuid.UUID) -> None:
+    try:
+        await process_demo_portraits.configure(
+            queueing_lock=f"demo-portraits:{tree_id}"
+        ).defer_async(tree_id=str(tree_id))
+    except AlreadyEnqueued:
+        pass
+    except Exception:
+        logger.exception("could not enqueue demo portraits", extra={"tree_id": str(tree_id)})
 
 
 async def enqueue_integrity_check(run_id: uuid.UUID) -> None:

@@ -50,7 +50,7 @@ def link(path: str) -> str:
 async def list_users(
     session: AsyncSession, *, q: str | None, is_active: bool | None, limit: int, offset: int
 ) -> tuple[list[User], int]:
-    stmt = select(User)
+    stmt = select(User).where(User.is_sandbox.is_(False))  # demo accounts come and go
     if q:
         like = f"%{q.strip().lower()}%"
         stmt = stmt.where(

@@ -6,6 +6,8 @@ import { Button, Dialog, ErrorAlert, Field, Input } from "@/components/ui";
 import { useErrorMessage } from "@/lib/hooks";
 import type { Tree } from "@/lib/types";
 
+import { useMe } from "@/features/auth/api";
+
 import { useDeleteTree, useUpdateTree } from "./api";
 import { ShareTreeDialog } from "./ShareTreeDialog";
 
@@ -30,6 +32,7 @@ export function TreeActions({
   const errorMessage = useErrorMessage();
   const [renaming, setRenaming] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const me = useMe();
   if (tree.my_role !== "admin") return null;
 
   return (
@@ -39,14 +42,17 @@ export function TreeActions({
           {errorMessage(del.error)}
         </span>
       )}
-      <Button
-        variant="ghost"
-        className={buttonClassName}
-        aria-label={t("share.named", { name: tree.name })}
-        onClick={() => setSharing(true)}
-      >
-        {t("share.button")}
-      </Button>
+      {/* Demo accounts cannot share (their trees are discarded after the demo). */}
+      {!me.data?.is_sandbox && (
+        <Button
+          variant="ghost"
+          className={buttonClassName}
+          aria-label={t("share.named", { name: tree.name })}
+          onClick={() => setSharing(true)}
+        >
+          {t("share.button")}
+        </Button>
+      )}
       <Button
         variant="ghost"
         className={buttonClassName}

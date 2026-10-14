@@ -124,7 +124,8 @@ jobs:
           # Same settings as `make test-e2e`: the tests are written against the Ukrainian UI,
           # and test accounts don't need their own demo family.
           sed -i -e 's/^DEFAULT_LANGUAGE=.*/DEFAULT_LANGUAGE=uk/' \
-            -e 's/^DEMO_TREE_FOR_NEW_USERS=.*/DEMO_TREE_FOR_NEW_USERS=false/' .env
+            -e 's/^DEMO_TREE_FOR_NEW_USERS=.*/DEMO_TREE_FOR_NEW_USERS=false/' \
+            -e 's/^DEMO_LOGIN_ENABLED=.*/DEMO_LOGIN_ENABLED=true/' .env
           docker compose -f docker-compose.yml up -d --no-build --wait
           docker compose -f docker-compose.yml exec -T backend python -m app.seed
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0

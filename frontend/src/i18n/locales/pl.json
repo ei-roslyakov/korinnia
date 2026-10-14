@@ -56,7 +56,10 @@
     "mfaTitle": "Weryfikacja dwuetapowa",
     "mfaHint": "Wpisz 6-cyfrowy kod z aplikacji uwierzytelniającej lub jeden z kodów zapasowych.",
     "code": "Kod",
-    "verify": "Potwierdź"
+    "verify": "Potwierdź",
+    "tryDemo": "Wypróbuj demo",
+    "demoHint": "Lub zaloguj się jako {{email}} / {{password}}. Każdy odwiedzający dostaje własną kopię rodziny demo na 30 minut; nikt inny nie widzi Twoich zmian.",
+    "preparingDemo": "Przygotowujemy Twoją rodzinę demo…"
   },
   "invite": {
     "title": "Dołącz do archiwum rodzinnego",
@@ -296,7 +299,11 @@
     "no_user_with_email": "Nie ma użytkownika z takim adresem e-mail. Sprawdź adres lub poproś administratora o wysłanie zaproszenia.",
     "share_link_invalid": "Link wygasł lub został odwołany.",
     "share_link_not_found": "Nie znaleziono linku.",
-    "cannot_create_trees": "Nie możesz tworzyć drzew w tej witrynie. Poproś administratora."
+    "cannot_create_trees": "Nie możesz tworzyć drzew w tej witrynie. Poproś administratora.",
+    "not_in_demo": "To nie jest dostępne w demo.",
+    "demo_session_fixed": "Sesji demo nie można przedłużyć.",
+    "demo_busy": "Demo jest teraz przeciążone. Spróbuj ponownie za kilka minut.",
+    "session_expired": "Sesja wygasła. Zaloguj się ponownie."
   },
   "dates": {
     "approx": "ok. {{date}}",
@@ -1292,5 +1299,17 @@
   "help": {
     "contents": "Spis treści",
     "englishOnly": "Przewodnik nie jest jeszcze dostępny po polsku; oto wersja angielska."
+  },
+  "session": {
+    "endsIn": "Sesja wygaśnie za {{time}}.",
+    "staySignedIn": "Pozostań zalogowany",
+    "demoEndsIn": "Demo kończy się za {{time}}. Twoje zmiany zostaną usunięte.",
+    "expiredTitle": "Sesja wygasła",
+    "expiredHint": "Ze względów bezpieczeństwa wpisz hasło dla {{email}}, aby kontynuować. Strona pozostanie otwarta.",
+    "refresh": "Odśwież sesję",
+    "demoEndedTitle": "Demo się zakończyło",
+    "demoEndedHint": "Sesja demo trwa 30 minut. Twoja kopia demo i wprowadzone zmiany zostały usunięte. Rozpocznij nowe demo, aby dalej poznawać aplikację.",
+    "newDemo": "Rozpocznij nowe demo",
+    "demoBadge": "Demo · zostało {{time}}"
   }
 }

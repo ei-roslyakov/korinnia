@@ -33,6 +33,10 @@ class Me(Schema):
     is_superadmin: bool
     # Whether "New tree" / "Import GEDCOM" are available (superadmin, or allowed for this user).
     can_create_trees: bool = False
+    # A throwaway account from the public demo login (see services/demo_sessions).
+    is_sandbox: bool = False
+    # When this sign-in ends (the app warns before, then asks to sign in again).
+    session_expires_at: datetime | None = None
     totp_enabled: bool
     trees: list[MeTree]
     welcome_dismissed: bool = False

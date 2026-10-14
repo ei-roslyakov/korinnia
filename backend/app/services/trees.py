@@ -152,6 +152,7 @@ async def list_all_trees(
         select(Tree, owner, members)
         .outerjoin(owner, owner.id == Tree.owner_id)
         .where(Tree.deleted_at.is_not(None) if deleted else Tree.deleted_at.is_(None))
+        .where(or_(owner.id.is_(None), owner.is_sandbox.is_(False)))  # public demo copies
     )
     if q:
         like = f"%{q.strip().lower()}%"

@@ -32,6 +32,27 @@ export function useLogin() {
   });
 }
 
+/** "Try the demo": a fresh demo account with its own copy of the demo family. */
+export function useDemoLogin() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<LoginResponse>("/api/v1/auth/demo"),
+    onSuccess: (data) => {
+      qc.clear();
+      if (data.user) qc.setQueryData(ME_KEY, data.user);
+    },
+  });
+}
+
+/** "Stay signed in": the session gets a full timeout from now (not for demo accounts). */
+export function useExtendSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<Me>("/api/v1/auth/session/extend"),
+    onSuccess: (me) => qc.setQueryData(ME_KEY, me),
+  });
+}
+
 export function useLoginMfa() {
   const qc = useQueryClient();
   return useMutation({

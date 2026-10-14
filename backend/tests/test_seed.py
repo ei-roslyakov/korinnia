@@ -51,8 +51,8 @@ async def test_seed_creates_demo_family(
     assert all(p.primary_photo_id and p.primary_photo_crop for p in people)
     assert await count(MediaFile) == n
     tasks = [j["task_name"] for j in job_queue.jobs.values()]
-    assert tasks.count("media.process") == n
-    assert tasks.count("media.avatar") == n
+    # Previews and portraits come from one job per copy.
+    assert tasks.count("demo.portraits") == 1
 
     # Seeded data is coherent: no implausibility warnings anywhere.
     for person in await session.scalars(select(Person).where(Person.tree_id == tree.id)):

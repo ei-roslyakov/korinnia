@@ -50,11 +50,20 @@ for genealogy in (
     api_router.include_router(genealogy.router)
 
 
+class DemoLogin(BaseModel):
+    """The public demo credentials (meant to be published)."""
+
+    email: str
+    password: str
+
+
 class MetaInfo(BaseModel):
     name: str
     version: str
     environment: str
     default_language: Language
+    # Shown on the sign-in page when DEMO_LOGIN_ENABLED.
+    demo_login: DemoLogin | None = None
 
 
 @api_router.get("/meta", response_model=MetaInfo, tags=["meta"])
@@ -65,4 +74,10 @@ async def meta(settings: Annotated[Settings, Depends(get_settings)]) -> MetaInfo
         version=settings.app_version,
         environment=settings.environment,
         default_language=settings.default_language,
+        demo_login=DemoLogin(
+            email=settings.demo_login_email,
+            password=settings.demo_login_password.get_secret_value(),
+        )
+        if settings.demo_login_enabled
+        else None,
     )
