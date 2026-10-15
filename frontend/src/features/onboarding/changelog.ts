@@ -13,6 +13,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-15.2",
+    items: {
+      en: [
+        "Names and years on the tree grow smoothly as you zoom out, instead of jumping in size.",
+      ],
+      uk: ["Імена й роки на дереві плавно більшають під час віддалення, а не стрибком."],
+      pl: ["Imiona i lata na drzewie płynnie rosną podczas oddalania, zamiast skakać rozmiarem."],
+    },
+  },
+  {
     id: "2026-10-15",
     items: {
       en: [

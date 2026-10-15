@@ -4,6 +4,11 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-15
 
+- **Card text grows smoothly when zooming out (D107)** — owner: "font changes while zooming".
+  The jump to larger type at 45 % is replaced by a gradual scale: below 70 % zoom the name and
+  years grow up to 1.35× (`cardTextScale` in `detail.ts`), applied through the CSS variable
+  `--k-card-text` set by `CardTextScale` on the canvas (no card re-renders). Name and years
+  stay sans-serif at every zoom. Lint, tests, E2E green.
 - **Cards keep portraits and years when zoomed out (D107)** — owner: "at the default zoom we
   see only names". Name-only cards now below 15 % zoom (was 45 %); 15–45 % show portrait,
   name and years in larger type, and the builder's "+" buttons. The demo tree opens at ~30 %

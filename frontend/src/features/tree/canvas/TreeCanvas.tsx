@@ -41,7 +41,7 @@ import {
 import { edgeTypes } from "./edgeTypes";
 import { exportFileName, exportTree, type ExportFormat } from "./exportTree";
 import { FullDetail } from "./detail";
-import { COUPLE_HEIGHT, type CoupleFlowNode } from "./nodes";
+import { CardTextScale, COUPLE_HEIGHT, type CoupleFlowNode } from "./nodes";
 import { separate } from "./overlap";
 import { GedcomExportDialog } from "../GedcomExportDialog";
 import { computeLayout } from "./layout";
@@ -693,6 +693,7 @@ function CanvasInner({
         fitViewOptions={{ padding: 0.15, maxZoom: 1.2 }}
       >
         <Background gap={24} color="var(--k-canvas-dots)" bgColor="transparent" />
+        <CardTextScale />
         {exportTitle && (
           <Panel position="top-right">
             <div
