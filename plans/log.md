@@ -2,6 +2,19 @@
 
 Newest first. One entry per finished task: what changed, why, commit, anything left open.
 
+## 2026-10-15
+
+- **Cards keep portraits and years when zoomed out (D107)** — owner: "at the default zoom we
+  see only names". Name-only cards now below 15 % zoom (was 45 %); 15–45 % show portrait,
+  name and years in larger type, and the builder's "+" buttons. The demo tree opens at ~30 %
+  and now shows portraits. This was also the CI end-to-end failure of 5ef0d46 (builder test:
+  "Додати дитину" missing because the card was name-only). E2E 27 × 3 green locally.
+  Not re-measured with `make perf` (2,000-person whole tree stays below 15 %, name-only).
+- **Production outage 2026-10-15 morning** — cluster-side: Kubernetes API unresponsive and the
+  app could not reach PostgreSQL (sign-in hung, readyz 524); recovered by itself. CNPG operator
+  restarted ~5 h before (15 restarts in total), worker restarted once. Cause not found (logs
+  gone); check the control-plane node's disk / memory if it recurs.
+
 ## 2026-10-14
 
 - **Session timeout + public demo login (D105, D106)** — owner's request: a shared demo login

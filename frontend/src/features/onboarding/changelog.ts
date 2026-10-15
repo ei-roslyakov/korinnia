@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-15",
+    items: {
+      en: [
+        "The tree shows portraits and life years again when it opens: cards switch to names only just when a very large tree is zoomed far out.",
+      ],
+      uk: [
+        "Родовід знову відкривається з портретами й роками життя: лише ім'я картки показують тільки тоді, коли дуже великий родовід сильно віддалено.",
+      ],
+      pl: [
+        "Drzewo znów otwiera się z portretami i latami życia: same imiona karty pokazują dopiero wtedy, gdy bardzo duże drzewo jest mocno oddalone.",
+      ],
+    },
+  },
+  {
     id: "2026-10-14",
     items: {
       en: [

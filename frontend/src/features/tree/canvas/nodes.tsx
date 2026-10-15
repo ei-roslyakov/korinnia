@@ -6,7 +6,7 @@ import { Avatar } from "@/features/person/Avatar";
 import { formatPartialDate, lifeYears } from "@/lib/dates";
 import type { PersonSummary, RelativeRelation } from "@/lib/genealogy";
 
-import { DETAIL_ZOOM, FullDetail } from "./detail";
+import { DETAIL_ZOOM, FullDetail, NAME_ONLY_ZOOM } from "./detail";
 import { FAMILY_SIZE, PERSON_HEIGHT, PERSON_WIDTH } from "./familyGraph";
 import { BRANCH, GROUND_HEIGHT, seeded, TRUNK_REACH, type TreeStyle } from "./treeStyle";
 
@@ -30,14 +30,18 @@ const ACCENT: Record<string, string> = {
   unknown: "border-l-stone-400",
 };
 
-const farSelector = (s: { transform: [number, number, number] }) => s.transform[2] < DETAIL_ZOOM;
+/** 0: name only, 1: card with larger type, 2: full detail (re-renders only on a change). */
+const detailSelector = (s: { transform: [number, number, number] }) =>
+  s.transform[2] < NAME_ONLY_ZOOM ? 0 : s.transform[2] < DETAIL_ZOOM ? 1 : 2;
 
 export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
   const { t } = useTranslation();
   const { person, highlighted, hiddenUp, hiddenDown, onAdd } = data;
-  const zoomedOut = useStore(farSelector);
+  const zoomLevel = useStore(detailSelector);
   const fullDetail = useContext(FullDetail);
-  const far = zoomedOut && !fullDetail;
+  const level = fullDetail ? 2 : zoomLevel;
+  const far = level === 0;
+  const large = level === 1;
   // The hover preview is only built while the pointer is over the card.
   const [hover, setHover] = useState(false);
   const ring = highlighted || selected ? "ring-2 ring-leaf-600" : "";
@@ -72,8 +76,12 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
       <Handle type="target" position={Position.Bottom} className={hidden} isConnectable={false} />
       <Avatar name={person.display_name} gender={person.gender} url={person.avatar_url} size="md" />
       <div className="min-w-0">
-        <div className="line-clamp-2 text-sm leading-tight font-medium">{person.display_name}</div>
-        <div className="text-bark-700 text-xs">
+        <div
+          className={`line-clamp-2 leading-tight ${large ? "font-serif text-lg font-semibold" : "text-sm font-medium"}`}
+        >
+          {person.display_name}
+        </div>
+        <div className={`text-bark-700 ${large ? "text-sm" : "text-xs"}`}>
           {lifeYears(person.birth, person.death, person.is_living)}
           {died && person.death && (
             <span className="ml-1" aria-hidden="true">

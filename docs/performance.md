@@ -26,8 +26,9 @@ Playwright / Chromium (1440×900). Run on a developer laptop (Docker Desktop), 2
 
 Changes made because of these measurements (D97):
 
-- Cards are drawn simply (name only) when zoomed out below 45 %, and the hover preview is only
-  built while hovering: the whole 2,000-person tree went from 2.4 s to 1.5 s, the longest task
+- Cards are drawn simply (name only) when zoomed out far, and the hover preview is only
+  built while hovering (the threshold was 45 % at first; since 2026-10-15 it is 15 %, so
+  trees of a few dozen people open with portraits and years, D107): the whole 2,000-person tree went from 2.4 s to 1.5 s, the longest task
   from 764 ms to 284 ms, panning from 44 to 50 fps, memory from 179 MB to 111 MB.
 - GEDCOM export no longer scans every family for every person: 1.1 s → 0.17 s at 2,000 people,
   6.3 s → 0.43 s at 5,000.
