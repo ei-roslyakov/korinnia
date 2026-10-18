@@ -1002,7 +1002,8 @@
     "night": "Night (glass)"
   },
   "footer": {
-    "rights": "All rights reserved",
+    "license": "Licensed under AGPL-3.0",
+    "source": "Source code",
     "thirdParty": "Third-party licences",
     "version": "App version",
     "guide": "Getting started",

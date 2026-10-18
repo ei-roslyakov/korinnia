@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-18",
+    items: {
+      en: [
+        "Korinnia is now free software under the AGPL-3.0 licence. The footer links the licence and the source code.",
+      ],
+      uk: [
+        "Korinnia тепер вільне програмне забезпечення під ліцензією AGPL-3.0. Унизу сторінки є посилання на ліцензію та вихідний код.",
+      ],
+      pl: [
+        "Korinnia jest teraz wolnym oprogramowaniem na licencji AGPL-3.0. Stopka zawiera odnośniki do licencji i kodu źródłowego.",
+      ],
+    },
+  },
+  {
     id: "2026-10-15.2",
     items: {
       en: [

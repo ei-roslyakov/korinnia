@@ -4,6 +4,35 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
 
 ## 2026-10-18
 
+- **GitHub repo settings (via gh, repo still private)** — description, website korinnia.app,
+  topics; Dependabot alerts + security fixes on; squash merge only, delete branch on merge;
+  Projects off; Actions limited to GitHub-owned + `astral-sh/setup-uv`, `azure/setup-helm`,
+  `docker/{build-push,login,setup-buildx}-action`, with SHA pinning required. A new third-party
+  action must be added to that allowlist (Settings → Actions) or workflows fail. Private
+  vulnerability reporting could not be enabled while private (404). After going public: fork PR
+  approval for all external contributors, private vulnerability reporting, secret scanning +
+  push protection, ruleset for `main` (PR + CI, no force-push, owner bypass).
+
+- **korinnia.rosliakov.club dropped from the docs** — the app moved to korinnia.app. README says
+  the demo is available at korinnia.app; SECURITY.md and the roadmap name only korinnia.app.
+  Not committed.
+
+- **PR template, CODEOWNERS, SECURITY.md, CONTRIBUTING.md** — owner: prepare for a public repo.
+  PR template: short checklist + AGPL contribution checkbox (keeps the option of other terms,
+  D109). CODEOWNERS `* @ei-roslyakov`. SECURITY.md: private vulnerability reporting via GitHub,
+  demo-only testing on korinnia.app. CONTRIBUTING.md: issue first, checks, licence of
+  contributions. Linked from the README. Open: enable private vulnerability reporting and protect
+  `main` (PR + CI, code-owner review) once public. Not committed.
+
+- **AGPL-3.0 licence; CI on GitHub-hosted runners (D109)** — owner: open the repo under AGPL-3.0,
+  CI to `ubuntu-latest`. `LICENSE` is the unmodified GNU AGPL-3.0 text; `AGPL-3.0-only` in
+  `pyproject.toml` and `package.json` (+ lock); README licence section, third-party notices header
+  (script + generated file); footer: "Licensed under AGPL-3.0" links to `LICENSE`, new
+  "Source code" link to GitHub (`footer.rights` → `footer.license`, `footer.source`, en/uk/pl);
+  "What's new" entry; D85 marked superseded. `ci.yml`: all jobs `ubuntu-latest`, dropped the
+  compose setup step the ARC image needed. Open: delete the korinnia ARC runner set in sandbox;
+  "Require approval for outside collaborators" in Actions settings. Not committed.
+
 - **Releases by hand; Argo CD Application moved to the infrastructure repo (D108)** — owner: no
   cluster details in the repo before it goes public; "automatically should run only CI", images
   published when a release is created by hand, on ubuntu runners; the owner updates the app in
@@ -14,6 +43,17 @@ Newest first. One entry per finished task: what changed, why, commit, anything l
   `APP_VERSION`, Helm chart). CI lost its leftover GHCR login and `packages: write`. Open: remove
   the old read-only korinnia deploy key, and in sandbox the repo secret for it and its SSM
   parameter. The old file stays in git history.
+
+## 2026-10-17
+
+- **README rewritten for a public repository** — owner: prepare the repo to be opened. README is
+  now a short overview (highlights, demo link, quick start, stack, roadmap of planned work only,
+  docs, licence); no phase numbers or ✅ lists. Details moved to new `docs/features.md` (full
+  list of what works), `docs/architecture.md` (diagram, stack, structure), `docs/development.md`
+  and `docs/self-hosting.md` (production, Helm, env vars, operator CLI, backups). CLAUDE.md and
+  plans now point feature upkeep at `docs/features.md` + README Roadmap. Not committed.
+  Open before going public: licence choice, self-hosted runners on a public repo, infra details
+  in `deploy/argocd/` and `plans/` (see roadmap "Before opening the repo").
 
 ## 2026-10-15
 

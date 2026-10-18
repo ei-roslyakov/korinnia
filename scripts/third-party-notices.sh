@@ -35,7 +35,7 @@ docker compose run --rm --no-deps -T backend sh -c '
   echo "Korinnia: third-party software notices"
   echo "======================================="
   echo
-  echo "Korinnia is Copyright (c) 2026 Yevhenii Rosliakov. All rights reserved."
+  echo "Korinnia is Copyright (c) 2026 Yevhenii Rosliakov, licensed under the GNU AGPL-3.0 (see LICENSE)."
   echo "It includes the following open-source components, each under its own licence."
   echo "Map data (c) OpenStreetMap contributors (ODbL), shown on the map itself."
   echo

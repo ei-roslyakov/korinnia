@@ -19,6 +19,8 @@ import { versionLabel } from "@/lib/version";
 const FIRST_YEAR = 2026;
 const THIS_YEAR = new Date().getFullYear();
 const COPYRIGHT_YEARS = THIS_YEAR > FIRST_YEAR ? `${FIRST_YEAR}–${THIS_YEAR}` : `${FIRST_YEAR}`;
+// AGPL-3.0 §13: users of the running app are offered its source.
+const SOURCE_URL = "https://github.com/ei-roslyakov/korinnia";
 
 export function Layout() {
   const { t, i18n } = useTranslation();
@@ -126,7 +128,10 @@ export function Layout() {
         <footer className="border-bark-100 text-bark-700 border-t print:hidden">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs">
             <span>
-              © {COPYRIGHT_YEARS} Yevhenii Rosliakov · {t("app.name")} · {t("footer.rights")}
+              © {COPYRIGHT_YEARS} Yevhenii Rosliakov · {t("app.name")} ·{" "}
+              <a href={`${SOURCE_URL}/blob/main/LICENSE`} className="hover:text-bark-900 underline">
+                {t("footer.license")}
+              </a>
             </span>
             <span className="flex flex-wrap items-center gap-3">
               {me.data && (
@@ -155,6 +160,9 @@ export function Layout() {
               </span>
               <a href="/third-party-notices.txt" className="hover:text-bark-900 underline">
                 {t("footer.thirdParty")}
+              </a>
+              <a href={SOURCE_URL} className="hover:text-bark-900 underline">
+                {t("footer.source")}
               </a>
             </span>
           </div>

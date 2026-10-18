@@ -1,7 +1,7 @@
 Korinnia: third-party software notices
 =======================================
 
-Korinnia is Copyright (c) 2026 Yevhenii Rosliakov. All rights reserved.
+Korinnia is Copyright (c) 2026 Yevhenii Rosliakov, licensed under the GNU AGPL-3.0 (see LICENSE).
 It includes the following open-source components, each under its own licence.
 Map data (c) OpenStreetMap contributors (ODbL), shown on the map itself.
 

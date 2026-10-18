@@ -17,7 +17,8 @@ Self-hosted family archive and interactive family tree (FastAPI + PostgreSQL + R
   `frontend/src/features/onboarding/changelog.ts` — users see it in "What's new" at sign-in.
   If it changes how the app is used, update the user guide (`frontend/src/features/help/guide.uk.md`
   and `guide.en.md`, same sections) and check the welcome guide (`welcome.*` strings).
-- Keep the existing docs current too: README feature statuses (✅ / 🚧 / 📋), a new D-number in
+- Keep the existing docs current too: `docs/features.md` (what works) and the README Roadmap
+  (what is planned; drop items once done), a new D-number in
   `docs/decisions.md` for design decisions, `docs/data-schema.md` for schema changes.
 
 ## Working rules

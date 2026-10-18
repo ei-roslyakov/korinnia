@@ -26,7 +26,7 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 
 ## Live deployment
 
-- Production: https://korinnia.app (also korinnia.rosliakov.club), deployed by Argo CD from an
+- Production: https://korinnia.app, deployed by Argo CD from an
   Application in the infrastructure repo (sandbox), not in this repo (D108).
 - Pushes to `main` and pull requests run **CI** only; nothing deploys automatically.
 - Releasing: create a GitHub release by hand (tag vX.Y.Z on main). The **Publish** workflow
@@ -96,6 +96,23 @@ and reveals other families' trees):
   people, relationships, dates, places and stories for an editor to review before saving
 - Optional, after all phases: letters to descendants (sealed until a date), duplicate detection and
   merge, PWA
+
+## Before opening the repo (2026-10-17)
+
+README and docs are ready for the public. Still to decide / do (see log 2026-10-17):
+
+- ✅ Licence: AGPL-3.0 (D109, 2026-10-18).
+- ✅ CI on GitHub-hosted runners (`ubuntu-latest`), 2026-10-18. Still to do: delete the
+  `korinnia-runners` ARC runner set in sandbox, and set "Require approval for all outside
+  collaborators" for fork PRs in the repo's Actions settings.
+- ✅ `deploy/argocd/` moved to the infrastructure repo, updated there by hand (D108, 2026-10-18).
+  Still in git history.
+- ✅ PR template, CODEOWNERS, SECURITY.md, CONTRIBUTING.md (2026-10-18). After going public:
+  enable private vulnerability reporting (Settings → Security) and protect `main`.
+- ✅ Repo settings applied while private (2026-10-18, see log). After going public: fork PR
+  approval, private vulnerability reporting, secret scanning + push protection, `main` ruleset.
+- `plans/` (log with outage notes, infra details, "owner:" quotes) and `CLAUDE.md` become public.
+- Git history: no real secrets found (gitleaks / trufflehog, 2026-10-17); only test passwords.
 
 ## Open issues and things to keep in mind
 

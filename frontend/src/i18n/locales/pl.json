@@ -1026,7 +1026,8 @@
     "night": "Noc (szkło)"
   },
   "footer": {
-    "rights": "Wszelkie prawa zastrzeżone",
+    "license": "Licencja AGPL-3.0",
+    "source": "Kod źródłowy",
     "thirdParty": "Licencje komponentów zewnętrznych",
     "version": "Wersja aplikacji",
     "guide": "Jak zacząć",

@@ -10,7 +10,8 @@ Working notes so that any new session (human or AI) can pick up where the last o
 
 Other documents stay where they are and are not repeated here:
 
-- `README.md` — feature list with ✅ / 🚧 / 📋 statuses, setup, commands
+- `README.md` — public overview, quick start, roadmap of planned features
+- `docs/features.md` — full list of what works; `docs/development.md`, `docs/self-hosting.md`, `docs/architecture.md`
 - `docs/decisions.md` — numbered design decisions (D1…); the reasoning behind choices
 - `docs/data-schema.md` — tables and columns
 - `docs/backup-restore.md`, `docs/user-guide.md`

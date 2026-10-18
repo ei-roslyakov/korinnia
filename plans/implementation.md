@@ -96,7 +96,8 @@ plans/            this folder
 - Demo family for every new user (66 people, 7 generations, several root families, biographies,
   illustrated portraits); `make seed` grows older copies into the current version. (D91)
   (D78, D79)
-- Licence "All rights reserved", footer with copyright, app version and third-party notices. (D85)
+- Licence AGPL-3.0 (D109; was "All rights reserved"), footer with copyright, licence and source
+  links, app version and third-party notices. (D85)
 - Kubernetes: Helm chart, GHCR images, Argo CD; media volume permission fix. (D87) Images and
   chart are published by the Publish workflow when a GitHub release is created by hand. (D108)
 - Tree management: tree admins rename/delete trees from the tree list, the builder toolbar or tree
@@ -110,8 +111,10 @@ plans/            this folder
 - Every change goes through services and is written to the audit log; deletes are soft deletes.
 - New UI strings go into all three locale files (a test checks parity); E2E tests use the
   Ukrainian UI (`DEFAULT_LANGUAGE=uk`).
-- New decisions get the next D-number in `docs/decisions.md`; README feature statuses are kept
-  current; schema changes go into `docs/data-schema.md`.
+- New decisions get the next D-number in `docs/decisions.md`; `docs/features.md` and the README
+  Roadmap are kept current; schema changes go into `docs/data-schema.md`.
+- GitHub Actions: only allowlisted actions, pinned by SHA (repo setting). A new third-party
+  action must be added under Settings → Actions → General first.
 - Commands: `make up`, `make lint`, `make test`, `make test-e2e`, `make fmt`, `make seed`,
   `make notices`, `make backup` / `make restore`. Dev login: `admin@example.com` /
   `change-me-now-please`.
