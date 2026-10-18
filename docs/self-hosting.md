@@ -36,6 +36,10 @@ The chart uses the images of its own version by default. Every setting is docume
 CloudNativePG cluster) and a ReadWriteMany volume for media. To build the images yourself, use
 `backend/Dockerfile` and `deploy/nginx/Dockerfile` with target `prod`.
 
+The chart can also create NetworkPolicies (`networkPolicies` in `values.yaml`); it ships none, so
+you define them for your cluster. The app only needs: ingress controller -> nginx :80, nginx ->
+backend :8000, backend and worker -> PostgreSQL, and DNS. It makes no other outbound connections.
+
 ## Configuration
 
 All settings are environment variables; the full list with comments is in

@@ -1,0 +1,43 @@
+{{- /*
+One NetworkPolicy per entry of .Values.networkPolicies (name suffix -> spec); the chart defines none
+itself. Pods are picked by `components` (this release's pods of those components), by a plain
+`podSelector`, or, with neither, every pod in the namespace.
+*/ -}}
+{{- range $name, $np := .Values.networkPolicies }}
+{{- if $np }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ printf "%s-%s" (include "korinnia.fullname" $) $name | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "korinnia.labels" $ | nindent 4 }}
+spec:
+  podSelector:
+    {{- if $np.components }}
+    matchLabels:
+      app.kubernetes.io/name: {{ include "korinnia.name" $ }}
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          {{- toYaml $np.components | nindent 10 }}
+    {{- else if $np.podSelector }}
+    {{- toYaml $np.podSelector | nindent 4 }}
+    {{- else }} {}
+    {{- end }}
+  {{- with $np.policyTypes }}
+  policyTypes:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if hasKey $np "ingress" }}
+  ingress:
+    {{- toYaml $np.ingress | nindent 4 }}
+  {{- end }}
+  {{- if hasKey $np "egress" }}
+  egress:
+    {{- toYaml $np.egress | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}

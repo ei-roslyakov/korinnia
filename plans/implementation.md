@@ -99,7 +99,8 @@ plans/            this folder
 - Licence AGPL-3.0 (D109; was "All rights reserved"), footer with copyright, licence and source
   links, app version and third-party notices. (D85)
 - Kubernetes: Helm chart, GHCR images, Argo CD; media volume permission fix. (D87) Images and
-  chart are published by the Publish workflow when a GitHub release is created by hand. (D108)
+  chart are published by the Publish workflow when a GitHub release is created by hand. (D108) The chart
+  renders NetworkPolicies from values (none by default; production's are in the Argo CD app).
 - Tree management: tree admins rename/delete trees from the tree list, the builder toolbar or tree
   settings; superadmin "Trees" tab lists every tree and restores deleted ones; person delete from
   the builder side panel. (D86)

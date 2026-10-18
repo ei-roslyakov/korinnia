@@ -129,3 +129,38 @@ ingress:
   tls: []
   #  - secretName: korinnia-tls
   #    hosts: [korinnia.example.com]
+
+# --- Network policies -------------------------------------------------------------------
+# None by default: each entry becomes a NetworkPolicy named <fullname>-<key>. Select pods with
+# `components` (backend, worker, nginx of this release) or a plain `podSelector`; neither selects
+# every pod in the namespace. policyTypes, ingress and egress are the NetworkPolicy fields as is.
+# Needs a CNI that enforces NetworkPolicy (e.g. Cilium, Calico; not Flannel).
+networkPolicies: {}
+#  default-deny:
+#    policyTypes: [Ingress, Egress]
+#  dns:
+#    policyTypes: [Egress]
+#    egress:
+#      - to:
+#          - namespaceSelector:
+#              matchLabels: {kubernetes.io/metadata.name: kube-system}
+#            podSelector:
+#              matchLabels: {k8s-app: kube-dns}
+#        ports:
+#          - {protocol: UDP, port: 53}
+#          - {protocol: TCP, port: 53}
+#  nginx:
+#    components: [nginx]
+#    policyTypes: [Ingress, Egress]
+#    ingress:
+#      - from:
+#          - namespaceSelector:
+#              matchLabels: {kubernetes.io/metadata.name: ingress-nginx}
+#        ports:
+#          - {protocol: TCP, port: 80}
+#    egress:
+#      - to:
+#          - podSelector:
+#              matchLabels: {app.kubernetes.io/component: backend}
+#        ports:
+#          - {protocol: TCP, port: 8000}
