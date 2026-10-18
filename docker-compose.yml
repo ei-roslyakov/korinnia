@@ -77,8 +77,8 @@ services:
       WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
     volumes:
       - media:/data/media
-    healthcheck:
-      disable: true
+    # No healthcheck (the image defines none), so `up --wait` waits for "running". An explicit
+    # `healthcheck: disable: true` makes Compose v2 fail --wait ("has no healthcheck configured").
     depends_on:
       backend:  # backend applies migrations (incl. the job queue schema) first
         condition: service_healthy
