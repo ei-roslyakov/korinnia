@@ -120,6 +120,9 @@ Still to do:
   (owner sets the visibility in each package's settings; `docs/self-hosting.md` already says
   public). Afterwards the image pull secret `infra-k8s-001-korinnia-ghcr-pull` in sandbox is no
   longer needed.
+- Pod hardening in the chart (D110), next release: non-root nginx, read-only root, no
+  capabilities, no ServiceAccount token. Production can then label its namespace Pod Security
+  `enforce: baseline` (+ `warn/audit: restricted`); `restricted` needs `fixPermissions: false`.
 
 ## Open issues and things to keep in mind
 

@@ -19,6 +19,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      automountServiceAccountToken: {{ .Values.automountServiceAccountToken }}
+      enableServiceLinks: false
+      # nginx runs unprivileged and still listens on port 80 (a namespaced, "safe" sysctl).
+      securityContext:
+        {{- toYaml (merge (dict "sysctls" (list (dict "name" "net.ipv4.ip_unprivileged_port_start" "value" "0"))) .Values.podSecurityContext) | nindent 8 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -46,6 +51,8 @@ spec:
               path: /nginx-health
               port: http
             periodSeconds: 20
+          securityContext:
+            {{- include "korinnia.securityContext" (list . 101) | nindent 12 }}
           resources:
             {{- toYaml .Values.nginx.resources | nindent 12 }}
           volumeMounts:
@@ -53,8 +60,15 @@ spec:
             - name: media
               mountPath: /data/media
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            # Written at start-up from /etc/nginx/templates.
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
       volumes:
         {{- include "korinnia.mediaVolume" . | nindent 8 }}
+        - name: nginx-conf
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

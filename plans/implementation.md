@@ -101,6 +101,9 @@ plans/            this folder
 - Kubernetes: Helm chart, GHCR images, Argo CD; media volume permission fix. (D87) Images and
   chart are published by the Publish workflow when a GitHub release is created by hand. (D108) The chart
   renders NetworkPolicies from values (none by default; production's are in the Argo CD app).
+  Pods are hardened by default: non-root (backend/worker uid 1000, nginx uid 101 still on port 80
+  via the `ip_unprivileged_port_start` sysctl), read-only root with `/tmp` emptyDirs, all
+  capabilities dropped, RuntimeDefault seccomp, no ServiceAccount token. (D110)
 - Tree management: tree admins rename/delete trees from the tree list, the builder toolbar or tree
   settings; superadmin "Trees" tab lists every tree and restores deleted ones; person delete from
   the builder side panel. (D86)

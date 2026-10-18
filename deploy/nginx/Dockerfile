@@ -23,7 +23,11 @@ COPY deploy/nginx/snippets/ /etc/nginx/snippets/
 COPY deploy/nginx/templates/ /etc/nginx/templates/
 ENV NGINX_MAX_BODY_SIZE=2048m \
     NGINX_BACKEND_UPSTREAM=backend:8000
-RUN mkdir -p /usr/share/nginx/html
+RUN mkdir -p /usr/share/nginx/html \
+ && chown nginx:nginx /etc/nginx/conf.d
+# Unprivileged (uid 101). Listening on port 80 still works: Docker and the Helm chart set
+# net.ipv4.ip_unprivileged_port_start=0. conf.d is written at start-up from the templates.
+USER 101
 HEALTHCHECK --interval=15s --timeout=3s --retries=5 CMD wget -qO- http://127.0.0.1/nginx-health || exit 1
 
 # --- prod: base + built static frontend

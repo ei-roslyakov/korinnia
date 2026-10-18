@@ -20,6 +20,8 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      automountServiceAccountToken: {{ .Values.automountServiceAccountToken }}
+      enableServiceLinks: false
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -38,11 +40,15 @@ spec:
                 name: {{ include "korinnia.fullname" . }}-config
           env:
             {{- include "korinnia.backendEnv" . | nindent 12 }}
+          securityContext:
+            {{- include "korinnia.securityContext" (list . 1000) | nindent 12 }}
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}
           volumeMounts:
             - name: media
               mountPath: /data/media
+            - name: tmp
+              mountPath: /tmp
       volumes:
         {{- include "korinnia.mediaVolume" . | nindent 8 }}
       {{- with .Values.nodeSelector }}

@@ -109,6 +109,20 @@ nginx:
 podSecurityContext:
   fsGroup: 1000
   fsGroupChangePolicy: OnRootMismatch
+  seccompProfile:
+    type: RuntimeDefault
+
+# Every app container (backend, worker, nginx). Each also runs as its image's user: 1000 for
+# backend and worker, 101 for nginx. Writable paths are emptyDirs (/tmp; nginx also conf.d).
+securityContext:
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: [ALL]
+
+# The app never calls the Kubernetes API.
+automountServiceAccountToken: false
 
 nodeSelector: {}
 tolerations: []

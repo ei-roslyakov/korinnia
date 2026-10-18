@@ -40,6 +40,11 @@ The chart can also create NetworkPolicies (`networkPolicies` in `values.yaml`); 
 you define them for your cluster. The app only needs: ingress controller -> nginx :80, nginx ->
 backend :8000, backend and worker -> PostgreSQL, and DNS. It makes no other outbound connections.
 
+Pods run hardened by default (`securityContext` in `values.yaml`): non-root, read-only root
+filesystem, no capabilities, RuntimeDefault seccomp, no ServiceAccount token. They meet Pod Security
+"restricted" except the `media-permissions` init container, which runs as root while
+`persistence.fixPermissions` is on; turn it off if your storage keeps the volume writable for gid 1000.
+
 ## Configuration
 
 All settings are environment variables; the full list with comments is in
