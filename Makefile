@@ -67,7 +67,7 @@ notices: ## Regenerate third-party licence notices (frontend/public/third-party-
 	sh scripts/third-party-notices.sh
 
 .PHONY: seed
-seed: ## Give every user their own demo family (25 people, 5 generations)
+seed: ## Give every user their own demo family (66 people, 7 generations)
 	$(COMPOSE) exec backend python -m app.seed --all-users
 
 # --- Quality ----------------------------------------------------------------------------

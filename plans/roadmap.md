@@ -105,16 +105,21 @@ SECURITY.md / CONTRIBUTING.md, repo settings (topics, Dependabot alerts + fixes,
 Actions allowlist with SHA pinning). Git history: no real secrets (gitleaks / trufflehog); the old
 Argo CD file stays in history. `plans/` and `CLAUDE.md` stay public (README "How it's built").
 
+**Public since 2026-10-18.** Then enabled: fork PR approval for all external contributors, private
+vulnerability reporting, secret scanning + push protection, ruleset `main` (PR with code-owner
+review, squash only, the four CI checks, no force-push or deletion; repository admins bypass, so
+the owner can still push directly).
+
 Still to do:
 
-- sandbox: delete the `korinnia-runners` ARC runner set
-  (`apps/namespaces/deploy-tools/helmReleases/arc-runner-set-korinnia.yaml`), the Argo CD repo
-  credential for korinnia (`infra-k8s-001-argo-main-korinnia-repo`) and its SSM parameter, and
-  the old `korinnia.rosliakov.club` ingress host.
-- Decide whether the GHCR images and chart become public (then update `docs/self-hosting.md`).
-- Only when the owner asks: make the repo public, then enable fork PR approval for all external
-  contributors, private vulnerability reporting, secret scanning + push protection, and a `main`
-  ruleset (PR + CI, no force-push, owner bypass).
+- ✅ sandbox (2026-10-18): korinnia ARC runner set removed, `korinnia.rosliakov.club` dropped
+  from the ingress and the Cloudflare tunnel config. Owner applies by hand: `terraform apply` in
+  `iac/services/cloudflare/tunnels`, and deletes the SSM parameter
+  `/sandbox/k8s/infra-k8s-001/korinnia/argocd_deploy_key` (eu-west-2).
+- GHCR images (`korinnia/backend`, `korinnia/nginx`) and chart (`charts/korinnia`) become public
+  (owner sets the visibility in each package's settings; `docs/self-hosting.md` already says
+  public). Afterwards the image pull secret `infra-k8s-001-korinnia-ghcr-pull` in sandbox is no
+  longer needed.
 
 ## Open issues and things to keep in mind
 

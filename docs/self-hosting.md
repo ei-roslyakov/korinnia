@@ -18,11 +18,23 @@ sends HSTS.
 
 ## Kubernetes
 
-A Helm chart lives in [`deploy/helm/korinnia`](../deploy/helm/korinnia); every setting is
-documented in its `values.yaml`. It expects an external PostgreSQL 16 (e.g. a CloudNativePG
-cluster) and a ReadWriteMany volume for media. Build the `backend` and `nginx` images from this
-repository (`backend/Dockerfile` and `deploy/nginx/Dockerfile`, target `prod`) and push them to
-your own registry.
+Each [release](https://github.com/ei-roslyakov/korinnia/releases) publishes public images and a
+Helm chart to GitHub Container Registry:
+
+- `ghcr.io/ei-roslyakov/korinnia/backend:X.Y.Z` (API and worker)
+- `ghcr.io/ei-roslyakov/korinnia/nginx:X.Y.Z` (frontend and media)
+- `oci://ghcr.io/ei-roslyakov/charts/korinnia --version X.Y.Z`
+
+Images are also tagged `X.Y` and `latest`.
+
+```bash
+helm install korinnia oci://ghcr.io/ei-roslyakov/charts/korinnia --version X.Y.Z -f my-values.yaml
+```
+
+The chart uses the images of its own version by default. Every setting is documented in
+[`values.yaml`](../deploy/helm/korinnia/values.yaml). It expects an external PostgreSQL 16 (e.g. a
+CloudNativePG cluster) and a ReadWriteMany volume for media. To build the images yourself, use
+`backend/Dockerfile` and `deploy/nginx/Dockerfile` with target `prod`.
 
 ## Configuration
 
