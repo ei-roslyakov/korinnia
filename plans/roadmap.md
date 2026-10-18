@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-14 (session timeout and public demo added; next: "You are in a family tree")_
+_Last updated: 2026-10-18 (repo prepared to go public; next: "You are in a family tree")_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -97,22 +97,24 @@ and reveals other families' trees):
 - Optional, after all phases: letters to descendants (sealed until a date), duplicate detection and
   merge, PWA
 
-## Before opening the repo (2026-10-17)
+## Before opening the repo
 
-README and docs are ready for the public. Still to decide / do (see log 2026-10-17):
+Done (2026-10-17/18): README and docs for the public, AGPL-3.0 (D109), CI on GitHub-hosted
+runners, Argo CD Application moved to the sandbox repo (D108), PR template / CODEOWNERS /
+SECURITY.md / CONTRIBUTING.md, repo settings (topics, Dependabot alerts + fixes, squash only,
+Actions allowlist with SHA pinning). Git history: no real secrets (gitleaks / trufflehog); the old
+Argo CD file stays in history. `plans/` and `CLAUDE.md` stay public (README "How it's built").
 
-- ✅ Licence: AGPL-3.0 (D109, 2026-10-18).
-- ✅ CI on GitHub-hosted runners (`ubuntu-latest`), 2026-10-18. Still to do: delete the
-  `korinnia-runners` ARC runner set in sandbox, and set "Require approval for all outside
-  collaborators" for fork PRs in the repo's Actions settings.
-- ✅ `deploy/argocd/` moved to the infrastructure repo, updated there by hand (D108, 2026-10-18).
-  Still in git history.
-- ✅ PR template, CODEOWNERS, SECURITY.md, CONTRIBUTING.md (2026-10-18). After going public:
-  enable private vulnerability reporting (Settings → Security) and protect `main`.
-- ✅ Repo settings applied while private (2026-10-18, see log). After going public: fork PR
-  approval, private vulnerability reporting, secret scanning + push protection, `main` ruleset.
-- `plans/` (log with outage notes, infra details, "owner:" quotes) and `CLAUDE.md` become public.
-- Git history: no real secrets found (gitleaks / trufflehog, 2026-10-17); only test passwords.
+Still to do:
+
+- sandbox: delete the `korinnia-runners` ARC runner set
+  (`apps/namespaces/deploy-tools/helmReleases/arc-runner-set-korinnia.yaml`), the Argo CD repo
+  credential for korinnia (`infra-k8s-001-argo-main-korinnia-repo`) and its SSM parameter, and
+  the old `korinnia.rosliakov.club` ingress host.
+- Decide whether the GHCR images and chart become public (then update `docs/self-hosting.md`).
+- Only when the owner asks: make the repo public, then enable fork PR approval for all external
+  contributors, private vulnerability reporting, secret scanning + push protection, and a `main`
+  ruleset (PR + CI, no force-push, owner bypass).
 
 ## Open issues and things to keep in mind
 

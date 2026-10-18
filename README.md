@@ -10,6 +10,9 @@ favours data durability, completeness and open formats.
 **Try it:** the demo is available at [korinnia.app](https://korinnia.app) → "Try the demo" gives you a throwaway account
 with a fictional seven-generation family to explore and edit for 30 minutes.
 
+> Korinnia is built with AI: the code is written by [Claude](https://claude.com/claude-code)
+> (Anthropic's Claude Code) under the direction and review of the maintainer.
+
 ## Highlights
 
 - **A tree that looks like a tree** — the family grows upwards from a trunk and roots, one row per
@@ -65,6 +68,15 @@ See [docs/architecture.md](docs/architecture.md).
 - Optional email sign-up and "Sign in with Google"
 - AI-assisted import from social media exports, reviewed by an editor before anything is saved
 - Later: letters to descendants (sealed until a date), duplicate detection and merge, PWA
+
+## How it's built
+
+Korinnia is developed together with Claude, an AI model by Anthropic, using Claude Code. The
+maintainer decides what to build, describes features, tests every change and reviews it before
+it ships; Claude writes most of the code, tests and documentation. Commits made this way carry a
+`Co-Authored-By: Claude` trailer. Working notes for these sessions live in [CLAUDE.md](CLAUDE.md)
+and [plans/](plans/README.md), and the reasoning behind design choices in
+[docs/decisions.md](docs/decisions.md).
 
 ## Documentation
 

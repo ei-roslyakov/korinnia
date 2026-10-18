@@ -4,13 +4,13 @@ Self-hosted family archive and interactive family tree (FastAPI + PostgreSQL + R
 
 ## Start here
 
-- Read `plans/roadmap.md` (where the project stands, what is next, open issues) and the top of
-  `plans/log.md` before starting work. `plans/implementation.md` describes how everything is built.
+- Read `plans/roadmap.md` (where the project stands, what is next, open issues) and the recent
+  `git log` before starting work. `plans/implementation.md` describes how everything is built.
 
 ## Keep the plans current (required)
 
-- After finishing any task, add a short dated entry to the top of `plans/log.md`: what changed,
-  why, the commit hash if committed, and anything left open.
+- Commit messages are the work log: say what changed and why. Anything left unfinished goes into
+  `plans/roadmap.md` ("Open issues" or the relevant section), not only into the message.
 - If the task finishes a feature, adds an idea, or uncovers a problem, update `plans/roadmap.md` in
   the same change. Structural changes also go into `plans/implementation.md`.
 - When a change is visible to users, add a dated entry (en / uk / pl) at the top of
