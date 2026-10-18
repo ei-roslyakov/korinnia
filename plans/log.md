@@ -2,6 +2,19 @@
 
 Newest first. One entry per finished task: what changed, why, commit, anything left open.
 
+## 2026-10-18
+
+- **Releases by hand; Argo CD Application moved to the infrastructure repo (D108)** — owner: no
+  cluster details in the repo before it goes public; "automatically should run only CI", images
+  published when a release is created by hand, on ubuntu runners; the owner updates the app in
+  sandbox by hand. `deploy/argocd/` is gone; the Application now lives in the sandbox repo, loaded
+  by its app-of-apps (the parent Application that pulled it from here is removed), and Renovate
+  there skips the korinnia chart and images. `deploy.yml`, `build-images.yml` and `release.yml`
+  replaced by `publish.yml` (on release published, ubuntu-latest: images X.Y.Z / X.Y / latest with
+  `APP_VERSION`, Helm chart). CI lost its leftover GHCR login and `packages: write`. Open: remove
+  the old read-only korinnia deploy key, and in sandbox the repo secret for it and its SSM
+  parameter. The old file stays in git history.
+
 ## 2026-10-15
 
 - **Card text grows smoothly when zooming out (D107)** — owner: "font changes while zooming".

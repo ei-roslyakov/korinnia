@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     environment: Literal["development", "test", "production"] = "development"
     log_level: str = "INFO"
-    # Release version, baked into the image by the Deploy workflow ("dev" for local builds).
+    # Release version, baked into the image by the Publish workflow ("dev" for local builds).
     app_version: str = "dev"
 
     # --- Database -----------------------------------------------------------------

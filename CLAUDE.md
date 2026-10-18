@@ -23,7 +23,8 @@ Self-hosted family archive and interactive family tree (FastAPI + PostgreSQL + R
 ## Working rules
 
 - Commit and push only when asked; the owner usually checks locally first. Pushing to `main`
-  deploys to production (korinnia.app) through the Deploy workflow and Argo CD.
+  runs CI only. A GitHub release (created by hand) runs the Publish workflow (images + chart);
+  the owner then sets the version for production (korinnia.app) in the infrastructure repo.
 - Before reporting work as done: `make lint`, `make test` (and `make test-e2e` for UI flows).
   These commands wipe Vite's dev cache — run `docker compose restart frontend` afterwards or the
   tree canvas shows empty in the local app.

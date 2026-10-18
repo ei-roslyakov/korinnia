@@ -26,12 +26,12 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 
 ## Live deployment
 
-- Production: https://korinnia.app (also korinnia.rosliakov.club), Kubernetes cluster `infra-k8s-001`,
-  namespace `infra-k8s-001-korinnia`, deployed by Argo CD from
-  `deploy/argocd/infra-k8s-001/korinnia.yaml`.
-- Every push to `main` (except `*.md` and `deploy/argocd/**`) runs the **Deploy** workflow: builds
-  and pushes images to GHCR, publishes the Helm chart, bumps the patch version (v0.0.N), tags it, and
-  commits the new version into the Argo CD Application ("Deploy vX [skip ci]").
+- Production: https://korinnia.app (also korinnia.rosliakov.club), deployed by Argo CD from an
+  Application in the infrastructure repo (sandbox), not in this repo (D108).
+- Pushes to `main` and pull requests run **CI** only; nothing deploys automatically.
+- Releasing: create a GitHub release by hand (tag vX.Y.Z on main). The **Publish** workflow
+  (GitHub-hosted runners) builds the images as X.Y.Z / X.Y / latest and publishes the Helm chart.
+  Then the owner sets the new version in the Application in the sandbox repo by hand.
 - Last deployed at the time of writing: v0.0.16 (GEDCOM export, performance work, share links;
   migration 0010 applied 2026-10-11). The user guide goes out with the next deploy.
 - Production demo copies are updated with `python -m app.seed --all-users` in the backend pod

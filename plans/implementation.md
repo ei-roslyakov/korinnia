@@ -12,7 +12,8 @@ What exists today and how it is built. The reasoning for each choice is in
   OpenStreetMap, self-hosted Inter and Lora fonts.
 - **Runtime**: Docker Compose (postgres, backend, worker, nginx; dev override adds Vite with hot
   reload). nginx serves the built frontend, proxies `/api`, and streams media via
-  `X-Accel-Redirect`. Production: Helm chart (`deploy/helm/korinnia`) on Kubernetes via Argo CD.
+  `X-Accel-Redirect`. Production: Helm chart (`deploy/helm/korinnia`) on Kubernetes via Argo CD; the
+  Application lives in the infrastructure repo and its version is set there by hand (D108).
 - **Quality**: pytest (≈290 tests, separate `*_test` database), Vitest (≈130 tests), Playwright E2E
   on a throwaway production-build stack (desktop + mobile), ruff, mypy, eslint, prettier, tsc,
   pre-commit, GitHub Actions CI.
@@ -40,7 +41,7 @@ frontend/src/
   i18n/locales/  en.json, uk.json, pl.json (parity is tested)
   lib/           api client (CSRF), types, dates, kinship terms, hooks, version
 frontend/e2e/     Playwright specs
-deploy/           nginx image, Helm chart, Argo CD Application, backup/restore scripts
+deploy/           nginx image, Helm chart, backup/restore scripts
 scripts/          third-party-notices.sh (make notices), perf.sh + perf/browser.mjs (make perf)
 docs/             decisions, data schema, backup/restore, user guide (stub)
 plans/            this folder
@@ -96,8 +97,8 @@ plans/            this folder
   illustrated portraits); `make seed` grows older copies into the current version. (D91)
   (D78, D79)
 - Licence "All rights reserved", footer with copyright, app version and third-party notices. (D85)
-- Kubernetes: Helm chart, GHCR images, Deploy workflow with automatic patch versions, Argo CD;
-  media volume permission fix. (D87)
+- Kubernetes: Helm chart, GHCR images, Argo CD; media volume permission fix. (D87) Images and
+  chart are published by the Publish workflow when a GitHub release is created by hand. (D108)
 - Tree management: tree admins rename/delete trees from the tree list, the builder toolbar or tree
   settings; superadmin "Trees" tab lists every tree and restores deleted ones; person delete from
   the builder side panel. (D86)
@@ -115,4 +116,4 @@ plans/            this folder
   `make notices`, `make backup` / `make restore`. Dev login: `admin@example.com` /
   `change-me-now-please`.
 - Commit and push only when the owner asks; commit messages end with the Co-Authored-By line.
-  Pushing to `main` deploys to production.
+  Pushing to `main` runs CI only; production gets a version after a release (D108).
