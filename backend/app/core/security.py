@@ -46,7 +46,7 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, password_hash: str | None) -> bool:
     try:
         return _hasher.verify(password_hash or _DUMMY_HASH, password) and password_hash is not None
-    except (VerifyMismatchError, VerificationError, InvalidHashError):
+    except VerifyMismatchError, VerificationError, InvalidHashError:
         return False
 
 

@@ -3,7 +3,7 @@ name = "korinnia-backend"
 version = "0.1.0"
 description = "Korinnia — self-hosted family archive & interactive family tree (backend)"
 readme = "README.md"
-requires-python = ">=3.12,<3.13"
+requires-python = ">=3.15,<3.16"
 license = "AGPL-3.0-only"
 dependencies = [
     "fastapi>=0.115",
@@ -43,7 +43,7 @@ package = false
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py315"
 extend-exclude = ["alembic/versions/sql"]
 
 [tool.ruff.lint]
@@ -59,7 +59,7 @@ known-third-party = ["alembic"]
 "alembic/**" = ["N999"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.15"
 strict = true
 plugins = ["pydantic.mypy"]
 exclude = ["alembic/versions/"]

@@ -26,7 +26,7 @@ docker run --rm -v "$PWD/frontend":/w -v korinnia_frontend-node-modules:/w/node_
   ' > /tmp/korinnia-frontend-notices.txt
 
 docker compose run --rm --no-deps -T backend sh -c '
-  pip install --quiet --disable-pip-version-check --target /tmp/pl pip-licenses >/dev/null 2>&1
+  uv pip install --quiet --no-cache --target /tmp/pl pip-licenses >/dev/null 2>&1
   PYTHONPATH=/tmp/pl python -m piplicenses --from=mixed --format=plain-vertical --with-urls \
     --ignore-packages pip-licenses prettytable wcwidth
 ' > /tmp/korinnia-backend-notices.txt 2>/dev/null

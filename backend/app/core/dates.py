@@ -70,7 +70,7 @@ class PartialDate:
             )
         )
 
-    def validate(self) -> "PartialDate":
+    def validate(self) -> PartialDate:
         p = self.precision
         _check_ymd(self.year, self.month, self.day, "date")
         _check_ymd(self.end_year, self.end_month, self.end_day, "end date")

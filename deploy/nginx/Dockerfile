@@ -16,7 +16,7 @@ RUN npm run build \
       -exec gzip -k -9 {} \;
 
 # --- base: nginx + config (used directly in dev, where Vite serves the frontend)
-FROM nginx:1.29-alpine AS base
+FROM nginx:1.31.7-alpine AS base
 RUN rm -f /etc/nginx/conf.d/default.conf
 COPY deploy/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY deploy/nginx/snippets/ /etc/nginx/snippets/

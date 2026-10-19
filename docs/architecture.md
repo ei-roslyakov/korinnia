@@ -32,7 +32,7 @@ in [data-schema.md](data-schema.md).
 
 | Area | Technology |
 |---|---|
-| Backend | Python 3.12, FastAPI, Pydantic 2 + pydantic-settings, Uvicorn, uv |
+| Backend | Python 3.15, FastAPI, Pydantic 2 + pydantic-settings, Uvicorn, uv |
 | Auth & security | argon2id (argon2-cffi), JWT (PyJWT) in httpOnly cookies, CSRF double-submit cookie, TOTP 2FA (pyotp, segno QR codes, secrets encrypted with `cryptography`) |
 | Database | PostgreSQL 16, SQLAlchemy 2 (async, psycopg 3), Alembic migrations |
 | File storage | Local filesystem behind a `Storage` abstraction (Docker volume / Kubernetes PVC) |

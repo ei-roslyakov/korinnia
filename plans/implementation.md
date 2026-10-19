@@ -5,7 +5,7 @@ What exists today and how it is built. The reasoning for each choice is in
 
 ## Stack
 
-- **Backend**: Python 3.12, FastAPI, SQLAlchemy 2 (async, psycopg 3), Alembic, PostgreSQL 16,
+- **Backend**: Python 3.15, FastAPI, SQLAlchemy 2 (async, psycopg 3), Alembic, PostgreSQL 16,
   procrastinate (job queue in PostgreSQL), argon2id, JWT in httpOnly cookies, structured JSON logs.
 - **Frontend**: React + TypeScript + Vite, TanStack Query, React Flow (canvas), ELK (layout, in a Web
   Worker), Tailwind v4 (themes as CSS variables), react-i18next (en / uk / pl), Leaflet +
@@ -104,6 +104,7 @@ plans/            this folder
   Pods are hardened by default: non-root (backend/worker uid 1000, nginx uid 101 still on port 80
   via the `ip_unprivileged_port_start` sysctl), read-only root with `/tmp` emptyDirs, all
   capabilities dropped, RuntimeDefault seccomp, no ServiceAccount token. (D110)
+  Backend image: Python 3.15 on Debian 13 (trixie), no pip, uv never downloads a Python. (D111)
 - Tree management: tree admins rename/delete trees from the tree list, the builder toolbar or tree
   settings; superadmin "Trees" tab lists every tree and restores deleted ones; person delete from
   the builder side panel. (D86)
