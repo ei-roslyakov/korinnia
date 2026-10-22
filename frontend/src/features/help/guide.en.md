@@ -51,8 +51,7 @@ their children. Labels on the left name each generation and its decade.
 
 - **Move** by dragging the empty background; **zoom** with the mouse wheel, a pinch, or the
   **+ / −** buttons; **Fit to screen** shows everything. The overview map in the corner shows
-  where you are. Cards show the portrait, name and life years, with the lettering growing
-  gradually as you zoom out; only very large trees seen as a whole show just the names.
+  where you are. Cards show the portrait, name and life years; only very large trees seen as a whole show just the names.
 - **Whole tree** shows everyone. **Focus** shows only a few generations around one person
   (choose how many with **Generations**); small ▲ / ▼ marks mean there are more relatives
   beyond. Trees with more than 150 people open in focus mode.

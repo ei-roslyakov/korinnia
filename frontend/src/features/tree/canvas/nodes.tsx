@@ -1,20 +1,12 @@
-import {
-  Handle,
-  Position,
-  useStore,
-  useStoreApi,
-  type Node,
-  type NodeProps,
-  type ReactFlowState,
-} from "@xyflow/react";
-import { memo, useContext, useEffect, useState } from "react";
+import { Handle, Position, useStore, type Node, type NodeProps } from "@xyflow/react";
+import { memo, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Avatar } from "@/features/person/Avatar";
 import { formatPartialDate, lifeYears } from "@/lib/dates";
 import type { PersonSummary, RelativeRelation } from "@/lib/genealogy";
 
-import { cardTextScale, FullDetail, NAME_ONLY_ZOOM } from "./detail";
+import { FullDetail, NAME_ONLY_ZOOM } from "./detail";
 import { FAMILY_SIZE, PERSON_HEIGHT, PERSON_WIDTH } from "./familyGraph";
 import { BRANCH, GROUND_HEIGHT, seeded, TRUNK_REACH, type TreeStyle } from "./treeStyle";
 
@@ -41,32 +33,11 @@ const ACCENT: Record<string, string> = {
 /** Name only when zoomed far out (re-renders only on a change). */
 const farSelector = (s: { transform: [number, number, number] }) => s.transform[2] < NAME_ONLY_ZOOM;
 
-// Card text sizes follow --k-card-text, set by <CardTextScale> while zooming (no re-render).
-const NAME_SIZE = "text-[calc(0.875rem*var(--k-card-text,1))]";
-const YEARS_SIZE = "text-[calc(0.75rem*var(--k-card-text,1))]";
-
-/** Grows the card text gradually as the tree is zoomed out (sets a CSS variable on the canvas). */
-export function CardTextScale() {
-  const store = useStoreApi();
-  useEffect(() => {
-    let last = 0;
-    const apply = (s: ReactFlowState) => {
-      const scale = cardTextScale(s.transform[2]);
-      if (scale === last || !s.domNode) return;
-      last = scale;
-      s.domNode.style.setProperty("--k-card-text", String(scale));
-    };
-    apply(store.getState());
-    return store.subscribe(apply);
-  }, [store]);
-  return null;
-}
-
 export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps<PersonFlowNode>) {
   const { t } = useTranslation();
   const { person, highlighted, hiddenUp, hiddenDown, onAdd } = data;
   const zoomedOut = useStore(farSelector);
-  // Exports draw every card in full, at the normal text size.
+  // Exports draw every card in full.
   const fullDetail = useContext(FullDetail);
   const far = zoomedOut && !fullDetail;
   // The hover preview is only built while the pointer is over the card.
@@ -83,9 +54,7 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
         title={person.display_name}
       >
         <Handle type="target" position={Position.Bottom} className={hidden} isConnectable={false} />
-        <div className="line-clamp-2 font-serif text-xl leading-tight font-semibold">
-          {person.display_name}
-        </div>
+        <div className="line-clamp-2 text-sm leading-tight font-medium">{person.display_name}</div>
         <Handle type="source" position={Position.Top} className={hidden} isConnectable={false} />
       </div>
     );
@@ -103,12 +72,8 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
       <Handle type="target" position={Position.Bottom} className={hidden} isConnectable={false} />
       <Avatar name={person.display_name} gender={person.gender} url={person.avatar_url} size="md" />
       <div className="min-w-0">
-        <div
-          className={`line-clamp-2 leading-tight font-medium ${fullDetail ? "text-sm" : NAME_SIZE}`}
-        >
-          {person.display_name}
-        </div>
-        <div className={`text-bark-700 leading-snug ${fullDetail ? "text-xs" : YEARS_SIZE}`}>
+        <div className="line-clamp-2 text-sm leading-tight font-medium">{person.display_name}</div>
+        <div className="text-bark-700 text-xs leading-snug">
           {lifeYears(person.birth, person.death, person.is_living)}
           {died && person.death && (
             <span className="ml-1" aria-hidden="true">

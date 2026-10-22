@@ -13,6 +13,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-22",
+    items: {
+      en: ["Names and years on the tree keep the same size while you zoom."],
+      uk: ["Імена й роки на дереві більше не змінюють розміру під час масштабування."],
+      pl: ["Imiona i lata na drzewie nie zmieniają już rozmiaru podczas powiększania."],
+    },
+  },
+  {
     id: "2026-10-18",
     items: {
       en: [
