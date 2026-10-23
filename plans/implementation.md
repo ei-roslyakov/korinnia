@@ -119,7 +119,8 @@ plans/            this folder
 - New decisions get the next D-number in `docs/decisions.md`; `docs/features.md` and the README
   Roadmap are kept current; schema changes go into `docs/data-schema.md`.
 - GitHub Actions: only allowlisted actions, pinned by SHA (repo setting). A new third-party
-  action must be added under Settings → Actions → General first.
+  action must be added under Settings → Actions → General first. CI scans both images with
+  Trivy (fails on fixable CRITICAL CVEs).
 - Commands: `make up`, `make lint`, `make test`, `make test-e2e`, `make fmt`, `make seed`,
   `make notices`, `make backup` / `make restore`. Dev login: `admin@example.com` /
   `change-me-now-please`.

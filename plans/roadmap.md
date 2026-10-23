@@ -120,6 +120,9 @@ Still to do:
   (owner sets the visibility in each package's settings; `docs/self-hosting.md` already says
   public). Afterwards the image pull secret `infra-k8s-001-korinnia-ghcr-pull` in sandbox is no
   longer needed.
+- Trivy image scan in CI (job `images-e2e`, 2026-10-23): fails on fixable CRITICAL CVEs in the
+  backend and nginx images. Owner adds `aquasecurity/trivy-action` and `aquasecurity/setup-trivy`
+  to the Actions allowlist (Settings → Actions → General), or the job fails to start.
 - Pod hardening in the chart (D110), next release: non-root nginx, read-only root, no
   capabilities, no ServiceAccount token. Production can then label its namespace Pod Security
   `enforce: baseline` (+ `warn/audit: restricted`); `restricted` needs `fixPermissions: false`.

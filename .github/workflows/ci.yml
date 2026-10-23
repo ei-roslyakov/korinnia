@@ -109,6 +109,22 @@ jobs:
           load: true
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,mode=max,scope=nginx
+      # Fails on CRITICAL vulnerabilities that already have a fix (an unfixed CVE would block CI
+      # with nothing to do but wait). The full table is in the step log.
+      - name: Scan backend image (Trivy)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: korinnia/backend:latest
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - name: Scan nginx image (Trivy)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: korinnia/nginx:latest
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
       - name: Start production stack
         run: |
           cp .env.example .env
