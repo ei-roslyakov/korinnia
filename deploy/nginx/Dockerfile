@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.28
 # nginx image: serves the built frontend and proxies /api to the backend (plain HTTP;
 # TLS is terminated by the ingress / load balancer).
 # Build context: repository root.

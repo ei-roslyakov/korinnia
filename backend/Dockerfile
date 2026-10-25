@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.28
 # Backend + worker image (same image, different command).
 
 # Debian 13 (trixie): newer ffmpeg/poppler with far fewer known CVEs than bookworm.
