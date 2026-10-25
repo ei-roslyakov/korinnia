@@ -50,6 +50,15 @@ async def test_seed_creates_demo_family(
     assert all(p.biography for p in people)
     assert all(p.primary_photo_id and p.primary_photo_crop for p in people)
     assert await count(MediaFile) == n
+    # Every portrait is described for the family album: name, biography, year, place.
+    portraits = list(await session.scalars(select(MediaFile).where(MediaFile.tree_id == tree.id)))
+    assert all(m.title and m.description and m.date_sort for m in portraits)
+    assert sum(m.place_id is not None for m in portraits) > n // 2
+    stepan = next(m for m in portraits if m.title == "Степан Коваленко")
+    assert stepan.description is not None
+    assert stepan.description.startswith("Сільський коваль у Великих Сорочинцях.")
+    assert stepan.date.precision is not None
+    assert stepan.date.precision.value == "approx"
     tasks = [j["task_name"] for j in job_queue.jobs.values()]
     # Previews and portraits come from one job per copy.
     assert tasks.count("demo.portraits") == 1
@@ -302,10 +311,17 @@ async def test_complete_demo_redraws_outdated_generated_portraits(
     my_media = await session.get(MediaFile, mine.primary_photo_id)
     assert my_media is not None
     my_media.original_filename = "grandma-1950.jpg"
+    # A portrait from before the album: one title for all, no description yet.
+    plain = await session.get(MediaFile, people[2].primary_photo_id)
+    assert plain is not None
+    title = plain.title
+    plain.title, plain.description = seed_module.PORTRAIT_TITLE_OLD, None
     await session.commit()
 
     done = await seed_module.complete_demo(session, tree, owner, storage=local_storage)
-    assert (done.added, done.updated) == (0, 1)
+    assert (done.added, done.updated) == (0, 2)
+    await session.refresh(plain)
+    assert (plain.title, bool(plain.description)) == (title, True)
     await session.refresh(old)
     await session.refresh(old_media)
     await session.refresh(mine)

@@ -122,8 +122,31 @@ Editors and administrators switch the tree from **View** to **Builder**.
   automatically. The same file is not stored twice in a tree — you can link the existing one.
 - **Tag people**: draw a rectangle around a face and choose who it is. **Use as portrait**: crop
   a square for the picture shown on the tree (the original is never changed).
+- When you add photos in the **Media** tab, a short dialog asks for each one's **description**
+  right away (title, date and place are optional). **Later** skips it; **Edit** fills it in at any
+  time. The description is shown above the photo in the family album.
 - Each item can have a title, description, date and place, and comments. **Download original**
   gives the file as uploaded.
+
+## Family album
+
+- Every photo of the tree in one place, for everyone who can see the tree (also visitors with a
+  share link). Documents, scans, PDFs and videos are not in it; a photo appears once its preview
+  is ready.
+- On the tree page, the **Family album** button next to the tree's name (with the number of
+  photos) opens the album in a window over the tree; ✕, Esc or a click outside closes it.
+  **Show all** opens the album page, which is also in the row of tree sections.
+- Above each photo: its title in bold, the description (**more** for a long one), then date ·
+  place. Below it, the people in the photo: click a name for **Only photos of this person**,
+  **Show on the tree** (closes the album and centres the tree on them) or **Open their page**.
+  Click the photo to see it full screen, where you can swipe too.
+- Browse by swiping, with the ‹ › buttons on the photo, the ← → keys or the thumbnails. **Play slideshow** turns to
+  the next photo every few seconds; it pauses while the pointer or the keyboard is on the photos
+  and while the tab is in the background, and is not offered when your device asks for reduced
+  motion.
+- The album page shows a large carousel or a **Grid**, with filters by who is in the photo
+  (several people at once) and by decade, a search in descriptions, and the order: by photo date
+  (undated photos last) or newest uploads first.
 
 ## Sources and citations
 

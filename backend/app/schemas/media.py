@@ -6,6 +6,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, model_validator
 
 from app.core.enums import MediaKind, ProcessingStatus
+from app.schemas.common import Page
 from app.schemas.dates import PartialDateIn, PartialDateOut
 from app.schemas.places import PlaceSummary
 
@@ -56,6 +57,11 @@ class MediaOut(BaseModel):
     urls: MediaUrls
     people: list[MediaPersonOut]
     created_at: datetime
+
+
+class AlbumPage(Page[MediaOut]):
+    # Decades (1950 = the 1950s) that have dated photos, for the album's filter.
+    decades: list[int]
 
 
 class MediaUpdate(BaseModel):

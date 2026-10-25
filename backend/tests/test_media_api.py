@@ -397,3 +397,83 @@ async def test_job_wrappers(
     job_queue.jobs.clear()
     await tasks.requeue_stuck_media(timestamp=0)
     assert [j["args"] for j in job_queue.jobs.values()] == [{"media_id": stuck["id"]}]
+
+
+async def test_album_lists_photos_by_date_with_filters(
+    ctx: Ctx,
+    session: AsyncSession,
+    local_storage: LocalStorage,
+    make_user: Any,
+    make_client: Any,
+    add_member: Any,
+) -> None:
+    from datetime import timedelta
+
+    halyna, petro = await ctx.person("Галина"), await ctx.person("Петро")
+    uploaded = 0
+
+    async def photo(name: str, size: int, person: dict[str, Any] | None, **meta: Any) -> str:
+        nonlocal uploaded
+        form = {"person_id": person["id"]} if person else {}
+        media = (await upload(ctx, name, jpeg(size, 32), **form)).json()
+        await process(session, local_storage, media["id"])
+        # Uploads in one test share a timestamp: spread them out like real ones.
+        row = await session.get(MediaFile, media["id"])
+        assert row is not None
+        uploaded += 1
+        row.created_at = row.created_at + timedelta(minutes=uploaded)
+        await session.commit()
+        if meta:
+            resp = await ctx.editor.patch(f"{ctx.base}/media/{media['id']}", json=meta)
+            assert resp.status_code == 200, resp.text
+        return str(media["id"])
+
+    wedding = await photo("w.jpg", 40, halyna, description="Весілля в Полтаві", date=y(1958))
+    undated = await photo("u.jpg", 41, petro, title="Без дати")
+    school = await photo("s.jpg", 42, petro, description="Перший клас", date=y(1951, month=9))
+    later = await photo("l.jpg", 43, None, date=y(1973, precision="approx"))
+    # Not in the album: still processing, not a photo, in the trash.
+    await upload(ctx, "pending.jpg", jpeg(44, 32))
+    pdf = (await upload(ctx, "doc.pdf", PDF)).json()
+    await process(session, local_storage, pdf["id"])
+    gone = await photo("d.jpg", 45, halyna, date=y(1960))
+    await ctx.editor.delete(f"{ctx.base}/media/{gone}")
+
+    url = f"{ctx.base}/album"
+    body = (await ctx.editor.get(url)).json()
+    assert [m["id"] for m in body["items"]] == [school, wedding, later, undated]
+    assert (body["total"], body["decades"]) == (4, [1950, 1970])
+    newest = (await ctx.editor.get(url, params={"sort": "newest"})).json()
+    assert [m["id"] for m in newest["items"]] == [later, school, undated, wedding]
+
+    paged = (await ctx.editor.get(url, params={"limit": 2, "offset": 2})).json()
+    assert ([m["id"] for m in paged["items"]], paged["total"]) == ([later, undated], 4)
+
+    def ids(resp: Any) -> list[str]:
+        return [m["id"] for m in resp.json()["items"]]
+
+    assert ids(await ctx.editor.get(url, params={"person_id": petro["id"]})) == [school, undated]
+    both = {"person_id": [petro["id"], halyna["id"]]}
+    assert ids(await ctx.editor.get(url, params=both)) == [school, wedding, undated]
+    # A decade (undated photos drop out); the decade list ignores the year range.
+    fifties = (await ctx.editor.get(url, params={"year_from": 1950, "year_to": 1959})).json()
+    assert ([m["id"] for m in fifties["items"]], fifties["decades"]) == (
+        [school, wedding],
+        [1950, 1970],
+    )
+    assert ids(await ctx.editor.get(url, params={"year_from": 1955})) == [wedding, later]
+    # Search covers the description (also in the plain media list).
+    assert ids(await ctx.editor.get(url, params={"q": "полтав"})) == [wedding]
+    listing = (await ctx.editor.get(f"{ctx.base}/media", params={"q": "перший"})).json()
+    assert [m["id"] for m in listing["items"]] == [school]
+    assert (await ctx.editor.get(url, params={"sort": "random"})).status_code == 422
+
+    # Readable by viewers, not by outsiders.
+    viewer = await make_user("album-viewer@example.com")
+    await add_member(ctx.tree, viewer, TreeRole.viewer)
+    await make_user("album-out@example.com")
+    v, o = await make_client(), await make_client()
+    await v.login("album-viewer@example.com")
+    await o.login("album-out@example.com")
+    assert (await v.get(url)).json()["total"] == 4
+    assert (await o.get(url)).status_code == 404

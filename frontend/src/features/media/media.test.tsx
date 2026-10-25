@@ -113,12 +113,47 @@ describe("media tab in the editor", () => {
       new File(["a"], "лист.jpg", { type: "image/jpeg" }),
       new File(["b"], "same.jpg", { type: "image/jpeg" }),
     ]);
+    // Describing can wait.
+    for (let i = 0; i < 2; i++)
+      await userEvent.click(await screen.findByRole("button", { name: "Пізніше" }));
     expect(await screen.findByText("Точно такий файл уже є в родоводі.")).toBeInTheDocument();
     const sent = FakeXHR.sent[0]!;
     expect(sent.get("person_id")).toBe("p2");
     expect(sent.get("kind")).toBe("document_scan");
     await userEvent.click(screen.getByRole("button", { name: "Пов’язати наявний файл" }));
     await waitFor(() => expect(tagged).toEqual({ person_id: "p2", region: null }));
+  });
+
+  it("asks for each new photo's description right away and saves it once uploaded", async () => {
+    const patches: unknown[] = [];
+    api("editor", {
+      "PATCH /api/v1/trees/t1/media/m5": (init) => {
+        patches.push(JSON.parse(String(init.body)));
+        return json(mediaItem("m5", "photo"));
+      },
+    });
+    FakeXHR.responses = [
+      { status: 201, body: mediaItem("m5", "photo") },
+      { status: 201, body: mediaItem("m6", "photo") },
+    ];
+    renderWithProviders(<App />, { route: "/trees/t1/people/p2/edit?tab=media" });
+    await userEvent.upload(await screen.findByLabelText("Вибрати файли"), [
+      new File(["a"], "весілля.jpg", { type: "image/jpeg" }),
+      new File(["b"], "школа.jpg", { type: "image/jpeg" }),
+    ]);
+    const first = within(await screen.findByRole("dialog", { name: "Опишіть фото (1 з 2)" }));
+    expect(first.getByText("весілля.jpg")).toBeInTheDocument();
+    await userEvent.type(first.getByLabelText("Опис"), "Весілля Галини, 1946");
+    await userEvent.type(first.getByLabelText("Назва"), "Весілля");
+    await userEvent.click(first.getByRole("button", { name: "Зберегти й далі" }));
+    await waitFor(() =>
+      expect(patches).toEqual([{ description: "Весілля Галини, 1946", title: "Весілля" }]),
+    );
+    // The second one is left for later: nothing is sent for it.
+    const second = within(await screen.findByRole("dialog", { name: "Опишіть фото (2 з 2)" }));
+    await userEvent.click(second.getByRole("button", { name: "Пізніше" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(patches).toHaveLength(1);
   });
 
   it("lists linked media and sets a portrait with a crop", async () => {

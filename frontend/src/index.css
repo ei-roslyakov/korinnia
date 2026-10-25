@@ -281,6 +281,20 @@ body {
   }
 }
 
+/* The family album popup: the backdrop fades in, the window rises slightly. */
+@keyframes album-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes album-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+}
+
 @keyframes panel-in {
   from {
     opacity: 0;

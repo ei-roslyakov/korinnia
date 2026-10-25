@@ -15,6 +15,7 @@ function page<K extends string>(load: () => Promise<Record<K, ComponentType>>, n
   return lazy(() => load().then((m) => ({ default: m[name] })));
 }
 
+const AlbumPage = page(() => import("@/features/album/AlbumPage"), "AlbumPage");
 const AdminLayout = page(() => import("@/features/admin/AdminLayout"), "AdminLayout");
 const PersonEditorPage = page(
   () => import("@/features/builder/PersonEditorPage"),
@@ -106,6 +107,14 @@ export function App() {
             element={
               <RequireAuth>
                 <PersonEditorPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/album"
+            element={
+              <RequireAuth>
+                <AlbumPage />
               </RequireAuth>
             }
           />

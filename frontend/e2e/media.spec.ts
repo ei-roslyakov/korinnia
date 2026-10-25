@@ -65,6 +65,8 @@ test("upload a photo, previews are generated, it becomes the portrait", async ({
     mimeType: "image/jpeg",
     buffer: jpeg,
   });
+  // A new photo asks for its description right away; it can wait (album.spec covers it).
+  await page.getByRole("dialog").getByRole("button", { name: "Пізніше" }).click();
 
   // Uploaded → processed by the worker → thumbnail served through nginx.
   const row = page.locator("li").filter({ hasText: `Emily ${tag}.jpg` });
