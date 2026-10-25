@@ -44,7 +44,7 @@ in [data-schema.md](data-schema.md).
 | Web server | nginx — static frontend, `/api` reverse proxy, gzip, caching and security headers. Plain HTTP: TLS is terminated by your ingress / load balancer |
 | Media processing | Pillow (+ pillow-heif), ffmpeg, poppler `pdftoppm`, `filetype` (content-based type detection) |
 | Testing | pytest + pytest-asyncio + httpx (backend); Vitest + Testing Library, Playwright (E2E) |
-| Lint / format / types | ruff, mypy (strict); ESLint + typescript-eslint, Prettier; pre-commit |
+| Lint / format / types | ruff, mypy (strict); oxlint, Prettier, TypeScript 7 (`tsc`); pre-commit |
 | CI / delivery | GitHub Actions (lint, types, tests, image builds, E2E against the production stack); Helm chart |
 
 Exact versions are pinned in `backend/uv.lock` and `frontend/package-lock.json`.
