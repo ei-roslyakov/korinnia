@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-25.2",
+    items: {
+      en: [
+        "Creating a new place while describing a photo no longer reloads the page and loses the photo.",
+      ],
+      uk: [
+        "Створення нового місця під час опису фото більше не перезавантажує сторінку й не губить фото.",
+      ],
+      pl: [
+        "Tworzenie nowego miejsca podczas opisywania zdjęcia nie przeładowuje już strony i nie gubi zdjęcia.",
+      ],
+    },
+  },
+  {
     id: "2026-10-25",
     items: {
       en: [

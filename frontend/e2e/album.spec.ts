@@ -116,3 +116,57 @@ test("a described photo shows in the family album on the tree page and the album
   await page.getByRole("button", { name: "Сітка" }).click();
   await expect(page.getByRole("img", { name: description })).toBeVisible();
 });
+
+test("a new place created while describing a photo keeps the editor and the photo", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/login");
+  await page.getByLabel("Електронна пошта").fill(ADMIN_EMAIL);
+  await page.getByLabel("Пароль").fill(ADMIN_PASSWORD);
+  await page.getByRole("button", { name: "Увійти" }).click();
+  await expect(page.getByRole("link", { name: /Родина Коваленків \(демо\)/ })).toBeVisible();
+
+  const tag = `${testInfo.project.name}-${testInfo.repeatEachIndex}-${Date.now() % 1000000}`;
+  const placeName = `Хутір ${tag}`;
+  const trees = await (await page.request.get("/api/v1/trees")).json();
+  const treeId = trees.find((t: { name: string }) => t.name.includes("демо")).id;
+  const csrf = (await page.context().cookies()).find((c) => c.name === "korinnia_csrf")!.value;
+  const created = await page.request.post(`/api/v1/trees/${treeId}/persons`, {
+    data: { names: [{ first_name: "Марія", last_name: `Місце${tag}`, is_primary: true }] },
+    headers: { "X-CSRF-Token": csrf },
+  });
+  expect(created.status()).toBe(201);
+  const personId = (await created.json()).id;
+  const editor = `/trees/${treeId}/people/${personId}/edit?tab=media`;
+
+  await page.goto(editor);
+  await page.getByLabel("Вибрати файли").setInputFiles({
+    name: `place-${tag}.jpg`,
+    mimeType: "image/jpeg",
+    buffer: await makeJpeg(page, tag),
+  });
+  const describe = page.getByRole("dialog", { name: "Опишіть фото" });
+  await describe.getByLabel("Опис").fill(`Біля хати ${tag}`);
+  await describe.getByRole("combobox", { name: "Місце" }).fill(placeName);
+  await page.getByRole("option", { name: `+ Створити «${placeName}»` }).click();
+
+  // The "New place" dialog opens over the description. Its form used to sit inside the
+  // description's form, so "Create" reloaded the page and the photo was lost.
+  const newPlace = page.getByRole("dialog", { name: "Нове місце" });
+  await expect(
+    newPlace.getByTestId("map-picker").locator("img.leaflet-tile-loaded").first(),
+  ).toBeVisible({ timeout: 15_000 });
+  await newPlace.getByRole("button", { name: "Створити" }).click();
+  await expect(newPlace).toHaveCount(0);
+  await expect(page).toHaveURL((url) => url.pathname + url.search === editor);
+  await expect(describe.getByText(placeName)).toBeVisible();
+
+  await describe.getByRole("button", { name: "Зберегти" }).click();
+  await expect(describe).toHaveCount(0);
+  const row = page.locator("li").filter({ hasText: `place-${tag}.jpg` });
+  await expect(row).toBeVisible();
+  const media = await (
+    await page.request.get(`/api/v1/trees/${treeId}/media?person_id=${personId}`)
+  ).json();
+  expect(media.items[0].place.name).toBe(placeName);
+});
