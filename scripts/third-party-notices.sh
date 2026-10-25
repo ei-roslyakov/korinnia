@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 OUT=frontend/public/third-party-notices.txt
 
 docker run --rm -v "$PWD/frontend":/w -v korinnia_frontend-node-modules:/w/node_modules -w /w \
-  node:22-alpine sh -c '
+  node:24-alpine sh -c '
     npx --yes license-checker-rseidelsohn@4 --production --excludePrivatePackages --json \
       > /tmp/licenses.json 2>/dev/null
     node -e "

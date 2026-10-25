@@ -3,32 +3,97 @@
   "packageRules": [
     {
       "description": "Group frontend npm minor/patch updates into one PR",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchManagers": [
+        "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "frontend"
     },
     {
       "description": "Group backend Python minor/patch updates into one PR",
-      "matchManagers": ["pep621"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchManagers": [
+        "pep621"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "backend"
     },
     {
       "description": "Group Docker base image updates (Dockerfiles + docker-compose) into one PR",
-      "matchManagers": ["dockerfile", "docker-compose"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
       "groupName": "docker-images"
     },
     {
       "description": "Group GitHub Actions minor/patch updates (global config also groups these)",
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
       "groupName": "github-actions"
     },
     {
+      "description": "The Playwright package and its Docker image move together (browsers must match)",
+      "matchPackageNames": [
+        "@playwright/test",
+        "mcr.microsoft.com/playwright"
+      ],
+      "groupName": "playwright"
+    },
+    {
+      "description": "Node everywhere (CI, nginx image build, dev container, notices script) in one PR, majors included",
+      "matchPackageNames": [
+        "node"
+      ],
+      "groupName": "node"
+    },
+    {
       "description": "Korinnia's own images are built in CI, not pulled from a registry",
-      "matchPackageNames": ["korinnia/**"],
+      "matchPackageNames": [
+        "korinnia/**"
+      ],
       "enabled": false
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Playwright image that runs `make test-e2e`; must match @playwright/test",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
+      "matchStrings": [
+        "PLAYWRIGHT_IMAGE \\?= (?<depName>mcr\\.microsoft\\.com/playwright):(?<currentValue>v[0-9.]+-noble)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>noble)$"
+    },
+    {
+      "description": "Node image used by scripts/third-party-notices.sh",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^scripts/third-party-notices\\.sh$/"
+      ],
+      "matchStrings": [
+        "(?<depName>node):(?<currentValue>[0-9]+-alpine)"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }
