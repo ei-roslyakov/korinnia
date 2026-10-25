@@ -3,7 +3,7 @@
 # TLS is terminated by the ingress / load balancer).
 # Build context: repository root.
 
-FROM node:22-alpine AS frontend-build
+FROM node:24-alpine AS frontend-build
 WORKDIR /src
 COPY frontend/package.json frontend/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
