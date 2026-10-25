@@ -718,8 +718,12 @@
       "hint": "What is happening, who is in it, when and where? The description is shown above the photo in the family album.",
       "later": "Later",
       "saveNext": "Save and next",
-      "preview": "The file being described"
-    }
+      "preview": "The file being described",
+      "people": "Who else is in the photo",
+      "addPerson": "Choose a person from the tree…",
+      "removePerson": "Remove {{name}}"
+    },
+    "relatives": "Family"
   },
   "collab": {
     "sources": "Sources",

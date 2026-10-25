@@ -726,8 +726,12 @@
       "hint": "Co się dzieje, kto jest na zdjęciu, kiedy i gdzie? Opis jest pokazywany nad zdjęciem w albumie rodzinnym.",
       "later": "Później",
       "saveNext": "Zapisz i dalej",
-      "preview": "Opisywany plik"
-    }
+      "preview": "Opisywany plik",
+      "people": "Kto jeszcze jest na zdjęciu",
+      "addPerson": "Wybierz osobę z drzewa…",
+      "removePerson": "Usuń {{name}}"
+    },
+    "relatives": "Rodzina"
   },
   "collab": {
     "sources": "Źródła",

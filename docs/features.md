@@ -59,7 +59,7 @@ Everything below works today. Planned work is listed in the [roadmap](../README.
 - Gallery with lightbox (keyboard navigation, captions, date, place, people), documents list, audio and video players
 - Face / person tagging in group photos; names shown on the photo and linked
 - Portraits: pick a photo and crop a square (original untouched)
-- A new photo asks for its description (title, date, place optional) as soon as it is added in the person editor
+- A new photo asks for its description (title, date, place optional) and who else is in it (relatives offered in a dropdown, anyone else by name) as soon as it is added in the person editor
 - Family album: every processed photo of the tree in a carousel with the description above each photo (title, description with "more", date · place) and the people below; swipe (Embla), arrows on the photo, ←/→, thumbnails, optional slideshow (pauses on hover / focus / hidden tab, off with reduced motion); neighbouring photos preload only, more pages load near the end (D113)
 - "Family album" button in the tree header (with the photo count) opens the album in a popup over the tree (Esc / ✕ / click outside closes it); a person chip offers only their photos, show on the tree, or their page; album page `/trees/:id/album` with a large carousel or grid, filters by people and decade, search in descriptions, order by photo date (undated last) or newest upload
 - Lightbox: description above the image, swipe between items

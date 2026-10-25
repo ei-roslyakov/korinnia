@@ -25,6 +25,7 @@ import {
   type MediaItem,
   type PartialDateInput as DateValue,
   type PersonDetail,
+  type PersonSummary,
   type PlaceSummary,
   type Region,
 } from "@/lib/genealogy";
@@ -47,6 +48,17 @@ interface Describing {
   key: string;
   file: File;
   uploaded: Promise<MediaItem | null>;
+}
+
+/** The person's closest family, offered first when choosing who else is in a photo. */
+function relativesOf(person: PersonDetail): PersonSummary[] {
+  const all = [
+    ...person.partners.map((r) => r.person),
+    ...person.parents.map((r) => r.person),
+    ...person.children.map((r) => r.person),
+    ...person.siblings.map((r) => r.person),
+  ];
+  return all.filter((p, i) => p.id !== person.id && all.findIndex((q) => q.id === p.id) === i);
 }
 
 const isImageFile = (f: File) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name);
@@ -123,14 +135,27 @@ export function MediaTab({
     if (added.length) setDescribing((list) => [...list, ...added]);
   };
 
-  // The upload keeps going while the editor types; the details are saved when it is done.
-  const finishDescribing = (entry: Describing, details: MediaPatch | null) => {
+  // The upload keeps going while the editor types; the details and the other people in the
+  // photo are saved when it is done.
+  const finishDescribing = (entry: Describing, details: MediaPatch | null, people: string[]) => {
     setDescribing((list) => list.filter((d) => d.key !== entry.key));
     // Counts "2 of 3" within one batch; starts again once every photo is answered.
     setDescribedCount((n) => (describing.length > 1 ? n + 1 : 0));
-    if (!details) return;
-    void entry.uploaded.then((item) => {
-      if (item) update.mutate({ id: item.id, ...details }, { onSuccess: onChanged });
+    if (!details && !people.length) return;
+    void entry.uploaded.then(async (item) => {
+      if (!item) return;
+      try {
+        await Promise.all([
+          details && update.mutateAsync({ id: item.id, ...details }),
+          ...people.map((personId) =>
+            tag.mutateAsync({ mediaId: item.id, personId, region: null }),
+          ),
+        ]);
+      } catch {
+        // Shown by the error alert below; the photo itself is saved.
+      } finally {
+        onChanged();
+      }
     });
   };
 
@@ -247,7 +272,14 @@ export function MediaTab({
       )}
 
       <ErrorAlert
-        error={reorder.error ?? untag.error ?? del.error ?? reprocess.error ?? update.error}
+        error={
+          reorder.error ??
+          untag.error ??
+          del.error ??
+          reprocess.error ??
+          update.error ??
+          (describing.length ? null : tag.error)
+        }
       />
       {media.length === 0 && uploads.length === 0 && (
         <p className="text-bark-700 text-sm">{t("media.none")}</p>
@@ -337,10 +369,11 @@ export function MediaTab({
         <DescribeDialog
           key={describing[0].key}
           treeId={treeId}
+          person={person}
           file={describing[0].file}
           n={describedCount + 1}
           total={describedCount + describing.length}
-          onDone={(details) => finishDescribing(describing[0]!, details)}
+          onDone={(details, people) => finishDescribing(describing[0]!, details, people)}
         />
       )}
       {editing && (
@@ -350,6 +383,7 @@ export function MediaTab({
         <TagDialog
           treeId={treeId}
           media={media.find((m) => m.id === tagging.id) ?? tagging}
+          suggestions={relativesOf(person)}
           onClose={() => setTagging(null)}
         />
       )}
@@ -366,22 +400,26 @@ export function MediaTab({
 }
 
 /** Asked right after photos are chosen: the description first (shown above the photo in the
- *  family album), the title, date and place optional. "Later" keeps the photo undescribed. */
+ *  family album), the title, date, place and who else is in it optional. "Later" keeps the
+ *  photo undescribed and linked only to this person. */
 function DescribeDialog({
   treeId,
+  person,
   file,
   n,
   total,
   onDone,
 }: {
   treeId: string;
+  person: PersonDetail;
   file: File;
   n: number;
   total: number;
-  onDone: (details: MediaPatch | null) => void;
+  onDone: (details: MediaPatch | null, people: string[]) => void;
 }) {
   const { t } = useTranslation();
   const [description, setDescription] = useState("");
+  const [others, setOthers] = useState<PersonSummary[]>([]);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState<DateValue | null>(null);
   const [place, setPlace] = useState<PlaceSummary | null>(null);
@@ -402,7 +440,10 @@ function DescribeDialog({
       ...(payloadDate && { date: payloadDate }),
       ...(place && { place_id: place.id }),
     };
-    onDone(Object.keys(details).length ? details : null);
+    onDone(
+      Object.keys(details).length ? details : null,
+      others.map((p) => p.id),
+    );
   };
   const heading =
     total > 1
@@ -410,7 +451,7 @@ function DescribeDialog({
       : t("media.describe.title");
 
   return (
-    <Dialog open title={heading} onClose={() => onDone(null)}>
+    <Dialog open title={heading} onClose={() => onDone(null, [])}>
       <form onSubmit={onSubmit} className="max-h-[75vh] space-y-3 overflow-y-auto pr-1">
         <div className="flex items-center gap-3">
           <div className="bg-bark-100 size-20 shrink-0 overflow-hidden rounded">
@@ -452,8 +493,42 @@ function DescribeDialog({
           value={place}
           onChange={setPlace}
         />
+        <fieldset className="space-y-2">
+          <legend className="text-bark-900 mb-1 text-sm font-medium">
+            {t("media.describe.people")}
+          </legend>
+          <ul aria-label={t("media.describe.people")} className="flex flex-wrap gap-1.5">
+            <li className="border-bark-100 bg-bark-50 rounded-full border px-3 py-1 text-xs">
+              {person.display_name}
+            </li>
+            {others.map((p) => (
+              <li
+                key={p.id}
+                className="bg-leaf-700 text-on-leaf inline-flex items-center gap-1 rounded-full py-1 pr-1 pl-3 text-xs"
+              >
+                {p.display_name}
+                <button
+                  type="button"
+                  aria-label={t("media.describe.removePerson", { name: p.display_name })}
+                  onClick={() => setOthers((list) => list.filter((q) => q.id !== p.id))}
+                  className="flex size-5 items-center justify-center rounded-full hover:bg-black/20"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+          <PersonCombobox
+            treeId={treeId}
+            label={t("media.describe.addPerson")}
+            excludeIds={[person.id, ...others.map((p) => p.id)]}
+            suggestions={relativesOf(person)}
+            suggestionsLabel={t("media.relatives")}
+            onSelect={(p) => setOthers((list) => [...list, p])}
+          />
+        </fieldset>
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => onDone(null)}>
+          <Button variant="secondary" onClick={() => onDone(null, [])}>
             {t("media.describe.later")}
           </Button>
           <Button type="submit">
@@ -560,10 +635,12 @@ function MediaMetaDialog({
 function TagDialog({
   treeId,
   media,
+  suggestions,
   onClose,
 }: {
   treeId: string;
   media: MediaItem;
+  suggestions: PersonSummary[];
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -586,6 +663,9 @@ function TagDialog({
         <PersonCombobox
           treeId={treeId}
           label={region ? t("media.whoIsThis") : t("media.addPerson")}
+          excludeIds={region ? [] : media.people.map((p) => p.person_id)}
+          suggestions={suggestions}
+          suggestionsLabel={t("media.relatives")}
           onSelect={(p) =>
             tag.mutate(
               { mediaId: media.id, personId: p.id, region },
