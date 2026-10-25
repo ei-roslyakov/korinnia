@@ -156,6 +156,34 @@ describe("media tab in the editor", () => {
     expect(patches).toHaveLength(1);
   });
 
+  it("links other family members in a new photo from the relatives dropdown", async () => {
+    const tags: unknown[] = [];
+    api("editor", {
+      "POST /api/v1/trees/t1/media/m5/people": (init) => {
+        tags.push(JSON.parse(String(init.body)));
+        return json(mediaItem("m5", "photo"));
+      },
+    });
+    FakeXHR.responses = [{ status: 201, body: mediaItem("m5", "photo") }];
+    renderWithProviders(<App />, { route: "/trees/t1/people/p2/edit?tab=media" });
+    await userEvent.upload(await screen.findByLabelText("Вибрати файли"), [
+      new File(["a"], "сестри.jpg", { type: "image/jpeg" }),
+    ]);
+    const dialog = within(await screen.findByRole("dialog", { name: "Опишіть фото" }));
+    // The relatives drop down before anything is typed; the person themself is already in it.
+    await userEvent.click(dialog.getByRole("combobox", { name: "Оберіть людину з родоводу…" }));
+    expect(dialog.getByText("Рідні")).toBeInTheDocument();
+    expect(dialog.queryByRole("option", { name: /Галина/ })).not.toBeInTheDocument();
+    await userEvent.click(dialog.getByRole("option", { name: /Ольга Ткачук/ }));
+    const inPhoto = within(dialog.getByRole("list", { name: "Хто ще на фото" }));
+    expect(inPhoto.getByText("Ольга Ткачук")).toBeInTheDocument();
+    // Chosen once: not offered again.
+    await userEvent.click(dialog.getByRole("combobox", { name: "Оберіть людину з родоводу…" }));
+    expect(dialog.queryByRole("option", { name: /Ольга Ткачук/ })).not.toBeInTheDocument();
+    await userEvent.click(dialog.getByRole("button", { name: "Зберегти" }));
+    await waitFor(() => expect(tags).toEqual([{ person_id: "p4", region: null }]));
+  });
+
   it("lists linked media and sets a portrait with a crop", async () => {
     let patch: unknown;
     api("editor", {

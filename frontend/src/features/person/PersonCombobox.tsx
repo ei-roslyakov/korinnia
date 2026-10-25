@@ -16,17 +16,24 @@ function useDebounced<T>(value: T, ms: number): T {
   return debounced;
 }
 
-/** Accessible combobox searching people by name variant (Cyrillic/Latin), place or year. */
+/**
+ * Accessible combobox searching people by name variant (Cyrillic/Latin), place or year.
+ * `suggestions` (e.g. the person's relatives) drop down before anything is typed.
+ */
 export function PersonCombobox({
   treeId,
   onSelect,
   label,
   excludeIds = [],
+  suggestions = [],
+  suggestionsLabel,
 }: {
   treeId: string;
   onSelect: (person: PersonSummary) => void;
   label: string;
   excludeIds?: string[];
+  suggestions?: PersonSummary[];
+  suggestionsLabel?: string;
 }) {
   const { t } = useTranslation();
   const listId = useId();
@@ -35,9 +42,12 @@ export function PersonCombobox({
   const [active, setActive] = useState(0);
   const query = useDebounced(text.trim(), 250);
   const search = usePersonSearch(treeId, query);
-  const results =
-    query.length >= 2 ? (search.data?.items ?? []).filter((p) => !excludeIds.includes(p.id)) : [];
-  const showList = open && query.length >= 2;
+  const searching = query.length >= 2;
+  const results = (searching ? (search.data?.items ?? []) : suggestions).filter(
+    (p) => !excludeIds.includes(p.id),
+  );
+  const suggesting = !searching && text.trim().length === 0 && results.length > 0;
+  const showList = open && (searching || suggesting);
 
   const choose = (person: PersonSummary) => {
     onSelect(person);
@@ -85,10 +95,15 @@ export function PersonCombobox({
           role="listbox"
           className="border-bark-100 bg-surface absolute z-30 mt-1 max-h-80 w-full overflow-y-auto rounded-md border py-1 shadow-lg"
         >
-          {search.isFetching && results.length === 0 && (
+          {suggesting && suggestionsLabel && (
+            <li role="presentation" className="text-bark-700 px-3 pt-1 pb-0.5 text-xs">
+              {suggestionsLabel}
+            </li>
+          )}
+          {searching && search.isFetching && results.length === 0 && (
             <li className="text-bark-700 px-3 py-2 text-sm">{t("canvas.searching")}</li>
           )}
-          {!search.isFetching && results.length === 0 && (
+          {searching && !search.isFetching && results.length === 0 && (
             <li className="text-bark-700 px-3 py-2 text-sm">{t("canvas.noResults")}</li>
           )}
           {results.map((p, i) => (

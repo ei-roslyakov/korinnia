@@ -123,8 +123,10 @@ Editors and administrators switch the tree from **View** to **Builder**.
 - **Tag people**: draw a rectangle around a face and choose who it is. **Use as portrait**: crop
   a square for the picture shown on the tree (the original is never changed).
 - When you add photos in the **Media** tab, a short dialog asks for each one's **description**
-  right away (title, date and place are optional). **Later** skips it; **Edit** fills it in at any
-  time. The description is shown above the photo in the family album.
+  right away (title, date and place are optional). Under **Who else is in the photo**, choose the
+  other people from the list — family shows up at once, anyone else by name; the photo then
+  appears on their pages too. **Later** skips all of this; **Edit** and **Tag people** fill it in
+  at any time. The description is shown above the photo in the family album.
 - Each item can have a title, description, date and place, and comments. **Download original**
   gives the file as uploaded.
 

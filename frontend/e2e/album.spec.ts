@@ -50,8 +50,13 @@ test("a described photo shows in the family album on the tree page and the album
   });
   expect(created.status()).toBe(201);
   const personId = (await created.json()).id;
+  const brother = await page.request.post(`/api/v1/trees/${treeId}/persons`, {
+    data: { names: [{ first_name: "Петро", last_name: surname, is_primary: true }] },
+    headers: { "X-CSRF-Token": csrf },
+  });
+  expect(brother.status()).toBe(201);
 
-  // 1. The editor uploads a photo and describes it right away.
+  // 1. The editor uploads a photo, describes it right away and adds who else is in it.
   await page.goto(`/trees/${treeId}/people/${personId}/edit?tab=media`);
   await page.getByLabel("Вибрати файли").setInputFiles({
     name: `album-${tag}.jpg`,
@@ -63,10 +68,18 @@ test("a described photo shows in the family album on the tree page and the album
   // Older than every demo portrait, so it is among the first photos of the album.
   await dialog.getByLabel("Дата: точність").selectOption("year");
   await dialog.getByLabel("Дата: Рік").fill("1801");
+  await dialog
+    .getByRole("combobox", { name: "Оберіть людину з родоводу…" })
+    .fill(`Петро ${surname}`);
+  await page.getByRole("option", { name: new RegExp(`Петро ${surname}`) }).click();
+  await expect(
+    dialog.getByRole("list", { name: "Хто ще на фото" }).getByText(`Петро ${surname}`),
+  ).toBeVisible();
   await dialog.getByRole("button", { name: "Зберегти" }).click();
   await expect(dialog).toHaveCount(0);
   const row = page.locator("li").filter({ hasText: `album-${tag}.jpg` });
   await expect(row.locator("img")).toBeVisible({ timeout: 30_000 });
+  await expect(row.getByText("людей: 2")).toBeVisible();
 
   // 2. It is in the album popup on the tree page (opened with the button), the description
   // above the photo.
@@ -87,6 +100,7 @@ test("a described photo shows in the family album on the tree page and the album
   }
   await expect(shown.getByText(description)).toBeVisible();
   await expect(shown.getByText("1801")).toBeVisible();
+  await expect(shown.getByRole("button", { name: new RegExp(`Петро ${surname}`) })).toBeVisible();
   const text = (await shown.getByText(description).boundingBox())!;
   const photo = (await shown.getByRole("img").boundingBox())!;
   expect(text.y + text.height).toBeLessThanOrEqual(photo.y + 1);

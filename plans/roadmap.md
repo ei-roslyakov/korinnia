@@ -69,7 +69,9 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 - Tree-wide photo album: `GET /album` (ready photos by photo date or newest, filters by people
   and decade, search in descriptions), a popup over the tree opened with the "Family album"
   button (only on request, owner's choice; filter by a person, show them on the tree), the album page `trees/:id/album` (carousel or grid), Lightbox with
-  swipe and the description above the image. New photos ask for a description in the editor.
+  swipe and the description above the image. New photos ask for a description in the editor,
+  and who else is in them (relatives in a dropdown, others by name; tags without a face
+  rectangle — "Tag people" adds that later).
   The demo family's portraits got titles, descriptions, approximate dates and places (run
   `python -m app.seed --all-users` after the deploy so existing demo copies get them).
 - Possible follow-ups: an album filter by place; choosing photos for the album (today it is

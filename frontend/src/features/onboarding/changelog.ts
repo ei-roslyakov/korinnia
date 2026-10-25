@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-25.3",
+    items: {
+      en: [
+        "When you add a photo to a person, you can choose who else is in it — their family is offered in a list. The photo then shows on their pages too.",
+      ],
+      uk: [
+        "Додаючи фото людині, можна одразу вибрати, хто ще на ньому, — її рідні пропонуються списком. Фото з'явиться й на їхніх сторінках.",
+      ],
+      pl: [
+        "Dodając zdjęcie osobie, możesz od razu wybrać, kto jeszcze na nim jest — jej rodzina jest podpowiadana na liście. Zdjęcie pojawi się też na ich stronach.",
+      ],
+    },
+  },
+  {
     id: "2026-10-25.2",
     items: {
       en: [

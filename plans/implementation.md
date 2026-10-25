@@ -71,7 +71,8 @@ plans/            this folder
    `features/album` — `AlbumCarousel` (Embla), `AlbumPopup` (`AlbumButton` in the tree header, popup in a portal),
    `AlbumPage` at `trees/:treeId/album` (lazy route); `media/PhotoCaption` is shared with the
    Lightbox; the editor's media tab asks for a description per new photo (`DescribeDialog`,
-   PATCH after the upload finishes). The demo seed gives every portrait a title, description,
+   PATCH and a tag per chosen person after the upload finishes; `PersonCombobox` takes
+   `suggestions`, here the person's relatives, shown before anything is typed). The demo seed gives every portrait a title, description,
    approximate date and place (`complete_demo` fills older copies).
 7. **Collaboration** — sources and citations on any fact, stories with review workflow,
    contributor suggestions with diff and approval, comments, research questions, data-quality
