@@ -9,6 +9,7 @@ import {
   type ReactNode,
   type SelectHTMLAttributes,
 } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
 import { cx } from "@/lib/cx";
@@ -188,7 +189,11 @@ export function Dialog({
     if (!open && el.open) el.close?.();
   }, [open]);
   if (!open) return null;
-  return (
+  // Rendered on <body>: a dialog opened from inside another dialog's form (e.g. "New place"
+  // in the photo description) would otherwise put its <form> inside that form. Nested forms
+  // are invalid HTML, and the browser then submitted the inner one natively, reloading the
+  // page. React events still bubble to the opener's components through the portal.
+  return createPortal(
     <dialog
       ref={ref}
       onClose={onClose}
@@ -207,7 +212,8 @@ export function Dialog({
         </button>
       </div>
       <div className="p-4">{children}</div>
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }
 
