@@ -61,7 +61,8 @@ describe("App", () => {
     await userEvent.click(screen.getByRole("button", { name: "Підтвердити" }));
     expect(await screen.findByText("Код недійсний.")).toBeInTheDocument();
     const mfaCall = fetch.mock.calls.find((c) => c[0] === "/api/v1/auth/login/mfa");
-    expect((mfaCall?.[1] as RequestInit).body).toBe('{"code":"123456"}');
+    expect(mfaCall).toBeDefined();
+    expect((mfaCall![1] as RequestInit).body).toBe('{"code":"123456"}');
   });
 
   it("shows a translated error for wrong credentials", async () => {

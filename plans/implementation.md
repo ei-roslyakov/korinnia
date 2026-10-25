@@ -15,7 +15,7 @@ What exists today and how it is built. The reasoning for each choice is in
   `X-Accel-Redirect`. Production: Helm chart (`deploy/helm/korinnia`) on Kubernetes via Argo CD; the
   Application lives in the infrastructure repo and its version is set there by hand (D108).
 - **Quality**: pytest (≈290 tests, separate `*_test` database), Vitest (≈130 tests), Playwright E2E
-  on a throwaway production-build stack (desktop + mobile), ruff, mypy, eslint, prettier, tsc,
+  on a throwaway production-build stack (desktop + mobile), ruff, mypy, oxlint, prettier, tsc,
   pre-commit, GitHub Actions CI.
 
 ## Repository layout

@@ -54,7 +54,7 @@ export function MapPicker({
       marker.current = null;
     };
     // The map is created once; later value changes only move the pin (below).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

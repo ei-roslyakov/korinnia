@@ -32,7 +32,7 @@ make help            # list all commands
 make logs s=backend  # follow logs of one service
 make test            # backend (pytest, separate korinnia_test DB) + frontend (Vitest)
 make test-e2e        # Playwright on a throwaway production-build stack (your data is untouched)
-make lint            # ruff, mypy, eslint, prettier, tsc
+make lint            # ruff, mypy, oxlint, prettier, tsc
 make fmt             # auto-format everything
 make migrate         # apply migrations manually
 make revision m="add person table"   # autogenerate a migration
