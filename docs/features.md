@@ -36,7 +36,7 @@ Everything below works today. Planned work is listed in the [roadmap](../README.
 - Relationship calculator: "how is B related to A?" with the kinship term in Ukrainian (двоюрідний, троюрідний…; тесть / свекор…), English (first cousin once removed…) or Polish, half / adoptive notes, closest common ancestors and the path through the tree
 - Family map (OpenStreetMap): places of birth, life, marriage, migration, death and burial; filters by event type and person, with a person's life path drawn in order
 - Family timeline: every dated event in chronological order, grouped by decade, with optional historical context (World Wars, Holodomor, Chornobyl, independence…)
-- "On this day": birthdays, wedding anniversaries and memorial days for a date or the coming week / month
+- "On this day": birthdays, wedding anniversaries and memorial days for a date or the coming week / month / three months
 - Statistics: people, generations, period covered, oldest ancestor, longest life, average lifespan, surnames (spellings in different scripts grouped), first names, births and deaths by decade
 
 ## Builder mode (editors and admins)

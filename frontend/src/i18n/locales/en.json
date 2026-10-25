@@ -922,7 +922,8 @@
       "ranges": {
         "0": "This day only",
         "7": "This day and the next 7",
-        "30": "The next 30 days"
+        "30": "The next 30 days",
+        "92": "The next 3 months"
       },
       "today": "Today",
       "hint": "Birthdays, wedding anniversaries and memorial days. Only exactly known dates (day, month and year) are included.",

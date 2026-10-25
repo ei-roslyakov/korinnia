@@ -48,7 +48,7 @@ from app.schemas.places import PlaceSummary
 from app.services.genealogy.common import name_display, pick_primary
 from app.services.genealogy.summaries import load_names
 
-MAX_WINDOW_DAYS = 31
+MAX_WINDOW_DAYS = 92  # three months
 
 
 @dataclass(slots=True)

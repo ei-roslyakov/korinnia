@@ -10,7 +10,7 @@ import { FactLine } from "./FactLine";
 import { EmptyState } from "@/components/EmptyState";
 import { TextSkeleton } from "@/components/Skeleton";
 
-const RANGES = [0, 7, 30] as const;
+const RANGES = [0, 7, 30, 92] as const;
 
 /** Birthdays, wedding anniversaries and memorial days of exactly dated facts. */
 export function OnThisDayPage() {

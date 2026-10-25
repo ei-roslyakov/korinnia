@@ -13,6 +13,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-25.4",
+    items: {
+      en: ["“On this day” can now show the next 3 months."],
+      uk: ["«Цього дня» тепер може показати наступні 3 місяці."],
+      pl: ["„Tego dnia” może teraz pokazać najbliższe 3 miesiące."],
+    },
+  },
+  {
     id: "2026-10-25.3",
     items: {
       en: [

@@ -295,7 +295,13 @@ async def test_on_this_day(ctx: Ctx, family: dict[str, Any]) -> None:
     assert [i["on"] for i in nye["items"]] == []
     nye = (await ctx.editor.get(f"{ctx.base}/on-this-day?date=2025-12-20&days=31")).json()
     assert nye["days"] == 31
-    assert (await ctx.editor.get(f"{ctx.base}/on-this-day?days=32")).status_code == 422
+    # Three months is the longest window.
+    quarter = (await ctx.editor.get(f"{ctx.base}/on-this-day?date=2025-10-01&days=92")).json()
+    assert quarter["days"] == 92
+    assert {(i["on"], i["fact"]["type"]) for i in week["items"]} <= {
+        (i["on"], i["fact"]["type"]) for i in quarter["items"]
+    }
+    assert (await ctx.editor.get(f"{ctx.base}/on-this-day?days=93")).status_code == 422
     assert (await ctx.editor.get(f"{ctx.base}/on-this-day")).status_code == 200
 
 
