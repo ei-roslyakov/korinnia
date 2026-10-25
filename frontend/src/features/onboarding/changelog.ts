@@ -13,6 +13,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-25",
+    items: {
+      en: [
+        "Family album: every photo of the tree in one carousel, with its description above it. Open it with the Family album button next to the tree's name — a window over the tree — or on its own page with filters by person and decade.",
+        "When you add photos in a person's editor, you are asked for their description right away.",
+      ],
+      uk: [
+        "Сімейний альбом: усі фото родоводу в одній каруселі, з описом над кожним. Відкрийте його кнопкою «Сімейний альбом» поруч із назвою родоводу — у вікні над деревом — або на окремій сторінці з фільтрами за людиною й десятиліттям.",
+        "Додаючи фото в редакторі людини, ви одразу можете їх описати.",
+      ],
+      pl: [
+        "Album rodzinny: wszystkie zdjęcia drzewa w jednej karuzeli, z opisem nad każdym. Otwórz go przyciskiem „Album rodzinny” obok nazwy drzewa — w oknie nad drzewem — albo na osobnej stronie z filtrami według osoby i dekady.",
+        "Dodając zdjęcia w edytorze osoby, od razu możesz je opisać.",
+      ],
+    },
+  },
+  {
     id: "2026-10-22",
     items: {
       en: ["Names and years on the tree keep the same size while you zoom."],

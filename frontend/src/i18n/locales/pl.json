@@ -719,6 +719,14 @@
       "selected_few": "Wybrano {{count}} pliki",
       "selected_many": "Wybrano {{count}} plików",
       "selected_other": "Wybrano {{count}} pliku"
+    },
+    "describe": {
+      "title": "Opisz zdjęcie",
+      "progress": "{{n}} z {{total}}",
+      "hint": "Co się dzieje, kto jest na zdjęciu, kiedy i gdzie? Opis jest pokazywany nad zdjęciem w albumie rodzinnym.",
+      "later": "Później",
+      "saveNext": "Zapisz i dalej",
+      "preview": "Opisywany plik"
     }
   },
   "collab": {
@@ -882,7 +890,8 @@
       "map": "Mapa",
       "onThisDay": "Tego dnia",
       "relationship": "Pokrewieństwo",
-      "stats": "Statystyki"
+      "stats": "Statystyki",
+      "album": "Album rodzinny"
     },
     "clearPerson": "Usuń osobę",
     "categories": {
@@ -1312,5 +1321,46 @@
     "demoEndedHint": "Sesja demo trwa 30 minut. Twoja kopia demo i wprowadzone zmiany zostały usunięte. Rozpocznij nowe demo, aby dalej poznawać aplikację.",
     "newDemo": "Rozpocznij nowe demo",
     "demoBadge": "Demo · zostało {{time}}"
+  },
+  "album": {
+    "title": "Album rodzinny",
+    "carousel": "karuzela",
+    "slide": "slajd",
+    "slideOf": "{{n}} z {{total}}",
+    "count_one": "{{count}} zdjęcie",
+    "count_few": "{{count}} zdjęcia",
+    "count_many": "{{count}} zdjęć",
+    "count_other": "{{count}} zdjęcia",
+    "showAll": "Pokaż wszystkie",
+    "photo": "Zdjęcie",
+    "photoOf": "Zdjęcie: {{names}}",
+    "more": "więcej",
+    "less": "mniej",
+    "play": "Uruchom pokaz",
+    "pause": "Wstrzymaj pokaz",
+    "goTo": "Przejdź do zdjęcia {{n}}",
+    "thumbnails": "Miniatury albumu",
+    "emptyTitle": "W albumie nie ma jeszcze zdjęć",
+    "emptyHint": "Zdjęcia dodaje się do osób: otwórz edytor osoby, kartę „Media” i opisz każde zdjęcie.",
+    "emptyHowTo": "Jak dodać zdjęcia",
+    "person": "Kto jest na zdjęciu",
+    "decade": "Dekada",
+    "allDecades": "Wszystkie lata",
+    "decadeValue": "lata {{decade}}–{{end}}",
+    "sort": "Kolejność",
+    "sortDate": "Według daty zdjęcia",
+    "sortNewest": "Najpierw najnowsze",
+    "view": "Widok",
+    "viewCarousel": "Karuzela",
+    "viewGrid": "Siatka",
+    "search": "Szukaj w opisach…",
+    "loadMore": "Pokaż więcej",
+    "noMatch": "Brak zdjęć pasujących do filtrów.",
+    "openPhoto": "Otwórz zdjęcie",
+    "onlyTheirPhotos": "Tylko zdjęcia tej osoby",
+    "showOnTree": "Pokaż na drzewie",
+    "openPersonPage": "Otwórz stronę",
+    "filteredBy": "Zdjęcia: {{name}}",
+    "clearFilter": "Pokaż zdjęcia wszystkich"
   }
 }

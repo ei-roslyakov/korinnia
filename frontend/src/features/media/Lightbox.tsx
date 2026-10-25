@@ -1,13 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import { CommentsThread } from "@/features/collab/CommentsThread";
-import { formatPartialDate } from "@/lib/dates";
 import type { MediaItem } from "@/lib/genealogy";
 import { atLeast, type Role } from "@/lib/types";
 
-/** Full-screen viewer for photos, scans and videos with prev/next and face tags. */
+import { photoAlt } from "./photoAlt";
+import { PhotoCaption } from "./PhotoCaption";
+
+/** A horizontal move of at least this many pixels (and more sideways than up) is a swipe. */
+const SWIPE_PX = 50;
+
+/** Full-screen viewer for photos, scans and videos with prev/next, swipe and face tags. */
 export function Lightbox({
   items,
   index,
@@ -15,6 +20,7 @@ export function Lightbox({
   onClose,
   personLink,
   comments,
+  total,
 }: {
   items: MediaItem[];
   index: number;
@@ -23,11 +29,28 @@ export function Lightbox({
   personLink: (id: string) => string;
   /** Tree members can read and (contributor+) write comments on the item. */
   comments?: { treeId: string; role: Role };
+  /** All items, when `items` is only what is loaded so far (the family album). */
+  total?: number;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [showTags, setShowTags] = useState(true);
   const [showComments, setShowComments] = useState(false);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const item = items[index];
+
+  // One item is shown at a time, so a swipe only needs its direction (no drag-follow).
+  const onPointerDown = (e: PointerEvent) => {
+    swipeStart.current = { x: e.clientX, y: e.clientY };
+  };
+  const onPointerUp = (e: PointerEvent) => {
+    const start = swipeStart.current;
+    swipeStart.current = null;
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(e.clientY - start.y)) return;
+    if (dx < 0 && index < items.length - 1) onIndex(index + 1);
+    if (dx > 0 && index > 0) onIndex(index - 1);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -53,7 +76,7 @@ export function Lightbox({
     >
       <div className="flex items-center justify-between gap-2 px-4 py-2 text-sm">
         <span>
-          {index + 1} / {items.length}
+          {index + 1} / {Math.max(total ?? 0, items.length)}
         </span>
         <div className="flex items-center gap-3">
           {tagged.length > 0 && (
@@ -91,7 +114,20 @@ export function Lightbox({
       </div>
       <div className="flex min-h-0 flex-1">
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="relative flex min-h-0 flex-1 items-center justify-center px-12">
+          <PhotoCaption
+            key={item.id}
+            item={item}
+            tone="dark"
+            fallback={item.original_filename}
+            className="mx-auto w-full max-w-3xl px-4 pb-2"
+          />
+          <div
+            className="relative flex min-h-0 flex-1 touch-pan-y items-center justify-center px-12"
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+            onPointerCancel={() => (swipeStart.current = null)}
+            data-testid="lightbox-stage"
+          >
             {index > 0 && (
               <button
                 type="button"
@@ -108,8 +144,13 @@ export function Lightbox({
               <div className="relative inline-block max-h-full">
                 <img
                   src={item.urls.web}
-                  alt={item.title ?? item.original_filename}
-                  className="block max-h-[calc(100dvh-10rem)] max-w-full object-contain"
+                  alt={
+                    item.kind === "photo"
+                      ? photoAlt(item, t)
+                      : (item.title ?? item.original_filename)
+                  }
+                  draggable={false}
+                  className="block max-h-[calc(100dvh-12rem)] max-w-full object-contain"
                 />
                 {showTags &&
                   tagged.map((p) => (
@@ -143,17 +184,8 @@ export function Lightbox({
               </button>
             )}
           </div>
-          <div className="space-y-1 px-4 py-3 text-sm">
-            <div className="font-medium">{item.title ?? item.original_filename}</div>
-            <div className="text-white/70">
-              {[formatPartialDate(item.date, t, i18n.language), item.place?.name]
-                .filter(Boolean)
-                .join(" · ")}
-            </div>
-            {item.description && (
-              <p className="whitespace-pre-line text-white/80">{item.description}</p>
-            )}
-            {item.people.length > 0 && (
+          {item.people.length > 0 && (
+            <div className="px-4 py-3 text-sm">
               <div className="flex flex-wrap gap-x-2 text-white/80">
                 {t("media.inPhoto")}:{" "}
                 {item.people.map((p) => (
@@ -167,8 +199,8 @@ export function Lightbox({
                   </Link>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         {comments && showComments && (
           <aside

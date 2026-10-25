@@ -22,7 +22,8 @@ with a fictional seven-generation family to explore and edit for 30 minutes.
   approximate dates, places with historical names, sources and citations on every fact, full
   revision history and a trash bin.
 - **Media archive** — photos (incl. HEIC), scans, PDFs, audio and video; originals kept
-  byte-for-byte with SHA-256 checksums and checked weekly; face tagging and portraits.
+  byte-for-byte with SHA-256 checksums and checked weekly; face tagging and portraits; a family
+  album carousel of every described photo.
 - **Family together** — per-tree roles (viewer, contributor, editor, admin), suggestions and
   stories with moderation, comments, research questions, share links for people without an
   account.

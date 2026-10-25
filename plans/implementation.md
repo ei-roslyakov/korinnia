@@ -65,7 +65,14 @@ plans/            this folder
    (D47–D53)
 6. **Media** — uploads (streamed), content-type detection, originals never modified, worker makes
    web versions/thumbnails/posters, gallery + lightbox, face tags, portrait crop, served only to
-   members via nginx. (D54–D59)
+   members via nginx. (D54–D59) Family album (2026-10-25, D113): `GET /trees/{id}/album`
+   (photos that are ready, by `date_sort` with undated last or newest upload, person / year
+   filters, decades for the filter, search in title + description + filename);
+   `features/album` — `AlbumCarousel` (Embla), `AlbumPopup` (`AlbumButton` in the tree header, popup in a portal),
+   `AlbumPage` at `trees/:treeId/album` (lazy route); `media/PhotoCaption` is shared with the
+   Lightbox; the editor's media tab asks for a description per new photo (`DescribeDialog`,
+   PATCH after the upload finishes). The demo seed gives every portrait a title, description,
+   approximate date and place (`complete_demo` fills older copies).
 7. **Collaboration** — sources and citations on any fact, stories with review workflow,
    contributor suggestions with diff and approval, comments, research questions, data-quality
    panel. (D60–D67)

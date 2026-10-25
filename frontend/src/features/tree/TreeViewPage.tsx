@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router";
 
 import { Button, ErrorAlert, Select, Spinner } from "@/components/ui";
+import { AlbumButton } from "@/features/album/AlbumPopup";
 import { AddRelativeDialog } from "@/features/builder/AddRelativeDialog";
 import { DeletePersonDialog } from "@/features/builder/DeletePersonDialog";
 import { useResetLayout, useSaveLayoutOffsets } from "@/features/builder/api";
@@ -110,6 +111,14 @@ export function TreeViewPage() {
       <div className="border-bark-100 bg-surface flex flex-wrap items-center gap-x-4 gap-y-2 border-b px-4 py-2">
         <h1 className="font-serif text-lg font-semibold">{tree.data.name}</h1>
         <span className="text-bark-700 text-xs">{t("canvas.persons", { count })}</span>
+        {count > 0 && (
+          <AlbumButton
+            treeId={treeId}
+            role={tree.data.my_role}
+            canEdit={canEdit}
+            onShowOnTree={goTo}
+          />
+        )}
         {count > 0 && <SearchBox treeId={treeId} onSelect={(p) => goTo(p.id)} />}
         {count > 0 && (
           <div className="flex items-center gap-2 text-sm">

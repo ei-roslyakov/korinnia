@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, BinaryIO
 
 from anyio import to_thread
-from sqlalchemy import func, or_, select
+from sqlalchemy import exists, extract, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -355,16 +355,70 @@ async def list_media(
     if kind:
         stmt = stmt.where(MediaFile.kind == kind)
     if q:
-        like = f"%{q.strip().lower()}%"
-        stmt = stmt.where(
-            or_(
-                func.lower(MediaFile.title).like(like),
-                func.lower(MediaFile.original_filename).like(like),
-            )
-        )
+        stmt = stmt.where(_matches(q))
     total = await session.scalar(select(func.count()).select_from(stmt.subquery())) or 0
     rows = await session.scalars(stmt.order_by(*order).limit(limit).offset(offset))
     return list(rows), total
+
+
+def _matches(q: str) -> Any:
+    """Title, description or file name contains `q` (case-insensitive)."""
+    like = f"%{q.strip().lower()}%"
+    return or_(
+        func.lower(MediaFile.title).like(like),
+        func.lower(MediaFile.description).like(like),
+        func.lower(MediaFile.original_filename).like(like),
+    )
+
+
+async def list_album(
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    *,
+    person_ids: Sequence[uuid.UUID],
+    year_from: int | None,
+    year_to: int | None,
+    q: str | None,
+    newest: bool,
+    limit: int,
+    offset: int,
+) -> tuple[list[MediaFile], int, list[int]]:
+    """The tree's photo album: processed, not deleted photos, by photo date (undated last)
+    or newest upload first. Also returns the decades that have photos (for the filter;
+    without the year range, so the choice never narrows itself)."""
+    stmt = select(MediaFile).where(
+        MediaFile.tree_id == tree_id,
+        MediaFile.deleted_at.is_(None),
+        MediaFile.kind == MediaKind.photo,
+        MediaFile.processing_status == ProcessingStatus.ready,
+    )
+    if person_ids:
+        stmt = stmt.where(
+            exists().where(
+                MediaPerson.media_id == MediaFile.id, MediaPerson.person_id.in_(person_ids)
+            )
+        )
+    if q:
+        stmt = stmt.where(_matches(q))
+    year = extract("year", MediaFile.date_sort)
+    dated = stmt.where(MediaFile.date_sort.is_not(None)).subquery()
+    decades = sorted(
+        int(d)
+        for d in await session.scalars(
+            select(func.floor(extract("year", dated.c.date_sort) / 10) * 10).distinct()
+        )
+    )
+    if year_from is not None:
+        stmt = stmt.where(year >= year_from)
+    if year_to is not None:
+        stmt = stmt.where(year <= year_to)
+    if newest:
+        order: Any = (MediaFile.created_at.desc(), MediaFile.id)
+    else:
+        order = (MediaFile.date_sort.asc().nulls_last(), MediaFile.created_at, MediaFile.id)
+    total = await session.scalar(select(func.count()).select_from(stmt.subquery())) or 0
+    rows = await session.scalars(stmt.order_by(*order).limit(limit).offset(offset))
+    return list(rows), total, decades
 
 
 async def update_media(

@@ -711,6 +711,14 @@
       "add": "Add media",
       "selected_one": "{{count}} file selected",
       "selected_other": "{{count}} files selected"
+    },
+    "describe": {
+      "title": "Describe the photo",
+      "progress": "{{n}} of {{total}}",
+      "hint": "What is happening, who is in it, when and where? The description is shown above the photo in the family album.",
+      "later": "Later",
+      "saveNext": "Save and next",
+      "preview": "The file being described"
     }
   },
   "collab": {
@@ -872,7 +880,8 @@
       "map": "Map",
       "onThisDay": "On this day",
       "relationship": "Relationship",
-      "stats": "Statistics"
+      "stats": "Statistics",
+      "album": "Family album"
     },
     "clearPerson": "Clear person",
     "categories": {
@@ -1246,5 +1255,44 @@
     "demoEndedHint": "Demo sessions last 30 minutes. Your demo copy and the changes you made are discarded. Start a new demo to continue exploring.",
     "newDemo": "Start a new demo",
     "demoBadge": "Demo · {{time}} left"
+  },
+  "album": {
+    "title": "Family album",
+    "carousel": "carousel",
+    "slide": "slide",
+    "slideOf": "{{n}} of {{total}}",
+    "count_one": "{{count}} photo",
+    "count_other": "{{count}} photos",
+    "showAll": "Show all",
+    "photo": "Photo",
+    "photoOf": "Photo of {{names}}",
+    "more": "more",
+    "less": "less",
+    "play": "Play slideshow",
+    "pause": "Pause slideshow",
+    "goTo": "Go to photo {{n}}",
+    "thumbnails": "Album thumbnails",
+    "emptyTitle": "No photos in the album yet",
+    "emptyHint": "Photos are added to people: open a person's editor, the Media tab, and describe each photo.",
+    "emptyHowTo": "How to add photos",
+    "person": "Who is in the photo",
+    "decade": "Decade",
+    "allDecades": "All years",
+    "decadeValue": "{{decade}}s",
+    "sort": "Order",
+    "sortDate": "By photo date",
+    "sortNewest": "Newest uploads first",
+    "view": "View",
+    "viewCarousel": "Carousel",
+    "viewGrid": "Grid",
+    "search": "Search descriptions…",
+    "loadMore": "Show more",
+    "noMatch": "No photos match these filters.",
+    "openPhoto": "Open photo",
+    "onlyTheirPhotos": "Only photos of this person",
+    "showOnTree": "Show on the tree",
+    "openPersonPage": "Open their page",
+    "filteredBy": "Photos of {{name}}",
+    "clearFilter": "Show everyone's photos"
   }
 }

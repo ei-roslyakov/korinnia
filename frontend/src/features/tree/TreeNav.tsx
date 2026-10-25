@@ -29,6 +29,7 @@ export function TreeNav({
     </>
   );
   const links: [string, ReactNode, boolean][] = [
+    ["album", t("insights.nav.album"), true],
     ["timeline", t("insights.nav.timeline"), true],
     ["map", t("insights.nav.map"), true],
     ["on-this-day", t("insights.nav.onThisDay"), true],

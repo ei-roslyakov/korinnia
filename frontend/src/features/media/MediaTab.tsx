@@ -32,6 +32,7 @@ import { useErrorMessage } from "@/lib/hooks";
 
 import {
   uploadMedia,
+  type MediaPatch,
   useDeleteMedia,
   useReorderMedia,
   useReprocessMedia,
@@ -40,6 +41,15 @@ import {
   useUpdateMedia,
 } from "./api";
 import { RegionSelector } from "./RegionSelector";
+
+/** A just-added photo waiting for its description (asked right away, saved once uploaded). */
+interface Describing {
+  key: string;
+  file: File;
+  uploaded: Promise<MediaItem | null>;
+}
+
+const isImageFile = (f: File) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name);
 
 interface UploadState {
   key: string;
@@ -68,6 +78,9 @@ export function MediaTab({
   const [editing, setEditing] = useState<MediaItem | null>(null);
   const [tagging, setTagging] = useState<MediaItem | null>(null);
   const [cropping, setCropping] = useState<MediaItem | null>(null);
+  const [describing, setDescribing] = useState<Describing[]>([]);
+  const [describedCount, setDescribedCount] = useState(0);
+  const update = useUpdateMedia(treeId);
   const reorder = useReorderMedia(treeId, person.id);
   const untag = useUntagPerson(treeId);
   const tag = useTagPerson(treeId);
@@ -80,7 +93,7 @@ export function MediaTab({
 
   const send = async (file: File, key: string, allowDuplicate = false) => {
     try {
-      await uploadMedia(treeId, file, {
+      const item = await uploadMedia(treeId, file, {
         personId: person.id,
         kind: asDocument ? "document_scan" : undefined,
         allowDuplicate,
@@ -88,21 +101,37 @@ export function MediaTab({
       });
       setUploads((list) => list.filter((u) => u.key !== key));
       onChanged();
+      return item;
     } catch (err) {
       const dup =
         err instanceof ApiError && err.code === "duplicate_media"
           ? String((err.body as { media_id: string }).media_id)
           : undefined;
       setUpload(key, { error: err, duplicateOf: dup });
+      return null;
     }
   };
 
   const addFiles = (files: FileList | File[]) => {
+    const added: Describing[] = [];
     for (const file of Array.from(files)) {
       const key = `${file.name}-${file.size}-${Math.random()}`;
       setUploads((list) => [...list, { key, name: file.name, progress: 0, file }]);
-      void send(file, key);
+      const uploaded = send(file, key);
+      if (isImageFile(file)) added.push({ key, file, uploaded });
     }
+    if (added.length) setDescribing((list) => [...list, ...added]);
+  };
+
+  // The upload keeps going while the editor types; the details are saved when it is done.
+  const finishDescribing = (entry: Describing, details: MediaPatch | null) => {
+    setDescribing((list) => list.filter((d) => d.key !== entry.key));
+    // Counts "2 of 3" within one batch; starts again once every photo is answered.
+    setDescribedCount((n) => (describing.length > 1 ? n + 1 : 0));
+    if (!details) return;
+    void entry.uploaded.then((item) => {
+      if (item) update.mutate({ id: item.id, ...details }, { onSuccess: onChanged });
+    });
   };
 
   const move = (i: number, delta: number) => {
@@ -217,7 +246,9 @@ export function MediaTab({
         </ul>
       )}
 
-      <ErrorAlert error={reorder.error ?? untag.error ?? del.error ?? reprocess.error} />
+      <ErrorAlert
+        error={reorder.error ?? untag.error ?? del.error ?? reprocess.error ?? update.error}
+      />
       {media.length === 0 && uploads.length === 0 && (
         <p className="text-bark-700 text-sm">{t("media.none")}</p>
       )}
@@ -302,6 +333,16 @@ export function MediaTab({
           </li>
         ))}
       </ul>
+      {describing[0] && (
+        <DescribeDialog
+          key={describing[0].key}
+          treeId={treeId}
+          file={describing[0].file}
+          n={describedCount + 1}
+          total={describedCount + describing.length}
+          onDone={(details) => finishDescribing(describing[0]!, details)}
+        />
+      )}
       {editing && (
         <MediaMetaDialog treeId={treeId} media={editing} onClose={() => setEditing(null)} />
       )}
@@ -321,6 +362,106 @@ export function MediaTab({
         />
       )}
     </div>
+  );
+}
+
+/** Asked right after photos are chosen: the description first (shown above the photo in the
+ *  family album), the title, date and place optional. "Later" keeps the photo undescribed. */
+function DescribeDialog({
+  treeId,
+  file,
+  n,
+  total,
+  onDone,
+}: {
+  treeId: string;
+  file: File;
+  n: number;
+  total: number;
+  onDone: (details: MediaPatch | null) => void;
+}) {
+  const { t } = useTranslation();
+  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState<DateValue | null>(null);
+  const [place, setPlace] = useState<PlaceSummary | null>(null);
+  // A local preview of the chosen file, released when the dialog moves on.
+  const showPreview = (img: HTMLImageElement | null) => {
+    if (!img || typeof URL.createObjectURL !== "function") return;
+    const url = URL.createObjectURL(file);
+    img.src = url;
+    return () => URL.revokeObjectURL(url);
+  };
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const payloadDate = toPayload(date);
+    const details: MediaPatch = {
+      ...(description.trim() && { description: description.trim() }),
+      ...(title.trim() && { title: title.trim() }),
+      ...(payloadDate && { date: payloadDate }),
+      ...(place && { place_id: place.id }),
+    };
+    onDone(Object.keys(details).length ? details : null);
+  };
+  const heading =
+    total > 1
+      ? `${t("media.describe.title")} (${t("media.describe.progress", { n, total })})`
+      : t("media.describe.title");
+
+  return (
+    <Dialog open title={heading} onClose={() => onDone(null)}>
+      <form onSubmit={onSubmit} className="max-h-[75vh] space-y-3 overflow-y-auto pr-1">
+        <div className="flex items-center gap-3">
+          <div className="bg-bark-100 size-20 shrink-0 overflow-hidden rounded">
+            <img
+              ref={showPreview}
+              alt={t("media.describe.preview")}
+              className="size-full object-cover"
+              onError={(e) => (e.currentTarget.hidden = true)}
+            />
+          </div>
+          <p className="text-bark-700 min-w-0 text-sm break-words">{file.name}</p>
+        </div>
+        <p className="text-bark-700 text-xs">{t("media.describe.hint")}</p>
+        <Field label={t("builder.events.description")}>
+          {(id) => (
+            <TextArea
+              id={id}
+              rows={4}
+              autoFocus
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          )}
+        </Field>
+        <Field label={t("builder.events.title")}>
+          {(id) => (
+            <Input
+              id={id}
+              maxLength={300}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          )}
+        </Field>
+        <PartialDateInput label={t("builder.events.date")} value={date} onChange={setDate} />
+        <PlaceInput
+          treeId={treeId}
+          label={t("builder.events.place")}
+          value={place}
+          onChange={setPlace}
+        />
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => onDone(null)}>
+            {t("media.describe.later")}
+          </Button>
+          <Button type="submit">
+            {n < total ? t("media.describe.saveNext") : t("common.save")}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
   );
 }
 

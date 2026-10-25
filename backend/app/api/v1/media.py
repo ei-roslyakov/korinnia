@@ -15,7 +15,14 @@ from app.core.errors import NotFoundError
 from app.jobs.queue import enqueue_avatar, enqueue_media_processing
 from app.models import MediaFile, MediaKind, Person
 from app.schemas.common import Page
-from app.schemas.media import MediaOrder, MediaOut, MediaUpdate, TagIn, TagUpdate
+from app.schemas.media import (
+    AlbumPage,
+    MediaOrder,
+    MediaOut,
+    MediaUpdate,
+    TagIn,
+    TagUpdate,
+)
 from app.services.genealogy import media as media_service
 from app.services.genealogy.common import get_live
 from app.storage import LocalStorage, Storage, get_storage
@@ -83,6 +90,34 @@ async def list_media(
         total=total,
         limit=page.limit,
         offset=page.offset,
+    )
+
+
+@router.get("/album", response_model=AlbumPage)
+async def album(
+    access: TreeViewer,
+    session: SessionDep,
+    page: PageParams,
+    person_id: Annotated[list[uuid.UUID] | None, Query(max_length=50)] = None,
+    year_from: Annotated[int | None, Query(ge=1, le=9999)] = None,
+    year_to: Annotated[int | None, Query(ge=1, le=9999)] = None,
+    q: Annotated[str | None, Query(max_length=200)] = None,
+    sort: Literal["date", "newest"] = "date",
+) -> AlbumPage:
+    """The family album: every processed photo of the tree, by photo date (undated photos
+    last, then by upload time) or newest upload first. `person_id` (repeatable) keeps photos
+    showing any of these people; `year_from` / `year_to` filter by the photo's date; `q`
+    searches the title, description and file name."""
+    items, total, decades = await media_service.list_album(
+        session, access.tree.id, person_ids=person_id or [], year_from=year_from, year_to=year_to,
+        q=q, newest=sort == "newest", limit=page.limit, offset=page.offset,
+    )  # fmt: skip
+    return AlbumPage(
+        items=await media_service.media_out_many(session, items),
+        total=total,
+        limit=page.limit,
+        offset=page.offset,
+        decades=decades,
     )
 
 

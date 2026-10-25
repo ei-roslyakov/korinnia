@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-18 (repo prepared to go public; next: "You are in a family tree")_
+_Last updated: 2026-10-25 (family album with a carousel; next: "You are in a family tree")_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -63,6 +63,17 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   networks) — D100.
 - ✅ TOTP secrets encrypted at rest (migration 0011, optional `DATA_ENCRYPTION_KEY`) — D101.
 - (Already done early: couple-aware layout, D74.)
+
+## Family album (done 2026-10-25, D113)
+
+- Tree-wide photo album: `GET /album` (ready photos by photo date or newest, filters by people
+  and decade, search in descriptions), a popup over the tree opened with the "Family album"
+  button (only on request, owner's choice; filter by a person, show them on the tree), the album page `trees/:id/album` (carousel or grid), Lightbox with
+  swipe and the description above the image. New photos ask for a description in the editor.
+  The demo family's portraits got titles, descriptions, approximate dates and places (run
+  `python -m app.seed --all-users` after the deploy so existing demo copies get them).
+- Possible follow-ups: an album filter by place; choosing photos for the album (today it is
+  every photo); full-screen slideshow mode.
 
 ## Now: "You are in a family tree" (agreed 2026-10-12)
 
@@ -128,6 +139,14 @@ Still to do:
   `enforce: baseline` (+ `warn/audit: restricted`); `restricted` needs `fixPermissions: false`.
 
 ## Open issues and things to keep in mind
+
+- `e2e/builder.spec.ts` "add a child from a card…" failed once on chromium in a full
+  `make test-e2e` run (2026-10-25: a `toBeVisible` timeout) and passed on its own and in the
+  next full run; looks like a flake under parallel load, not investigated.
+- **Living people's photos in the family album (open question for the owner).** The album shows
+  every photo to everyone who can see the tree, viewers and share-link visitors included — the
+  same as person pages and the media list today. Should it (and maybe media in general) hide
+  photos of living people from viewers and share-link visitors? Not changed until decided.
 
 - **Vite dev cache breaks after running tests locally.** `make lint` / `make test` run `npm ci` in a
   container that shares `node_modules` with the dev server, which wipes Vite's pre-bundled deps; the

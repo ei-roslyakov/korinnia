@@ -30,6 +30,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.dates import PartialDate
 from app.core.db import get_engine, get_sessionmaker
+from app.core.enums import DatePrecision
 from app.core.errors import AppError
 from app.core.logging import configure_logging
 from app.models import Person, Tree, User
@@ -45,6 +46,7 @@ from app.services.genealogy import media as media_service
 from app.services.genealogy import persons as person_service
 from app.services.genealogy import places as place_service
 from app.services.genealogy import relationships as rel_service
+from app.services.genealogy.common import set_date
 from app.storage import Storage, get_storage
 
 TREE_NAME = "Родина Коваленків (демо)"
@@ -1274,6 +1276,35 @@ def _portrait_age(p: P) -> int:
     return max(20, min(int((end - born) * 0.6), 55 if p.died else 48))
 
 
+PORTRAIT_TITLE_OLD = "Портрет (ілюстрація)"  # before the album: one title for every portrait
+PORTRAIT_NOTE = "Ілюстрований портрет, намальований для демонстраційного родоводу."
+
+
+def _portrait_meta(p: P, places: dict[str, Any]) -> dict[str, Any]:
+    """Title, description, date and place of a generated portrait, so the family album shows
+    who it is, when and where: the name, the first paragraph of the biography, the year the
+    drawing shows the person at (approximate) and their home place."""
+    name = f"{p.first} {p.last}" if not p.latin_primary else " ".join(p.latin or ())
+    bio = BIOGRAPHIES.get(p.key, "").split("\n\n", 1)[0].strip()
+    born = (p.born or {}).get("year")
+    year = min(born + _portrait_age(p), 2025) if born else None
+    return {
+        "title": name,
+        "description": f"{bio}\n\n{PORTRAIT_NOTE}" if bio else PORTRAIT_NOTE,
+        "date": PartialDate(year=year, precision=DatePrecision.approx) if year else None,
+        "place_id": places.get(p.born_in or p.died_in or ""),
+    }
+
+
+def _describe_portrait(media: Any, p: P, places: dict[str, Any]) -> None:
+    meta = _portrait_meta(p, places)
+    media.title = meta["title"]
+    media.description = meta["description"]
+    if meta["date"]:
+        set_date(media, "date", "date_sort", meta["date"])
+    media.place_id = meta["place_id"]
+
+
 async def _store_portrait(
     session: AsyncSession,
     storage: Storage,
@@ -1282,6 +1313,7 @@ async def _store_portrait(
     index: int,
     p: P,
     actor: Actor,
+    places: dict[str, Any],
 ) -> Any:
     """Draw, store (like an upload) and set as the person's portrait; returns the media id."""
     data = _portrait_bytes(index, p)
@@ -1291,10 +1323,10 @@ async def _store_portrait(
         tree.id,
         media_service.Upload(file=io.BytesIO(data), filename=_portrait_file(p), size=len(data)),
         actor=actor,
-        title="Портрет (ілюстрація)",
         person_id=person.id,
         allow_duplicate=True,
     )
+    _describe_portrait(media, p, places)
     person.primary_photo_id = media.id
     person.primary_photo_crop = dict(HEAD_CROP)
     person.avatar_key = None  # redrawn by the worker
@@ -1312,13 +1344,17 @@ async def _portraits(
 ) -> list[tuple[Any, Any]]:
     """An illustrated portrait per person (or per person in `only`)."""
     stored = []
+    places = await _places(session, tree, actor)
     for i, p in enumerate(PEOPLE):
         if only is not None and p.key not in only:
             continue
         person = await session.get(Person, ids[p.key]) if p.key in ids else None
         if person is not None:
             stored.append(
-                (await _store_portrait(session, storage, tree, person, i, p, actor), person.id)
+                (
+                    await _store_portrait(session, storage, tree, person, i, p, actor, places),
+                    person.id,
+                )
             )
     return stored
 
@@ -1471,6 +1507,7 @@ async def complete_demo(
     actor = Actor(owner, ip="seed")
     store = storage or get_storage()
     result = DemoUpdate(added=await _extend(session, tree, owner, actor, store))
+    places = await _places(session, tree, actor)
     by_name: dict[tuple[str | None, str | None], Person] = {}
     rows = await session.execute(
         select(PersonName.first_name, PersonName.last_name, Person)
@@ -1499,8 +1536,17 @@ async def complete_demo(
             and _is_generated_portrait(current.original_filename, p)
             and current.original_filename != _portrait_file(p)
         )
+        if (
+            current is not None
+            and current.original_filename == _portrait_file(p)
+            and current.title == PORTRAIT_TITLE_OLD
+            and current.description is None
+        ):
+            _describe_portrait(current, p, places)  # for the family album
+            await session.commit()
+            changed = True
         if person.primary_photo_id is None or outdated:
-            media_id = await _store_portrait(session, store, tree, person, i, p, actor)
+            media_id = await _store_portrait(session, store, tree, person, i, p, actor, places)
             if outdated and current is not None:
                 await media_service.delete_media(session, current, actor)  # to the trash
             await enqueue_media_processing(media_id)
