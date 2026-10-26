@@ -180,7 +180,7 @@ The links under the tree's title:
 - **Map** — where the family was born, lived, married, moved, died and is buried; filters by
   event type and person, with a person's life path drawn in order.
 - **On this day** — birthdays, wedding anniversaries and memorial days for a date or the coming
-  week or month.
+  week, month or three months.
 - **Relationship** — choose two people to get the exact kinship term ("first cousin once
   removed", in Ukrainian "троюрідний брат", "свекор"…), the closest common ancestors and the
   path between them.
