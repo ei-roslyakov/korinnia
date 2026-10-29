@@ -110,7 +110,7 @@ test-e2e: .env ## End-to-end tests (Playwright) on a throwaway production-build 
 
 .PHONY: perf
 perf: .env ## Performance check on a large synthetic tree (PEOPLE=2000) on a throwaway prod stack
-	PEOPLE=$(or $(PEOPLE),2000) sh scripts/perf.sh
+	PEOPLE=$(or $(PEOPLE),2000) PLAYWRIGHT_IMAGE=$(PLAYWRIGHT_IMAGE) sh scripts/perf.sh
 
 .PHONY: perf-tree
 perf-tree: ## Add a large synthetic tree to the dev stack: make perf-tree people=2000

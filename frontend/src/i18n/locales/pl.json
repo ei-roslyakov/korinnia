@@ -1499,5 +1499,41 @@
     "searchRecipes": "Szukaj po nazwie, składniku lub okazji…",
     "none": "Nie ma jeszcze przepisów ani tradycji.",
     "noneHint": "Zapisz barszcz babci, wielkanocny zwyczaj albo weselną piosenkę, żeby nie zostały zapomniane."
+  },
+  "charts": {
+    "title": "Wykresy",
+    "generations": "Pokolenia",
+    "unknown": "nieznany",
+    "paternal": "linia ojca",
+    "maternal": "linia matki",
+    "legend": "kliknij osobę, aby umieścić ją w środku; ⟳ przodek pokazany ponownie (małżeństwo krewnych); przerywana linia — przysposobieni lub nierodzeni",
+    "more": "Poza wykresem są kolejne pokolenia.",
+    "download": "Pobierz {{format}}",
+    "zoomIn": "Powiększ",
+    "zoomOut": "Pomniejsz",
+    "resetView": "Resetuj widok",
+    "fan": {
+      "title": "Wachlarz",
+      "of": "Przodkowie: {{name}}",
+      "file": "wachlarz",
+      "full": "Pełne koło"
+    },
+    "pedigree": {
+      "title": "Rodowód",
+      "of": "Rodowód: {{name}}",
+      "file": "rodowod"
+    },
+    "descendants": {
+      "title": "Potomkowie",
+      "of": "Potomkowie: {{name}}",
+      "file": "potomkowie",
+      "namesOnly": "Żyjące osoby tylko z imienia",
+      "fold": "Zwiń: {{name}}",
+      "unfold": "Rozwiń: {{name}}",
+      "more_one": "Pokazano do {{count}} pokolenia; są kolejne.",
+      "more_few": "Pokazano do {{count}} pokoleń; są kolejne.",
+      "more_many": "Pokazano do {{count}} pokoleń; są kolejne.",
+      "more_other": "Pokazano do {{count}} pokoleń; są kolejne."
+    }
   }
 }

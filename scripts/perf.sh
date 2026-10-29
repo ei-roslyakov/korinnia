@@ -6,7 +6,8 @@ set -eu
 cd "$(dirname "$0")/.."
 PEOPLE="${PEOPLE:-2000}"
 PORT="${PERF_PORT:-8092}"
-PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.63.0-noble}"
+# `make perf` passes the Makefile's image (the one matching @playwright/test).
+PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.64.1-noble}"
 STACK="docker compose -p korinnia-perf -f docker-compose.yml"
 
 cleanup() { $STACK down -v --remove-orphans >/dev/null 2>&1 || true; }

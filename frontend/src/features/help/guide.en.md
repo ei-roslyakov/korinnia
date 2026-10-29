@@ -201,6 +201,15 @@ The links under the tree's title:
   event, photos taken there and stories that mention it. **Show on the family map** opens the
   map at that place. Place names on person pages, in event lists, on the map and in the album
   link to these pages.
+- **Charts** (on a person's page, in the side panel, or in the tree's header when someone is
+  selected) show one person's family in classic forms: a **fan chart** of 4–8 generations of
+  ancestors (half or full circle, the father's line on the left, the mother's on the right),
+  a **pedigree** of 4–6 generations from left to right, and **descendants** as a numbered
+  outline (1, 1.1, 1.2.1 …) with partners and the year of marriage, where every generation
+  can be folded. Click a person to put them in the centre; ⟳ marks an ancestor who appears
+  twice (relatives who married), dashed lines adoptive or step parents. Drag to move, scroll
+  or pinch to zoom, and **Download PNG / PDF**. The address can be shared, also with link
+  visitors.
 - **Map** — where the family was born, lived, married, moved, died and is buried; filters by
   event type and person, with a person's life path drawn in order.
 - **On this day** — birthdays, wedding anniversaries and memorial days for a date or the coming

@@ -1429,5 +1429,39 @@
     "searchRecipes": "Search by name, ingredient or occasion…",
     "none": "No recipes or traditions yet.",
     "noneHint": "Write down a grandmother's borscht, an Easter custom or a wedding song so it is not forgotten."
+  },
+  "charts": {
+    "title": "Charts",
+    "generations": "Generations",
+    "unknown": "unknown",
+    "paternal": "father's line",
+    "maternal": "mother's line",
+    "legend": "click a person to put them in the centre; ⟳ an ancestor shown again (cousins married); dashed: adoptive or step",
+    "more": "There are more generations beyond this chart.",
+    "download": "Download {{format}}",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetView": "Reset view",
+    "fan": {
+      "title": "Fan chart",
+      "of": "Ancestors of {{name}}",
+      "file": "fan",
+      "full": "Full circle"
+    },
+    "pedigree": {
+      "title": "Pedigree",
+      "of": "Pedigree of {{name}}",
+      "file": "pedigree"
+    },
+    "descendants": {
+      "title": "Descendants",
+      "of": "Descendants of {{name}}",
+      "file": "descendants",
+      "namesOnly": "Living people as names only",
+      "fold": "Fold: {{name}}",
+      "unfold": "Unfold: {{name}}",
+      "more_one": "Shown up to {{count}} generation; there are more.",
+      "more_other": "Shown up to {{count}} generations; there are more."
+    }
   }
 }

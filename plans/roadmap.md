@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-29 (privacy of living people D114, calendar feed D115, place pages D116, recipes D117; next: chart views)_
+_Last updated: 2026-10-29 (privacy of living people D114, calendar feed D115, place pages D116, recipes D117, chart views D118; next: "You are in a family tree")_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -118,6 +118,17 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   copies; run `python -m app.seed --all-users` after the deploy).
 - Follow-ups (not planned): include recipes and traditions in the family archive export
   (phase 11, its own Markdown / printable section); scaling a recipe by servings.
+
+## Chart views (done 2026-10-29, D118)
+
+- `GET /persons/{id}/lineage` (ancestors ≤ 10, descendants ≤ 8 generations; 23 / 30 ms for 8
+  generations at 2,000 people, `docs/performance.md`); `features/charts`: fan chart, pedigree,
+  descendancy list at `trees/:id/charts/{fan|pedigree|descendants}/:personId`, PNG / PDF,
+  entry from the person page / side panel and the tree header.
+- `make perf` passes the Makefile's Playwright image to `scripts/perf.sh` (it had its own,
+  outdated default and failed after the 1.64 update).
+- Follow-ups (not planned): an hourglass chart (ancestors and descendants together);
+  descendants as a drawn chart, not only a list; vector PDF (today an image, as in D88).
 
 ## Now: "You are in a family tree" (agreed 2026-10-12)
 

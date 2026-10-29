@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-29.5",
+    items: {
+      en: [
+        "Charts: from a person’s page, see their ancestors as a fan chart or a pedigree, or their descendants as a numbered list — and download them as PNG or PDF.",
+      ],
+      uk: [
+        "Діаграми: зі сторінки людини можна побачити її предків віялом чи родоводом або нащадків нумерованим списком — і завантажити їх як PNG чи PDF.",
+      ],
+      pl: [
+        "Wykresy: ze strony osoby zobaczysz jej przodków jako wachlarz lub rodowód albo potomków jako numerowaną listę — i pobierzesz je jako PNG lub PDF.",
+      ],
+    },
+  },
+  {
     id: "2026-10-29.4",
     items: {
       en: [
