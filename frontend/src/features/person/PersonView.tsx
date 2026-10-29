@@ -148,6 +148,12 @@ export function PersonView({
             {lifeYears(person.birth?.date ?? null, person.death?.date ?? null, person.is_living)}
           </p>
           {person.short_summary && <p className="text-sm">{person.short_summary}</p>}
+          {person.details_hidden && (
+            <p className="text-bark-700 text-sm" data-testid="details-hidden">
+              <span aria-hidden="true">🔒 </span>
+              {t("person.detailsHidden")}
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-1">
             {person.is_living && <Badge tone="green">{t("person.living")}</Badge>}
             <Badge>

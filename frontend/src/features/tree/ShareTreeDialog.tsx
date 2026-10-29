@@ -16,7 +16,7 @@ export function ShareTreeDialog({
   tree,
   onClose,
 }: {
-  tree: Pick<Tree, "id" | "name">;
+  tree: Pick<Tree, "id" | "name" | "living_privacy">;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -84,7 +84,7 @@ export function ShareTreeDialog({
         </div>
       </form>
 
-      <ShareLinksSection treeId={tree.id} />
+      <ShareLinksSection treeId={tree.id} privacy={tree.living_privacy} />
 
       {members.data && members.data.members.length > 0 && (
         <section className="border-bark-100 mt-5 border-t pt-4">

@@ -34,7 +34,7 @@ Media files are stored as plain files under the media root (`/data/media`). The 
 | `recovery_codes` | 2FA recovery codes | `user_id`, `code_hash` (SHA-256), `used_at` |
 | `refresh_tokens` | Server-side session records | `id` (= JWT `jti`), `user_id`, `family_id`, `expires_at`, `session_expires_at` (end of the sign-in, same for the family; D105), `revoked_at`, `replaced_by_id`, `user_agent`, `ip_address` |
 | `login_attempts` | Sign-in throttling | `email`, `ip_address`, `success`, `created_at` |
-| `trees` | Family trees | `name`, `description`, `owner_id`, `is_demo` (a user's copy of the demo family; at most one live per owner), `deleted_at` (soft delete) |
+| `trees` | Family trees | `name`, `description`, `owner_id`, `is_demo` (a user's copy of the demo family; at most one live per owner), `living_privacy` (`off`/`share_links`/`viewers_and_share_links`, default `share_links`: who sees only the basics of living people, D114), `show_living_portraits` (default false), `deleted_at` (soft delete) |
 | `tree_memberships` | Per-tree roles | PK (`tree_id`, `user_id`), `role` (`viewer`/`contributor`/`editor`/`admin`) |
 | `invitations` | One-time invitation links | `token_hash`, `email`, `tree_id` + `role` or `is_superadmin`, `expires_at`, `accepted_at`, `accepted_user_id`, `revoked_at`, `created_by_id` |
 | `password_reset_tokens` | One-time reset links | `token_hash`, `user_id`, `expires_at`, `used_at`, `created_by_id` |
@@ -122,6 +122,10 @@ Imported people, events, places, sources and citations are ordinary rows of the 
 | `share_links` | A read-only link to one tree for people without an account | `tree_id`, `token_hash` (SHA-256 of the token in the URL; the token is shown once), `label`, `created_by_id`, `created_at`, `expires_at` (null: no expiry), `revoked_at`, `last_used_at`, `use_count` |
 
 `users` also gained `welcome_dismissed`, `changelog_seen` and `show_changelog` (migration 0009, D95).
+
+### Privacy of living people
+`trees` gained `living_privacy` and `show_living_portraits` (migration 0014, D114). Nothing is
+stored per person beyond the existing `persons.is_living`.
 
 ### Planned
 Export jobs (phase 11). Each section is documented here when it is implemented.

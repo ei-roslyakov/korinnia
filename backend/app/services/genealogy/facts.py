@@ -14,7 +14,7 @@ from __future__ import annotations
 import calendar
 import datetime as dt
 import uuid
-from collections.abc import Iterable
+from collections.abc import Collection, Iterable
 from dataclasses import dataclass, field
 from decimal import Decimal
 
@@ -103,7 +103,18 @@ def _partnership_end_type(reason: PartnershipEndReason | None) -> str | None:
     return "partnership_end"
 
 
-async def load_facts(session: AsyncSession, tree_id: uuid.UUID) -> Facts:
+async def load_facts(
+    session: AsyncSession, tree_id: uuid.UUID, hidden: Collection[uuid.UUID] = ()
+) -> Facts:
+    """All dated and undated facts; facts involving `hidden` people (living, for readers
+    who see only their basics) are left out."""
+    facts = await _load_facts(session, tree_id)
+    if hidden:
+        facts.rows = [r for r in facts.rows if not any(pid in hidden for pid, _ in r.persons)]
+    return facts
+
+
+async def _load_facts(session: AsyncSession, tree_id: uuid.UUID) -> Facts:
     live = set(
         await session.scalars(
             select(Person.id).where(Person.tree_id == tree_id, Person.deleted_at.is_(None))
@@ -229,8 +240,9 @@ async def timeline(
     to_year: int | None = None,
     limit: int = 100,
     offset: int = 0,
+    hidden: Collection[uuid.UUID] = (),
 ) -> TimelinePage:
-    facts = await load_facts(session, tree_id)
+    facts = await load_facts(session, tree_id, hidden)
     rows = [
         r
         for r in facts.rows
@@ -262,11 +274,16 @@ def _calendar_day(year: int, month: int, day: int) -> dt.date:
 
 
 async def on_this_day(
-    session: AsyncSession, tree_id: uuid.UUID, start: dt.date, days: int = 0
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    start: dt.date,
+    days: int = 0,
+    *,
+    hidden: Collection[uuid.UUID] = (),
 ) -> OnThisDay:
     """Anniversaries of exactly dated facts on `start` and the following `days` days."""
     days = max(0, min(days, MAX_WINDOW_DAYS))
-    facts = await load_facts(session, tree_id)
+    facts = await load_facts(session, tree_id, hidden)
     end = start + dt.timedelta(days=days)
     found: list[tuple[dt.date, FactRow]] = []
     for r in facts.rows:
@@ -292,9 +309,13 @@ async def on_this_day(
 
 
 async def map_data(
-    session: AsyncSession, tree_id: uuid.UUID, person_id: uuid.UUID | None = None
+    session: AsyncSession,
+    tree_id: uuid.UUID,
+    person_id: uuid.UUID | None = None,
+    *,
+    hidden: Collection[uuid.UUID] = (),
 ) -> MapData:
-    facts = await load_facts(session, tree_id)
+    facts = await load_facts(session, tree_id, hidden)
     rows = [r for r in facts.rows if person_id is None or r.involves(person_id)]
     points: dict[tuple[Decimal, Decimal], MapPoint] = {}
     missing: dict[uuid.UUID, Place] = {}

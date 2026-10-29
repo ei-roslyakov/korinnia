@@ -7,7 +7,14 @@ from typing import Literal
 
 from fastapi import APIRouter, status
 
-from app.api.deps import ActorDep, SessionDep, TreeContributor, TreeEditor, TreeViewer
+from app.api.deps import (
+    ActorDep,
+    SessionDep,
+    TreeContributor,
+    TreeEditor,
+    TreeViewer,
+    VisibilityDep,
+)
 from app.models import CommentTarget, QuestionStatus, SuggestionStatus
 from app.schemas.collaboration import (
     CommentCreate,
@@ -88,8 +95,16 @@ async def moderation_counts(access: TreeEditor, session: SessionDep) -> Moderati
 
 @router.get("/comments", response_model=list[CommentOut])
 async def list_comments(
-    entity_type: CommentTarget, entity_id: uuid.UUID, access: TreeViewer, session: SessionDep
+    entity_type: CommentTarget,
+    entity_id: uuid.UUID,
+    access: TreeViewer,
+    session: SessionDep,
+    seen: VisibilityDep,
 ) -> list[CommentOut]:
+    """Comments on a person, story or media item. Readers who see only the basics of living
+    people get none on those people, their media and stories only about them."""
+    if await svc.comment_target_hidden(session, entity_type, entity_id, seen):
+        return []
     rows = await svc.list_comments(
         session, access.tree.id, entity_type, entity_id, access.user, access.role
     )
@@ -134,11 +149,12 @@ async def delete_comment(
 async def list_questions(
     access: TreeViewer,
     session: SessionDep,
+    seen: VisibilityDep,
     person_id: uuid.UUID | None = None,
     status: QuestionStatus | None = None,
 ) -> list[QuestionOut]:
     rows = await svc.list_questions(session, access.tree.id, person_id=person_id, status=status)
-    return await svc.questions_out(session, rows)
+    return await svc.questions_out(session, [q for q in rows if not seen.hides_person(q.person_id)])
 
 
 @router.post("/questions", response_model=QuestionOut, status_code=status.HTTP_201_CREATED)

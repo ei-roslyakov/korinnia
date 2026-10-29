@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-29",
+    items: {
+      en: [
+        "Privacy of living people: visitors with a share link now see only the name, birth year and family links of living people — no dates, places, photos or documents. Tree administrators can extend this to viewers or turn it off on the Members page.",
+      ],
+      uk: [
+        "Приватність живих людей: відвідувачі за посиланням тепер бачать про живих людей лише ім’я, рік народження й родинні зв’язки — без дат, місць, фото й документів. Адміністратори родоводу можуть поширити це на глядачів або вимкнути на сторінці «Учасники».",
+      ],
+      pl: [
+        "Prywatność żyjących osób: odwiedzający przez link widzą teraz o żyjących osobach tylko imię, rok urodzenia i więzi rodzinne — bez dat, miejsc, zdjęć i dokumentów. Administratorzy drzewa mogą rozszerzyć to na przeglądających lub wyłączyć na stronie „Członkowie”.",
+      ],
+    },
+  },
+  {
     id: "2026-10-25.4",
     items: {
       en: ["“On this day” can now show the next 3 months."],

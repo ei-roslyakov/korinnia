@@ -79,11 +79,19 @@ export interface Tree {
   my_role: Role;
   /** The user's own copy of the fictional demo family. */
   is_demo?: boolean;
+  /** Who sees only the basics of living people (D114). */
+  living_privacy?: LivingPrivacy;
+  show_living_portraits?: boolean;
+  /** The current reader is one of them. */
+  living_details_hidden?: boolean;
   person_count?: number;
   first_year?: number | null;
   last_year?: number | null;
   cover?: string[];
 }
+
+export const LIVING_PRIVACY = ["off", "share_links", "viewers_and_share_links"] as const;
+export type LivingPrivacy = (typeof LIVING_PRIVACY)[number];
 
 export interface Member {
   user_id: string;

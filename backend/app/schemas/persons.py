@@ -144,6 +144,8 @@ class PersonSummary(BaseModel):
     birth_place: str | None = None
     primary_photo_id: uuid.UUID | None = None
     avatar_url: str | None = None
+    # Only the basics of this living person are shown to this reader (D114).
+    details_hidden: bool = False
 
 
 class ParentRef(BaseModel):
@@ -202,6 +204,8 @@ class PersonDetail(BaseModel):
     warnings: list[Warning]
     created_at: datetime
     updated_at: datetime
+    # Only the basics of this living person are shown to this reader (D114).
+    details_hidden: bool = False
 
 
 class DeletePreview(BaseModel):

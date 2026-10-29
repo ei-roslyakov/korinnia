@@ -21,7 +21,7 @@ export function TreeActions({
   className = "",
   buttonClassName = "",
 }: {
-  tree: Pick<Tree, "id" | "name" | "my_role">;
+  tree: Pick<Tree, "id" | "name" | "my_role" | "living_privacy">;
   leaveTo?: string;
   className?: string;
   buttonClassName?: string;

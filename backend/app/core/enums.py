@@ -31,6 +31,14 @@ _ROLE_RANK = {
 }
 
 
+class LivingPrivacy(StrEnum):
+    """Who sees only the basics of living people (D114)."""
+
+    off = "off"
+    share_links = "share_links"
+    viewers_and_share_links = "viewers_and_share_links"
+
+
 class Language(StrEnum):
     uk = "uk"
     en = "en"

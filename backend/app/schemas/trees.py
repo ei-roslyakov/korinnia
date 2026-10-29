@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.core.enums import TreeRole
+from app.core.enums import LivingPrivacy, TreeRole
 from app.schemas.common import Email, Schema
 from app.schemas.users import InvitationOut
 
@@ -20,6 +20,10 @@ class TreeOut(Schema):
     updated_at: datetime
     my_role: TreeRole
     is_demo: bool = False
+    living_privacy: LivingPrivacy = LivingPrivacy.share_links
+    show_living_portraits: bool = False
+    # The current reader sees only the basics of living people (D114).
+    living_details_hidden: bool = False
     # Overview for the tree list (only filled there).
     person_count: int = 0
     first_year: int | None = None
@@ -37,6 +41,8 @@ class CreateTreeRequest(BaseModel):
 class UpdateTreeRequest(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=10_000)
+    living_privacy: LivingPrivacy | None = None
+    show_living_portraits: bool | None = None
 
 
 class MemberOut(BaseModel):

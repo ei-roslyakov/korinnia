@@ -22,6 +22,7 @@ from app.models import (
     Person,
     QuestionStatus,
     Story,
+    StoryPerson,
     SuggestionStatus,
     SuggestionTarget,
     TreeRole,
@@ -47,6 +48,7 @@ from app.services.genealogy.common import get_live
 from app.services.genealogy.snapshots import event_snapshot
 from app.services.genealogy.sources import user_refs
 from app.services.genealogy.summaries import summary_map
+from app.services.visibility import Visibility
 
 # --- Suggestions ------------------------------------------------------------------------
 
@@ -258,6 +260,25 @@ async def _check_comment_target(
         story = await get_live(session, Story, tree_id, entity_id, "comment_target_not_found")
         if not story_service.can_view(story, user, role):
             raise NotFoundError("comment_target_not_found")
+
+
+async def comment_target_hidden(
+    session: AsyncSession, target: CommentTarget, entity_id: uuid.UUID, seen: Visibility
+) -> bool:
+    if not seen.restricted:
+        return False
+    if target == CommentTarget.person:
+        return seen.hides_person(entity_id)
+    if target == CommentTarget.media:
+        return seen.hides_media(entity_id)
+    about = list(
+        await session.scalars(
+            select(StoryPerson.person_id)
+            .join(Person, Person.id == StoryPerson.person_id)
+            .where(StoryPerson.story_id == entity_id, Person.deleted_at.is_(None))
+        )
+    )
+    return seen.hides_story(about)
 
 
 async def list_comments(

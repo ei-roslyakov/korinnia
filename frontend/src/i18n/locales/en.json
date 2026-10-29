@@ -386,7 +386,9 @@
     "lifeBar": "Life from {{from}} to {{to}}",
     "today": "today",
     "yearsLived_one": "{{count}} year",
-    "yearsLived_other": "{{count}} years"
+    "yearsLived_other": "{{count}} years",
+    "detailsHidden": "Details of living people are hidden: only the name, birth year and family links are shown.",
+    "detailsHiddenShort": "Details of living people are hidden"
   },
   "gender": {
     "male": "Male",
@@ -1221,7 +1223,7 @@
   },
   "shareLinks": {
     "title": "Anyone with the link can view",
-    "hint": "For relatives without an account: the link opens this tree read-only. Anyone who has it can see everything in the tree, including living people — choose an expiry and revoke it when it is no longer needed.",
+    "hint": "For relatives without an account: the link opens this tree read-only. Choose an expiry and revoke it when it is no longer needed.",
     "label": "Name (optional)",
     "labelPlaceholder": "e.g. For the reunion",
     "expires": "Valid for",
@@ -1243,7 +1245,12 @@
     "signIn": "Sign in",
     "opening": "Opening the shared tree…",
     "invalidTitle": "This link no longer works",
-    "invalidHint": "It has expired or was revoked. Ask whoever sent it for a new one."
+    "invalidHint": "It has expired or was revoked. Ask whoever sent it for a new one.",
+    "visitorsSee": {
+      "basics": "Visitors see only the name, birth year and family links of living people — no dates, places, photos, documents or stories about them.",
+      "everything": "Visitors see everything in the tree, including the details of living people."
+    },
+    "privacySettings": "Privacy settings"
   },
   "help": {
     "contents": "Contents",
@@ -1299,5 +1306,26 @@
     "openPersonPage": "Open their page",
     "filteredBy": "Photos of {{name}}",
     "clearFilter": "Show everyone's photos"
+  },
+  "livingPrivacy": {
+    "title": "Privacy of living people",
+    "hint": "Choose who sees only the basics of living people: name, gender, birth year and family links. Contributors, editors and admins always see everything.",
+    "who": "Who sees only the basics",
+    "options": {
+      "off": {
+        "label": "Nobody",
+        "help": "Everyone who can open the tree sees all details of living people."
+      },
+      "share_links": {
+        "label": "Visitors with a share link",
+        "help": "People opening a share link see only the basics; members see everything. Recommended."
+      },
+      "viewers_and_share_links": {
+        "label": "Viewers and visitors with a share link",
+        "help": "Members with the viewer role see only the basics too."
+      }
+    },
+    "portraits": "Show portraits of living people",
+    "portraitsHelp": "Their portrait appears on cards; their photos stay hidden."
   }
 }

@@ -133,7 +133,7 @@ Editors and administrators switch the tree from **View** to **Builder**.
 ## Family album
 
 - Every photo of the tree in one place, for everyone who can see the tree (also visitors with a
-  share link). Documents, scans, PDFs and videos are not in it; a photo appears once its preview
+  share link, without photos of living people — see **Privacy of living people**). Documents, scans, PDFs and videos are not in it; a photo appears once its preview
   is ready.
 - On the tree page, the **Family album** button next to the tree's name (with the number of
   photos) opens the album in a window over the tree; ✕, Esc or a click outside closes it.
@@ -203,14 +203,27 @@ Every tree has members, each with a role:
   access you choose. If nobody has that email, the app says so.
 - **Anyone with the link can view** (in the same dialog) creates a link for relatives without an
   account: they see the tree read-only, without signing in. Give it a name and an expiry, and
-  revoke it when it is no longer needed. Anyone with the link sees everything, including living
-  people.
+  revoke it when it is no longer needed.
 - **Members** (in the tree's menu, administrators) lists everyone with access: change roles,
   remove people, or create an invitation link for someone who has no account yet (valid for
   7 days, works once).
 - Contributors use **Suggest an edit** on a person's page; editors see a badge on
   **Moderation** and **Approve and apply** or **Reject** each suggestion.
 - **History** (administrators) is the tree's change log: who changed what and when.
+
+### Privacy of living people
+
+- On the **Members** page, **Privacy of living people** decides who sees only the basics of
+  living people — their name, gender, birth year and family links:
+  - **Nobody** — everyone who can open the tree sees everything;
+  - **Visitors with a share link** (the default) — members see everything;
+  - **Viewers and visitors with a share link** — members with the viewer role see only the
+    basics too.
+- For them, a living person's dates, places, events, biography and facts, photos and documents,
+  stories only about them, comments and research questions are left out, and the family album,
+  map, timeline and "On this day" skip them. A 🔒 on the card and the person's page says so.
+- **Show portraits of living people** keeps their portrait on cards; their photos stay hidden.
+- Contributors, editors and administrators always see everything.
 
 ## Import and export
 
@@ -249,7 +262,7 @@ Every tree has members, each with a role:
   original wording. A vague date is better than none.
 - Write names as they were: Cyrillic, Latin, maiden and married names are all searchable, and
   search finds "Kovalenko" when you type "Коваленко" and the other way round.
-- A GEDCOM export can leave out the details of living people; share links cannot, so give them
-  an expiry and send them only to people you trust.
+- Share links show living people with only the basics (see **Privacy of living people**); still
+  give them an expiry and send them only to people you trust.
 - Nothing you delete is lost: people, events, photos, sources and stories go to the **Trash**,
   and every change can be undone from **History**.

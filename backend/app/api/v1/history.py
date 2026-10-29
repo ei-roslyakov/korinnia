@@ -8,7 +8,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Query, status
 from pydantic import BaseModel
 
-from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer
+from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer, VisibilityDep
 from app.jobs.queue import enqueue_avatar
 from app.models import TreeRole
 from app.schemas.audit import AuditEntryOut, AuditQuery
@@ -42,10 +42,15 @@ async def history(
     access: TreeViewer,
     session: SessionDep,
     page: PageParams,
+    seen: VisibilityDep,
     entity_type: EntityType,
     entity_id: Annotated[uuid.UUID | None, Query()] = None,
 ) -> Page[AuditEntryOut]:
-    """Revisions of genealogical data with full before/after snapshots (newest first)."""
+    """Revisions of genealogical data with full before/after snapshots (newest first).
+    Readers who see only the basics of living people get none: old snapshots would
+    reveal the details hidden elsewhere."""
+    if seen.restricted:
+        return Page(items=[], total=0, limit=page.limit, offset=page.offset)
     q = AuditQuery(tree_id=access.tree.id, entity_type=entity_type, entity_id=entity_id)
     rows, total = await audit.list_entries(session, q, limit=page.limit, offset=page.offset)
     items = [AuditEntryOut.model_validate(r) for r in rows]

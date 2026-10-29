@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ME_KEY } from "@/features/auth/api";
 import { api } from "@/lib/api";
-import type { Invitation, Member, Role, Tree } from "@/lib/types";
+import type { Invitation, LivingPrivacy, Member, Role, Tree } from "@/lib/types";
 
 export const treesKey = ["trees"] as const;
 export const treeKey = (id: string) => ["tree", id] as const;
@@ -31,8 +31,12 @@ export function useCreateTree() {
 export function useUpdateTree(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { name?: string; description?: string | null }) =>
-      api.patch<Tree>(`/api/v1/trees/${id}`, body),
+    mutationFn: (body: {
+      name?: string;
+      description?: string | null;
+      living_privacy?: LivingPrivacy;
+      show_living_portraits?: boolean;
+    }) => api.patch<Tree>(`/api/v1/trees/${id}`, body),
     onSuccess: (tree) => {
       qc.setQueryData(treeKey(id), tree);
       void qc.invalidateQueries({ queryKey: treesKey });

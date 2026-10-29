@@ -9,7 +9,14 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, File, Form, Query, Request, Response, UploadFile, status
 from fastapi.responses import FileResponse
 
-from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer
+from app.api.deps import (
+    ActorDep,
+    PageParams,
+    SessionDep,
+    TreeEditor,
+    TreeViewer,
+    VisibilityDep,
+)
 from app.core.config import get_settings
 from app.core.errors import NotFoundError
 from app.jobs.queue import enqueue_avatar, enqueue_media_processing
@@ -77,13 +84,14 @@ async def list_media(
     access: TreeViewer,
     session: SessionDep,
     page: PageParams,
+    seen: VisibilityDep,
     person_id: uuid.UUID | None = None,
     kind: MediaKind | None = None,
     q: Annotated[str | None, Query(max_length=200)] = None,
 ) -> Page[MediaOut]:
     items, total = await media_service.list_media(
         session, access.tree.id, person_id=person_id, kind=kind, q=q,
-        limit=page.limit, offset=page.offset,
+        limit=page.limit, offset=page.offset, hidden=seen.hidden_media,
     )  # fmt: skip
     return Page(
         items=await media_service.media_out_many(session, items),
@@ -98,6 +106,7 @@ async def album(
     access: TreeViewer,
     session: SessionDep,
     page: PageParams,
+    seen: VisibilityDep,
     person_id: Annotated[list[uuid.UUID] | None, Query(max_length=50)] = None,
     year_from: Annotated[int | None, Query(ge=1, le=9999)] = None,
     year_to: Annotated[int | None, Query(ge=1, le=9999)] = None,
@@ -111,6 +120,7 @@ async def album(
     items, total, decades = await media_service.list_album(
         session, access.tree.id, person_ids=person_id or [], year_from=year_from, year_to=year_to,
         q=q, newest=sort == "newest", limit=page.limit, offset=page.offset,
+        hidden=seen.hidden_media,
     )  # fmt: skip
     return AlbumPage(
         items=await media_service.media_out_many(session, items),
@@ -122,8 +132,14 @@ async def album(
 
 
 @router.get("/media/{media_id}", response_model=MediaOut)
-async def get_media(media_id: uuid.UUID, access: TreeViewer, session: SessionDep) -> MediaOut:
-    return await _out(session, await media_service.get_media(session, access.tree.id, media_id))
+async def get_media(
+    media_id: uuid.UUID, access: TreeViewer, session: SessionDep, seen: VisibilityDep
+) -> MediaOut:
+    if seen.hides_media(media_id):
+        raise NotFoundError("media_not_found")
+    return seen.redact(
+        await _out(session, await media_service.get_media(session, access.tree.id, media_id))
+    )
 
 
 @router.patch("/media/{media_id}", response_model=MediaOut)
@@ -231,8 +247,11 @@ async def media_file(
     access: TreeViewer,
     session: SessionDep,
     storage: StorageDep,
+    seen: VisibilityDep,
 ) -> Response:
     """The original or a derived version. Requires read access to the tree."""
+    if seen.hides_media(media_id):
+        raise NotFoundError("media_not_found")
     media = await media_service.get_media(session, access.tree.id, media_id)
     found = media_service.variant_key(media, variant)
     if found is None:
@@ -251,9 +270,10 @@ async def person_avatar(
     access: TreeViewer,
     session: SessionDep,
     storage: StorageDep,
+    seen: VisibilityDep,
 ) -> Response:
     person = await get_live(session, Person, access.tree.id, person_id, "person_not_found")
-    if not person.avatar_key:
+    if not person.avatar_key or (seen.hides_person(person.id) and not seen.show_portraits):
         raise NotFoundError("file_not_found")
     return _file_response(
         request, storage, person.avatar_key, "image/webp", f"portrait-{person_id}.webp"

@@ -4,7 +4,8 @@ import uuid
 
 from fastapi import APIRouter, status
 
-from app.api.deps import ActorDep, SessionDep, TreeEditor, TreeViewer
+from app.api.deps import ActorDep, SessionDep, TreeEditor, TreeViewer, VisibilityDep
+from app.core.errors import NotFoundError
 from app.schemas.events import EventCreate, EventOut, EventUpdate
 from app.services.genealogy import events as event_service
 from app.services.genealogy.persons import events_out
@@ -21,7 +22,11 @@ async def create_event(
 
 
 @router.get("/{event_id}", response_model=EventOut)
-async def get_event(event_id: uuid.UUID, access: TreeViewer, session: SessionDep) -> EventOut:
+async def get_event(
+    event_id: uuid.UUID, access: TreeViewer, session: SessionDep, seen: VisibilityDep
+) -> EventOut:
+    if seen.hides_event(event_id):
+        raise NotFoundError("event_not_found")
     event = await event_service.get_event(session, access.tree.id, event_id)
     return (await events_out(session, access.tree.id, [event]))[0]
 

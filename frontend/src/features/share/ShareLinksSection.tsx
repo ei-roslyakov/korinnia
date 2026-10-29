@@ -1,16 +1,25 @@
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 
 import { Alert, Button, CopyField, ErrorAlert, Field, Input, Select } from "@/components/ui";
 import { useFormatDate } from "@/lib/hooks";
+import type { LivingPrivacy } from "@/lib/types";
 
 import { useCreateShareLink, useRevokeShareLink, useShareLinks } from "./api";
 
 const EXPIRY = { "7": 7, "30": 30, "365": 365, never: null } as const;
 type Expiry = keyof typeof EXPIRY;
 
-/** "Anyone with the link can view": create, copy and revoke read-only links (D98). */
-export function ShareLinksSection({ treeId }: { treeId: string }) {
+/** "Anyone with the link can view": create, copy and revoke read-only links (D98). Says
+ * what visitors will see of living people (D114). */
+export function ShareLinksSection({
+  treeId,
+  privacy = "share_links",
+}: {
+  treeId: string;
+  privacy?: LivingPrivacy;
+}) {
   const { t } = useTranslation();
   const formatDate = useFormatDate();
   const links = useShareLinks(treeId);
@@ -40,6 +49,13 @@ export function ShareLinksSection({ treeId }: { treeId: string }) {
         {t("shareLinks.title")}
       </h3>
       <p className="text-bark-700 text-xs">{t("shareLinks.hint")}</p>
+      <p className="text-bark-700 text-xs" data-testid="share-links-privacy">
+        <span aria-hidden="true">{privacy === "off" ? "👁 " : "🔒 "}</span>
+        {t(`shareLinks.visitorsSee.${privacy === "off" ? "everything" : "basics"}`)}{" "}
+        <Link to={`/trees/${treeId}/members`} className="text-leaf-700 underline">
+          {t("shareLinks.privacySettings")}
+        </Link>
+      </p>
       <form onSubmit={onSubmit} className="grid gap-2 sm:grid-cols-[1fr_auto_auto] sm:items-end">
         <Field label={t("shareLinks.label")}>
           {(id) => (
