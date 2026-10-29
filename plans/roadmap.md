@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-29 (privacy of living people D114, calendar feed D115; next: place pages, recipes, chart views)_
+_Last updated: 2026-10-29 (privacy of living people D114, calendar feed D115, place pages D116; next: recipes, chart views)_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -100,6 +100,16 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   did); a reminder option (`VALARM`) per feed; including other event types (baptisms,
   name days).
 
+## Place pages (done 2026-10-29, D116)
+
+- `features/places`: list at `trees/:id/places`, page at `trees/:id/places/:placeId`
+  (`GET /places/index`, `GET /places/{id}/summary`), "Places" in the tree's sections, place
+  names linked everywhere, map filter `?place=`. Editors: edit place, merge into another place
+  (`POST /places/{id}/merge`, undone by restoring the merged place from the trash).
+- Follow-ups (not planned): match stories by declined forms of place names (Ukrainian cases);
+  suggest likely duplicate places (same name / within 1 km); an album filter by place (see the
+  family album follow-ups).
+
 ## Now: "You are in a family tree" (agreed 2026-10-12)
 
 The owner's request: a user should learn that they appear as a person in some tree, with a
@@ -168,9 +178,12 @@ Still to do:
 - `e2e/builder.spec.ts` "add a child from a card…" failed once on chromium in a full
   `make test-e2e` run (2026-10-25: a `toBeVisible` timeout) and passed on its own and in the
   next full run; looks like a flake under parallel load, not investigated.
-- `e2e/album.spec.ts` "a new place created while describing a photo…" failed once on mobile in
-  a full `make test-e2e` run (2026-10-29), passed on its own and in the next full run; same
-  pattern as above, not investigated.
+- `e2e/album.spec.ts` "a new place created while describing a photo…" failed twice on mobile in
+  full runs (2026-10-29): it read the photo's place from the API right after the row appeared,
+  before the description PATCH had finished. Fixed by polling (place-pages branch).
+- `e2e/media.spec.ts` "upload a photo… becomes the portrait" failed once on mobile in a full run
+  (2026-10-29): the face region drawn by a mouse drag did not appear; passed on its own and in
+  the next full run. Not investigated.
 - **Vite dev cache breaks after running tests locally.** `make lint` / `make test` run `npm ci` in a
   container that shares `node_modules` with the dev server, which wipes Vite's pre-bundled deps; the
   tree canvas then shows empty (504 "Outdated Optimize Dep" for `elkjs`). Workaround:

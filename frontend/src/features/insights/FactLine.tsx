@@ -4,21 +4,27 @@ import { Link } from "react-router";
 import { formatPartialDate } from "@/lib/dates";
 import { factCategory, type Fact, type FactCategory } from "@/lib/genealogy";
 
+import { PlaceLink } from "@/features/places/PlaceLink";
+
 import { CATEGORY_STYLE, factTypeLabel } from "./facts";
 
-/** One fact: type badge, title, people (linked), place; optionally the date. */
+/** One fact: type badge, title, people (linked), place (linked to its page); optionally
+ * the date. A place page leaves out the type (its sections) and the place itself. */
 export function FactLine({
   fact,
   treeId,
   showDate = true,
+  showType = true,
+  showPlace = true,
 }: {
   fact: Fact;
   treeId: string;
   showDate?: boolean;
+  showType?: boolean;
+  showPlace?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const style = CATEGORY_STYLE[factCategory(fact.type)];
-  const where = fact.cemetery_name ?? fact.place?.name;
   return (
     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm">
       {showDate && fact.date && (
@@ -26,9 +32,11 @@ export function FactLine({
           {formatPartialDate(fact.date, t, i18n.language)}
         </span>
       )}
-      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${style.badge}`}>
-        {factTypeLabel(t, fact.type)}
-      </span>
+      {showType && (
+        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${style.badge}`}>
+          {factTypeLabel(t, fact.type)}
+        </span>
+      )}
       {fact.title && <span className="font-medium">{fact.title}</span>}
       <span>
         {fact.persons.map((p, i) => (
@@ -40,7 +48,21 @@ export function FactLine({
           </span>
         ))}
       </span>
-      {where && <span className="text-bark-700">· {where}</span>}
+      {showPlace && (fact.cemetery_name || fact.place) && (
+        <span className="text-bark-700">
+          ·{" "}
+          {fact.place ? (
+            <PlaceLink treeId={treeId} place={fact.place}>
+              {fact.cemetery_name ?? fact.place.name}
+            </PlaceLink>
+          ) : (
+            fact.cemetery_name
+          )}
+        </span>
+      )}
+      {!showPlace && fact.cemetery_name && (
+        <span className="text-bark-700">· {fact.cemetery_name}</span>
+      )}
     </div>
   );
 }

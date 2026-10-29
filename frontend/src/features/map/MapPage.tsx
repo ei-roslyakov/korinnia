@@ -10,6 +10,7 @@ import { useMapData } from "@/features/insights/api";
 import { CategoryFilter, FactLine } from "@/features/insights/FactLine";
 import { CATEGORY_STYLE, parseCategories } from "@/features/insights/facts";
 import { PersonFilter } from "@/features/insights/PersonFilter";
+import { PlaceLink } from "@/features/places/PlaceLink";
 import { factCategory, type FactCategory, type MapPoint } from "@/lib/genealogy";
 
 const DEFAULT_CENTER: [number, number] = [49.0, 31.0]; // Ukraine
@@ -31,6 +32,8 @@ export default function MapPage() {
   const { treeId = "" } = useParams();
   const [params, setParams] = useSearchParams();
   const personId = params.get("person");
+  // From a place page: only that place, its facts listed.
+  const placeId = params.get("place");
   const categories = parseCategories(params.get("cat"));
   const data = useMapData(treeId, personId);
   const [selected, setSelected] = useState<string | null>(null);
@@ -53,10 +56,14 @@ export default function MapPage() {
     return (data.data?.points ?? [])
       .map((p) => ({
         ...p,
-        facts: wanted.size ? p.facts.filter((f) => wanted.has(factCategory(f.type))) : p.facts,
+        facts: p.facts.filter(
+          (f) =>
+            (!wanted.size || wanted.has(factCategory(f.type))) &&
+            (!placeId || f.place?.id === placeId),
+        ),
       }))
       .filter((p) => p.facts.length > 0);
-  }, [data.data, catKey]);
+  }, [data.data, catKey, placeId]);
 
   // One person's life path: their places in chronological order.
   const path = useMemo(() => {
@@ -114,7 +121,9 @@ export default function MapPage() {
     }
   }, [points, path]);
 
-  const current = points.find((p) => keyOf(p) === selected) ?? null;
+  const current =
+    points.find((p) => keyOf(p) === selected) ??
+    (placeId && points.length === 1 ? points[0]! : null);
   const focus = (p: MapPoint) => {
     setSelected(keyOf(p));
     map.current?.setView([Number(p.latitude), Number(p.longitude)], 10);
@@ -134,6 +143,15 @@ export default function MapPage() {
           label={t("insights.map.person")}
           onChange={(id) => set("person", id)}
         />
+        {placeId && (
+          <button
+            type="button"
+            className="bg-leaf-50 text-leaf-800 rounded-full px-3 py-1 text-xs"
+            onClick={() => set("place", null)}
+          >
+            {t("places.mapFilter", { name: points[0]?.label ?? "…" })} ✕
+          </button>
+        )}
         {data.isFetching && <Spinner />}
       </div>
       <ErrorAlert error={data.error} />
@@ -147,7 +165,16 @@ export default function MapPage() {
           {current ? (
             <Card className="space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <h2 className="font-semibold">{current.label}</h2>
+                <h2 className="font-semibold">
+                  {current.place_id ? (
+                    <PlaceLink
+                      treeId={treeId}
+                      place={{ id: current.place_id, name: current.label }}
+                    />
+                  ) : (
+                    current.label
+                  )}
+                </h2>
                 <button
                   type="button"
                   className="text-bark-700 text-sm hover:underline"

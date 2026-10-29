@@ -13,6 +13,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-29.3",
+    items: {
+      en: [
+        "Place pages: every place has its own page with its former names, a map, who was born, married, lived, died or is buried there, and photos taken there. Find them under “Places” or click a place name anywhere.",
+        "Editors can merge duplicate places; restoring the merged place from the Trash undoes it.",
+      ],
+      uk: [
+        "Сторінки місць: кожне місце має свою сторінку з колишніми назвами, мапою, тими, хто там народився, одружився, жив, помер чи похований, і світлинами, зробленими там. Шукайте в розділі «Місця» або натисніть назву місця будь-де.",
+        "Редактори можуть об’єднувати дублікати місць; відновлення об’єднаного місця з Кошика скасовує це.",
+      ],
+      pl: [
+        "Strony miejsc: każde miejsce ma własną stronę z dawnymi nazwami, mapą, osobami, które się tam urodziły, wzięły ślub, mieszkały, zmarły lub są pochowane, i zdjęciami zrobionymi tam. Znajdziesz je w „Miejscach” albo klikając nazwę miejsca.",
+        "Redaktorzy mogą scalać zduplikowane miejsca; przywrócenie scalonego miejsca z Kosza to cofa.",
+      ],
+    },
+  },
+  {
     id: "2026-10-29.2",
     items: {
       en: [

@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Button, Dialog, ErrorAlert, Field, Input } from "@/components/ui";
 import type { HistoricalName, Place, PlaceSummary } from "@/lib/genealogy";
 
+import { useUpdatePlace } from "@/features/places/api";
+
 import { useCreatePlace, usePlaceSearch } from "./api";
 import { MapPicker, type LatLon } from "./MapPicker";
 
@@ -125,43 +127,56 @@ export function PlaceInput({
   );
 }
 
+/** Create a place, or edit `place` when given. */
 export function PlaceDialog({
   treeId,
-  initialName,
+  initialName = "",
+  place,
   onClose,
   onCreated,
 }: {
   treeId: string;
-  initialName: string;
+  initialName?: string;
+  place?: Place;
   onClose: () => void;
   onCreated: (place: Place) => void;
 }) {
   const { t } = useTranslation();
   const create = useCreatePlace(treeId);
-  const [name, setName] = useState(initialName);
-  const [region, setRegion] = useState("");
-  const [country, setCountry] = useState("");
-  const [pin, setPin] = useState<LatLon | null>(null);
-  const [historical, setHistorical] = useState<HistoricalName[]>([]);
+  const update = useUpdatePlace(treeId, place?.id ?? "");
+  const save = place ? update : create;
+  const [name, setName] = useState(place?.name ?? initialName);
+  const [region, setRegion] = useState(place?.region ?? "");
+  const [country, setCountry] = useState(place?.country ?? "");
+  const [pin, setPin] = useState<LatLon | null>(
+    place?.latitude && place.longitude
+      ? { lat: Number(place.latitude), lon: Number(place.longitude) }
+      : null,
+  );
+  const [historical, setHistorical] = useState<HistoricalName[]>(place?.historical_names ?? []);
+  const year = (v: string) => (v ? Number(v) : null);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    create.mutate(
-      {
-        name,
-        region: region || null,
-        country: country || null,
-        latitude: pin ? String(pin.lat) : null,
-        longitude: pin ? String(pin.lon) : null,
-        historical_names: historical.filter((h) => h.name.trim()),
-      },
-      { onSuccess: onCreated },
-    );
+    const body = {
+      name,
+      region: region || null,
+      country: country || null,
+      latitude: pin ? String(pin.lat) : null,
+      longitude: pin ? String(pin.lon) : null,
+      historical_names: historical.filter((h) => h.name.trim()),
+    };
+    if (place) update.mutate(body, { onSuccess: onCreated });
+    else create.mutate(body, { onSuccess: onCreated });
   };
 
   return (
-    <Dialog open title={t("builder.place.newTitle")} onClose={onClose}>
+    <Dialog
+      open
+      title={place ? t("places.editTitle", { name: place.name }) : t("builder.place.newTitle")}
+      onClose={onClose}
+    >
       <form onSubmit={onSubmit} className="space-y-3">
         <Field label={t("builder.place.name")}>
           {(id) => (
@@ -197,9 +212,23 @@ export function PlaceDialog({
                 }
               />
               <Input
+                aria-label={t("builder.place.from")}
+                placeholder={t("builder.place.from")}
+                className="w-24"
+                inputMode="numeric"
+                value={h.from_year ?? ""}
+                onChange={(e) =>
+                  setHistorical(
+                    historical.map((x, j) =>
+                      j === i ? { ...x, from_year: year(e.target.value) } : x,
+                    ),
+                  )
+                }
+              />
+              <Input
                 aria-label={t("builder.place.until")}
                 placeholder={t("builder.place.until")}
-                className="w-28"
+                className="w-24"
                 inputMode="numeric"
                 value={h.until_year ?? ""}
                 onChange={(e) =>
@@ -226,13 +255,13 @@ export function PlaceDialog({
           </Button>
         </div>
         <MapPicker value={pin} onChange={setPin} height={220} />
-        <ErrorAlert error={create.error} />
+        <ErrorAlert error={save.error} />
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>
             {t("common.cancel")}
           </Button>
-          <Button type="submit" busy={create.isPending}>
-            {t("common.create")}
+          <Button type="submit" busy={save.isPending}>
+            {place ? t("common.save") : t("common.create")}
           </Button>
         </div>
       </form>

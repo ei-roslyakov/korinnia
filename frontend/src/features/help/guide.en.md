@@ -113,6 +113,15 @@ Editors and administrators switch the tree from **View** to **Builder**.
   the person; everything goes to the **Trash**, from where it can be restored. Nothing is ever
   erased for good.
 
+### Places (editors)
+
+- On a place's page, **Edit place** changes its name, region, country, map pin and former
+  names (each with the years it was used).
+- **Merge into another place** is for duplicates, such as the same village entered twice:
+  choose the place to keep. Events, marriages and photos move there, and the merged place's
+  names are kept as its former names. The merged place goes to the **Trash**; restoring it
+  from there undoes the merge.
+
 ## Photos, documents and recordings
 
 - On a person's page or in the editor's **Media** tab, drag files in or **Choose files**:
@@ -177,6 +186,12 @@ The links under the tree's title:
 - **Timeline** — every dated event and marriage by decade, with filters by type, person and
   years, and optional historical context (the world wars, the Holodomor, Chornobyl,
   independence…).
+- **Places** — every place of the tree, most events first; search finds former names too. A
+  place's page shows its current and former names (with the years each was used), a small map
+  with the places nearby, the people born, married, living, dying or buried there grouped by
+  event, photos taken there and stories that mention it. **Show on the family map** opens the
+  map at that place. Place names on person pages, in event lists, on the map and in the album
+  link to these pages.
 - **Map** — where the family was born, lived, married, moved, died and is buried; filters by
   event type and person, with a person's life path drawn in order.
 - **On this day** — birthdays, wedding anniversaries and memorial days for a date or the coming

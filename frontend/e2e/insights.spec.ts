@@ -117,3 +117,27 @@ test("subscribe to a tree's anniversaries in a calendar app, then revoke", async
 
   await page.request.delete(`/api/v1/trees/${tree.id}`, { headers });
 });
+
+test("a place page opens from a person page and lists people by event type", async ({ page }) => {
+  await openDemoTree(page);
+  const treeId = page.url().match(/\/trees\/([0-9a-f-]+)/)![1]!;
+  const graph = (await (await page.request.get(`/api/v1/trees/${treeId}/graph`)).json()) as {
+    persons: { id: string; display_name: string; birth_place: string | null }[];
+  };
+  const person = graph.persons.find((p) => p.birth_place)!;
+  await page.goto(`/trees/${treeId}/people/${person.id}`);
+  await page.getByRole("link", { name: person.birth_place!, exact: true }).first().click();
+
+  await expect(page).toHaveURL(/\/places\/[0-9a-f-]+$/);
+  await expect(page.getByRole("heading", { level: 1, name: person.birth_place! })).toBeVisible();
+  const births = page.getByRole("heading", { level: 2, name: /Народження/ }).locator("..");
+  await expect(births.getByRole("link", { name: person.display_name }).first()).toBeVisible();
+
+  await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`/people/${person.id}$`));
+  await expect(page.getByRole("heading", { name: person.display_name }).first()).toBeVisible();
+
+  // The list of places is in the tree's sections, and finds former names too.
+  await page.goto(`/trees/${treeId}/places`);
+  await expect(page.getByRole("link", { name: person.birth_place!, exact: true })).toBeVisible();
+});

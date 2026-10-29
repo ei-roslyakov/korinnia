@@ -186,9 +186,11 @@ async def list_stories(
     limit: int = 50,
     offset: int = 0,
     hidden: Collection[uuid.UUID] = (),
+    mentions: Sequence[str] = (),
 ) -> tuple[list[Story], int]:
     """Stories this user may read. With `hidden` people (living, for readers who see only
-    their basics), stories about nobody else are left out."""
+    their basics), stories about nobody else are left out. `mentions`: only stories whose
+    title or text contains one of these words (e.g. a place's names)."""
     stmt = _visible(
         select(Story).where(Story.tree_id == tree_id, Story.deleted_at.is_(None)), user, role
     )
@@ -210,6 +212,10 @@ async def list_stories(
         )
     if status:
         stmt = stmt.where(Story.status == status)
+    if mentions:
+        stmt = stmt.where(
+            or_(*(or_(Story.title.ilike(f"%{m}%"), Story.body.ilike(f"%{m}%")) for m in mentions))
+        )
     total = await session.scalar(select(func.count()).select_from(stmt.subquery())) or 0
     rows = await session.scalars(
         stmt.order_by(Story.date_sort.asc().nulls_last(), Story.created_at)

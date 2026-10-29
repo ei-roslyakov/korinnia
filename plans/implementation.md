@@ -80,7 +80,12 @@ plans/            this folder
    contributor suggestions with diff and approval, comments, research questions, data-quality
    panel. (D60–D67)
 8. **Insights** — family map, timeline with historical context, relationship calculator (kinship
-   terms in uk/en/pl), statistics, "On this day". (D68–D73)
+   terms in uk/en/pl), statistics, "On this day". (D68–D73) Place pages (D116):
+   `services/genealogy/place_pages.py` (index, summary on top of `facts.load_facts`, nearby by
+   haversine, merge + `undo_merge` called from the trash restore), `features/places`
+   (`PlacesPage`, `PlacePage`, `PlaceLink` used wherever a place name is shown). Calendar feed
+   (D115): `exporters/ical.py`, `services/calendar_feeds.py`, `api/v1/calendar.py`,
+   `insights/CalendarFeedDialog`.
 9. **Data safety** — GEDCOM import (preview, duplicate merge, one transaction, undo) and weekly /
    on-demand integrity checks of stored originals; backups are left to the infrastructure.
    (D89–D90)

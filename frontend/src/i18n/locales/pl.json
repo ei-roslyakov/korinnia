@@ -519,7 +519,8 @@
       "historical": "Nazwy historyczne",
       "historicalName": "Dawna nazwa",
       "until": "Do roku",
-      "addHistorical": "Dodaj dawną nazwę"
+      "addHistorical": "Dodaj dawną nazwę",
+      "from": "Od roku"
     },
     "names": {
       "name": "Imię i nazwisko {{n}}",
@@ -1416,5 +1417,38 @@
     "confirmRenew": "Uzyskać nowy link? Stary przestanie działać, a subskrybujące go kalendarze przestaną się aktualizować.",
     "revoke": "Odwołaj",
     "confirmRevoke": "Odwołać link do kalendarza? Subskrybujące go kalendarze przestaną się aktualizować."
+  },
+  "places": {
+    "title": "Miejsca",
+    "all": "Wszystkie miejsca",
+    "search": "Szukaj miejsc, także po dawnych nazwach…",
+    "empty": "Nie ma jeszcze miejsc.",
+    "noMatches": "Żadne miejsce nie pasuje.",
+    "emptyHint": "Miejsca pojawią się tu, gdy narodzinom, ślubom, domom lub grobom zostanie przypisane miejsce.",
+    "counts": "wydarzenia: {{events}} · osoby: {{people}}",
+    "period": {
+      "both": "{{name}} ({{from}}–{{until}})",
+      "until": "{{name}} (do {{until}})",
+      "from": "{{name}} (od {{from}})"
+    },
+    "formerly": "Dawne nazwy:",
+    "summary": "wydarzenia: {{events}}, osoby: {{people}}",
+    "showOnMap": "Pokaż na mapie rodziny",
+    "nothingHere": "Nie zapisano tu jeszcze żadnych wydarzeń.",
+    "photos": "Zdjęcia zrobione tutaj",
+    "stories": "Historie wspominające to miejsce",
+    "nearby": "Miejsca w pobliżu",
+    "km": "{{km}} km",
+    "mapLabel": "Mapa okolicy: {{name}}",
+    "edit": "Edytuj miejsce",
+    "editTitle": "Edytuj „{{name}}”",
+    "merge": "Scal z innym miejscem",
+    "mergeTitle": "Scal „{{name}}” z innym miejscem",
+    "mergeHint": "Dla duplikatów (np. ta sama wieś wpisana dwa razy). Jej wydarzenia, śluby i zdjęcia przejdą do wybranego miejsca, a jej nazwy zostaną tam zachowane jako dawne. Można to cofnąć, przywracając miejsce z Kosza.",
+    "mergeInto": "Scal z",
+    "mergeSelf": "Wybierz inne miejsce.",
+    "mergeButton": "Scal",
+    "merged": "„{{source}}” scalono z „{{target}}”. Aby cofnąć, przywróć je z Kosza.",
+    "mapFilter": "Miejsce: {{name}}"
   }
 }

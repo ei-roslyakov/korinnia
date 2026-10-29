@@ -513,7 +513,8 @@
       "historical": "Historical names",
       "historicalName": "Former name",
       "until": "Until year",
-      "addHistorical": "Add former name"
+      "addHistorical": "Add former name",
+      "from": "From year"
     },
     "names": {
       "name": "Name {{n}}",
@@ -1348,5 +1349,38 @@
     "confirmRenew": "Get a new link? The old one stops working, so calendars subscribed to it stop updating.",
     "revoke": "Revoke",
     "confirmRevoke": "Revoke the calendar link? Calendars subscribed to it stop updating."
+  },
+  "places": {
+    "title": "Places",
+    "all": "All places",
+    "search": "Search places, also by former names…",
+    "empty": "No places yet.",
+    "noMatches": "No place matches.",
+    "emptyHint": "Places appear here once births, marriages, homes or graves are given a place.",
+    "counts": "{{events}} events · {{people}} people",
+    "period": {
+      "both": "{{name}} ({{from}}–{{until}})",
+      "until": "{{name}} (until {{until}})",
+      "from": "{{name}} (from {{from}})"
+    },
+    "formerly": "Former names:",
+    "summary": "{{events}} events, {{people}} people",
+    "showOnMap": "Show on the family map",
+    "nothingHere": "No events are recorded here yet.",
+    "photos": "Photos taken here",
+    "stories": "Stories mentioning this place",
+    "nearby": "Places nearby",
+    "km": "{{km}} km",
+    "mapLabel": "Map around {{name}}",
+    "edit": "Edit place",
+    "editTitle": "Edit “{{name}}”",
+    "merge": "Merge into another place",
+    "mergeTitle": "Merge “{{name}}” into another place",
+    "mergeHint": "Use this for duplicates (e.g. the same village entered twice). Its events, marriages and photos move to the place you choose, and its names are kept there as former names. You can undo this by restoring the place from the Trash.",
+    "mergeInto": "Merge into",
+    "mergeSelf": "Choose a different place.",
+    "mergeButton": "Merge",
+    "merged": "“{{source}}” was merged into “{{target}}”. Restore it from the Trash to undo.",
+    "mapFilter": "Place: {{name}}"
   }
 }
