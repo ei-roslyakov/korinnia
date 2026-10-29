@@ -63,3 +63,116 @@ test("timeline, on this day, statistics and map", async ({ page }) => {
   // Leaflet drew the markers.
   await expect(page.locator(".leaflet-interactive").first()).toBeVisible();
 });
+
+test("subscribe to a tree's anniversaries in a calendar app, then revoke", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/login");
+  await page.getByLabel("Електронна пошта").fill(ADMIN_EMAIL);
+  await page.getByLabel("Пароль").fill(ADMIN_PASSWORD);
+  await page.getByRole("button", { name: "Увійти" }).click();
+  await expect(page.getByRole("link", { name: /Родина Коваленків \(демо\)/ })).toBeVisible();
+  const csrf = (await page.context().cookies()).find((c) => c.name === "korinnia_csrf")!.value;
+  const headers = { "X-CSRF-Token": csrf };
+  // A tree of its own: a feed belongs to one user and tree, and projects run in parallel.
+  const tree = (await (
+    await page.request.post("/api/v1/trees", {
+      data: { name: `Календар ${testInfo.project.name} ${Date.now()}` },
+      headers,
+    })
+  ).json()) as { id: string };
+  await page.request.post(`/api/v1/trees/${tree.id}/persons`, {
+    data: {
+      names: [{ first_name: "Галина", last_name: "Коваленко" }],
+      birth: { date: { year: 1923, month: 5, day: 2 } },
+      death: { date: { year: 2001, month: 11, day: 2 } },
+    },
+    headers,
+  });
+
+  await page.goto(`/trees/${tree.id}/on-this-day`);
+  await page.getByRole("button", { name: "Підписатися в календарі" }).click();
+  const dialog = page.getByRole("dialog", { name: "Дні народження у вашому календарі" });
+  await dialog.getByLabel("Мова подій").selectOption("en");
+  await dialog.getByRole("button", { name: "Створити посилання" }).click();
+  const created = dialog.getByTestId("calendar-feed-created");
+  await expect(created).toBeVisible();
+  const url = await created.getByRole("textbox").inputValue();
+  expect(url).toMatch(/\/api\/v1\/calendar\/[\w-]+\.ics$/);
+  await expect(
+    created.getByRole("link", { name: "Відкрити в застосунку календаря" }),
+  ).toHaveAttribute("href", /^webcal:\/\//);
+
+  const path = new URL(url).pathname;
+  const ics = await page.request.get(path);
+  expect(ics.headers()["content-type"]).toContain("text/calendar");
+  const text = await ics.text();
+  expect(text).toContain("SUMMARY:Birthday: Галина Коваленко (b. 1923)");
+  expect(text).toContain("RRULE:FREQ=YEARLY");
+
+  page.once("dialog", (d) => void d.accept());
+  await dialog.getByRole("button", { name: "Відкликати" }).click();
+  await expect(dialog.getByRole("button", { name: "Створити посилання" })).toBeVisible();
+  expect((await page.request.get(path)).status()).toBe(404);
+
+  await page.request.delete(`/api/v1/trees/${tree.id}`, { headers });
+});
+
+test("a place page opens from a person page and lists people by event type", async ({ page }) => {
+  await openDemoTree(page);
+  const treeId = page.url().match(/\/trees\/([0-9a-f-]+)/)![1]!;
+  const graph = (await (await page.request.get(`/api/v1/trees/${treeId}/graph`)).json()) as {
+    persons: { id: string; display_name: string; birth_place: string | null }[];
+  };
+  const person = graph.persons.find((p) => p.birth_place)!;
+  await page.goto(`/trees/${treeId}/people/${person.id}`);
+  await page.getByRole("link", { name: person.birth_place!, exact: true }).first().click();
+
+  await expect(page).toHaveURL(/\/places\/[0-9a-f-]+$/);
+  await expect(page.getByRole("heading", { level: 1, name: person.birth_place! })).toBeVisible();
+  const births = page.getByRole("heading", { level: 2, name: /Народження/ }).locator("..");
+  await expect(births.getByRole("link", { name: person.display_name }).first()).toBeVisible();
+
+  await page.goBack();
+  await expect(page).toHaveURL(new RegExp(`/people/${person.id}$`));
+  await expect(page.getByRole("heading", { name: person.display_name }).first()).toBeVisible();
+
+  // The list of places is in the tree's sections, and finds former names too.
+  await page.goto(`/trees/${treeId}/places`);
+  await expect(page.getByRole("link", { name: person.birth_place!, exact: true })).toBeVisible();
+});
+
+test("fan chart: open from a person, change generations, re-centre, download", async ({ page }) => {
+  await openDemoTree(page);
+  const treeId = page.url().match(/\/trees\/([0-9a-f-]+)/)![1]!;
+  const found = (await (
+    await page.request.get(`/api/v1/trees/${treeId}/persons?q=Андрій Володимирович`)
+  ).json()) as { items: { id: string; display_name: string }[] };
+  const andrii = found.items[0]!;
+  await page.goto(`/trees/${treeId}/people/${andrii.id}`);
+  await page.getByRole("link", { name: "Діаграми" }).first().click();
+
+  await expect(page).toHaveURL(new RegExp(`/charts/fan/${andrii.id}`));
+  await expect(page.getByRole("heading", { name: `Предки: ${andrii.display_name}` })).toBeVisible();
+  const sectors = page.getByTestId("fan-sector");
+  await expect(sectors.first()).toBeVisible();
+  expect(await sectors.count()).toBeGreaterThan(7);
+
+  // Fewer generations: nothing beyond the 4th ring (slots 1–15).
+  await page.getByLabel("Поколінь").selectOption("4");
+  await expect(page).toHaveURL(/gen=4/);
+  await expect(page.locator('[data-testid="fan-sector"][data-slot="16"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid="fan-sector"][data-slot="2"]')).toBeVisible();
+
+  // The father's sector puts him in the centre.
+  const father = page.locator('[data-testid="fan-sector"][data-slot="2"]');
+  const fatherName = (await father.getAttribute("aria-label"))!.split(",")[0]!;
+  await father.click();
+  await expect(page).not.toHaveURL(new RegExp(`/charts/fan/${andrii.id}`));
+  await expect(page).toHaveURL(/gen=4/);
+  await expect(page.getByRole("heading", { name: `Предки: ${fatherName}` })).toBeVisible();
+
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Завантажити PNG" }).click();
+  expect((await download).suggestedFilename()).toMatch(/\.png$/);
+});

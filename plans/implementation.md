@@ -32,7 +32,7 @@ backend/app/
   jobs/          procrastinate app, tasks (media processing, demo family), worker
   storage/       local filesystem storage (atomic writes, SHA-256)
   importers/gedcom/  GEDCOM reader (parser, ANSEL, dates, records → plain data)
-  exporters/         placeholder for phase 11
+  exporters/         GEDCOM export, iCalendar feed (ical.py, D115)
   seed.py, cli.py         demo family seeding; operator CLI (create-superadmin, disable-2fa)
   perf.py                 synthetic large trees for `make perf`
 backend/alembic/  migrations (run automatically on backend start)
@@ -76,11 +76,21 @@ plans/            this folder
    PATCH and a tag per chosen person after the upload finishes; `PersonCombobox` takes
    `suggestions`, here the person's relatives, shown before anything is typed). The demo seed gives every portrait a title, description,
    approximate date and place (`complete_demo` fills older copies).
-7. **Collaboration** — sources and citations on any fact, stories with review workflow,
+7. **Collaboration** — sources and citations on any fact, stories with review workflow
+   (recipes and traditions are story kinds, D117: `schemas/stories.Recipe`,
+   `stories/RecipeFields`, `RecipeView`, `recipe.ts`),
    contributor suggestions with diff and approval, comments, research questions, data-quality
    panel. (D60–D67)
 8. **Insights** — family map, timeline with historical context, relationship calculator (kinship
-   terms in uk/en/pl), statistics, "On this day". (D68–D73)
+   terms in uk/en/pl), statistics, "On this day". (D68–D73) Place pages (D116):
+   `services/genealogy/place_pages.py` (index, summary on top of `facts.load_facts`, nearby by
+   haversine, merge + `undo_merge` called from the trash restore), `features/places`
+   (`PlacesPage`, `PlacePage`, `PlaceLink` used wherever a place name is shown). Calendar feed
+   (D115): `exporters/ical.py`, `services/calendar_feeds.py`, `api/v1/calendar.py`,
+   `insights/CalendarFeedDialog`. Chart views (D118): `services/genealogy/lineage.py` on the
+   kinship index, `features/charts` (`lineage.ts` pedigree slots and d'Aboville outline,
+   `FanChart`, `PedigreeChart`, `DescendancyList`, `PanZoom`, `exportChart` on top of the
+   tree export's helpers).
 9. **Data safety** — GEDCOM import (preview, duplicate merge, one transaction, undo) and weekly /
    on-demand integrity checks of stored originals; backups are left to the infrastructure.
    (D89–D90)

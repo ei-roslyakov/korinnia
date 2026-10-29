@@ -340,6 +340,21 @@ export interface Citation {
 }
 
 export type StoryStatus = "draft" | "pending_review" | "published";
+/** A family recipe or tradition is a story too (D117). */
+export type StoryKind = "story" | "recipe" | "tradition";
+
+export interface Ingredient {
+  amount?: string | null;
+  item: string;
+}
+
+export interface Recipe {
+  servings?: number | null;
+  prep_minutes?: number | null;
+  cook_minutes?: number | null;
+  ingredients: Ingredient[];
+  steps: string[];
+}
 export interface UserRef {
   id: string;
   display_name: string;
@@ -357,10 +372,13 @@ export interface StorySummary {
   updated_at: string;
   cover_url?: string | null;
   reading_minutes?: number;
+  kind?: StoryKind;
+  occasion?: string | null;
 }
 
 export interface Story extends StorySummary {
   body: string;
+  recipe?: Recipe | null;
   persons: PersonSummary[];
   media: MediaItem[];
   review_comment: string | null;
@@ -549,3 +567,29 @@ export const factCategory = (type: string): FactCategory =>
   (Object.keys(FACT_CATEGORIES) as FactCategory[]).find((c) =>
     (FACT_CATEGORIES[c] as readonly string[]).includes(type),
   ) ?? "life";
+
+// --- Place pages (D116) ---------------------------------------------------------------------
+
+export interface PlaceIndexItem {
+  place: Place;
+  /** Facts (events and marriages) at the place, and the different people in them. */
+  events: number;
+  people: number;
+}
+
+export interface NearbyPlace {
+  place: PlaceSummary;
+  distance_km: number;
+}
+
+export interface PlacePage {
+  place: Place;
+  /** Facts by type ("birth", "residence", "marriage", …). */
+  counts: Record<string, number>;
+  /** In date order, undated last. */
+  facts: Fact[];
+  persons: PersonSummary[];
+  media: MediaItem[];
+  stories: StorySummary[];
+  nearby: NearbyPlace[];
+}

@@ -9,7 +9,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import seed as seed_module
 from app.core.config import get_settings
-from app.models import MediaFile, ParentChild, Partnership, Person, PersonName, Tree, User
+from app.models import (
+    MediaFile,
+    ParentChild,
+    Partnership,
+    Person,
+    PersonName,
+    Story,
+    StoryPerson,
+    Tree,
+    User,
+)
 from app.services import trees as tree_service
 from app.services.context import Actor
 from app.services.demo_portraits import ERAS, era_of, render_portrait
@@ -44,6 +54,12 @@ async def test_seed_creates_demo_family(
     assert await count(Partnership) == len(seed_module.MARRIAGES)
     assert tree.description == seed_module.DESCRIPTION
     assert await seed_module.seed(session, owner, storage=local_storage) is None  # idempotent
+    # Two family recipes and a tradition, published and linked to their people.
+    stories = list(await session.scalars(select(Story).where(Story.tree_id == tree.id)))
+    assert sorted(s.kind.value for s in stories) == ["recipe", "recipe", "tradition"]
+    assert all(s.status.value == "published" and s.occasion for s in stories)
+    assert all(s.recipe and s.recipe["ingredients"] for s in stories if s.kind.value == "recipe")
+    assert await session.scalar(select(func.count()).select_from(StoryPerson)) == 6
 
     # Everyone has a biography and an illustrated portrait (processed by the worker).
     people = list(await session.scalars(select(Person).where(Person.tree_id == tree.id)))
@@ -277,10 +293,17 @@ async def test_complete_demo_fills_gaps_without_overwriting(
     stepan.biography = None
     paraska = people["Господиня"]
     paraska.biography = "Моя власна біографія."
+    # An older copy without the recipes; one of them the owner deleted (stays deleted).
+    stories = {s.title: s for s in await session.scalars(select(Story))}
+    await session.delete(stories["Борщ баби Параски"])
+    stories["Свят-вечір: дванадцять страв і дідух"].deleted_at = func.now()
     await session.commit()
 
     done = await seed_module.complete_demo(session, tree, owner, storage=local_storage)
-    assert (done.added, done.updated) == (0, len(seed_module.PEOPLE))
+    # Every person gets a portrait back, plus the one missing recipe.
+    assert (done.added, done.updated) == (0, len(seed_module.PEOPLE) + 1)
+    titles = set(await session.scalars(select(Story.title).where(Story.deleted_at.is_(None))))
+    assert titles == {"Борщ баби Параски", "Вареники з вишнями від Валентини"}
     await session.refresh(stepan)
     await session.refresh(paraska)
     assert stepan.biography == seed_module.BIOGRAPHIES["stepan"]

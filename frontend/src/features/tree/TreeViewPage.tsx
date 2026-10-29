@@ -164,6 +164,15 @@ export function TreeViewPage() {
             )}
           </div>
         )}
+        {personId && (
+          <Link
+            to={`/trees/${treeId}/charts/fan/${personId}`}
+            className="text-leaf-700 shrink-0 text-sm hover:underline"
+            data-testid="header-charts"
+          >
+            {t("charts.title")}
+          </Link>
+        )}
         {canEdit && (
           <div
             className="border-bark-100 inline-flex shrink-0 overflow-hidden rounded-md border text-sm"

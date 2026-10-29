@@ -96,7 +96,7 @@ New `persons` columns: `primary_photo_id` (FK `media_files`), `primary_photo_cro
 | `sources` | A document or testimony in the tree's library | `title`, `type` (`civil_record`/`church_record`/`archive_document`/`census`/`newspaper`/`letter`/`oral_history`/`book`/…), `author`, `archive_name`, `reference_number`, `url`, `notes`, `search_text` (transliterated, trigram index), soft delete |
 | `source_media` | Scans attached to a source | `source_id`, `media_id` |
 | `citations` | "This fact is supported by that source" | `source_id`, `entity_type` (`person`/`person_name`/`event`/`parent_child`/`partnership`/`media`), `entity_id`, `field` (e.g. `occupation`, only for `person`), `page`, `quality` (`primary`/`secondary`/`family_tradition`/`unverified`), `notes`, soft delete |
-| `stories` | A story or memory (Markdown) | `title`, `body`, `narrator`, `date_*` (partial date), `status` (`draft`/`pending_review`/`published`), `author_user_id`, `review_comment`, soft delete |
+| `stories` | A story or memory (Markdown), a family recipe or a tradition | `title`, `body`, `narrator`, `date_*` (partial date), `status` (`draft`/`pending_review`/`published`), `author_user_id`, `review_comment`, `kind` (`story`/`recipe`/`tradition`, migration 0016, D117), `recipe` (JSON, recipes only: `servings`, `prep_minutes`, `cook_minutes`, `ingredients` = [{`amount`, `item`}], `steps` = [text]), `occasion` (recipes and traditions), soft delete |
 | `story_persons` / `story_media` | People a story is about; media it shows | `story_id` + `person_id` / `media_id` |
 | `edit_suggestions` | A contributor's proposed change | `entity_type` (`person`/`event`), `entity_id`, `patch` (JSON: field → proposed value), `comment` (where the information comes from), `status` (`pending`/`approved`/`rejected`), `created_by_id`, `reviewed_by_id`, `reviewed_at`, `review_comment` |
 | `comments` | Discussion | `entity_type` (`person`/`story`/`media`), `entity_id`, `body`, `author_id`, `deleted_at` |
@@ -122,6 +122,11 @@ Imported people, events, places, sources and citations are ordinary rows of the 
 | `share_links` | A read-only link to one tree for people without an account | `tree_id`, `token_hash` (SHA-256 of the token in the URL; the token is shown once), `label`, `created_by_id`, `created_at`, `expires_at` (null: no expiry), `revoked_at`, `last_used_at`, `use_count` |
 
 `users` also gained `welcome_dismissed`, `changelog_seen` and `show_changelog` (migration 0009, D95).
+
+### Calendar feeds
+| Table | Purpose | Key columns |
+|---|---|---|
+| `calendar_feeds` | A member's private iCalendar subscription to a tree (migration 0015, D115); one per member and tree, deleted when revoked | `tree_id`, `user_id` (unique together), `token_hash` (SHA-256 of the token in the URL; the URL is shown once), `language` (`uk`/`en`/`pl`, of the event titles), `created_at`, `last_used_at`, `window_started_at` + `window_count` (fetches in the current hour, for the rate limit) |
 
 ### Privacy of living people
 `trees` gained `living_privacy` and `show_living_portraits` (migration 0014, D114). Nothing is

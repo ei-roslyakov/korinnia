@@ -13,6 +13,65 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-29.5",
+    items: {
+      en: [
+        "Charts: from a person’s page, see their ancestors as a fan chart or a pedigree, or their descendants as a numbered list — and download them as PNG or PDF.",
+      ],
+      uk: [
+        "Діаграми: зі сторінки людини можна побачити її предків віялом чи родоводом або нащадків нумерованим списком — і завантажити їх як PNG чи PDF.",
+      ],
+      pl: [
+        "Wykresy: ze strony osoby zobaczysz jej przodków jako wachlarz lub rodowód albo potomków jako numerowaną listę — i pobierzesz je jako PNG lub PDF.",
+      ],
+    },
+  },
+  {
+    id: "2026-10-29.4",
+    items: {
+      en: [
+        "Family recipes and traditions: “Recipes & traditions” on the stories page keeps grandma’s recipes with ingredients and steps (printable on one page) and holiday customs; they also show on the person’s page.",
+      ],
+      uk: [
+        "Родинні рецепти й традиції: «Рецепти й традиції» на сторінці історій зберігають бабусині рецепти з інгредієнтами й кроками (друкуються на одній сторінці) та святкові звичаї; вони показуються й на сторінці людини.",
+      ],
+      pl: [
+        "Rodzinne przepisy i tradycje: „Przepisy i tradycje” na stronie historii przechowują przepisy babci ze składnikami i krokami (do wydruku na jednej stronie) oraz świąteczne zwyczaje; widać je też na stronie osoby.",
+      ],
+    },
+  },
+  {
+    id: "2026-10-29.3",
+    items: {
+      en: [
+        "Place pages: every place has its own page with its former names, a map, who was born, married, lived, died or is buried there, and photos taken there. Find them under “Places” or click a place name anywhere.",
+        "Editors can merge duplicate places; restoring the merged place from the Trash undoes it.",
+      ],
+      uk: [
+        "Сторінки місць: кожне місце має свою сторінку з колишніми назвами, мапою, тими, хто там народився, одружився, жив, помер чи похований, і світлинами, зробленими там. Шукайте в розділі «Місця» або натисніть назву місця будь-де.",
+        "Редактори можуть об’єднувати дублікати місць; відновлення об’єднаного місця з Кошика скасовує це.",
+      ],
+      pl: [
+        "Strony miejsc: każde miejsce ma własną stronę z dawnymi nazwami, mapą, osobami, które się tam urodziły, wzięły ślub, mieszkały, zmarły lub są pochowane, i zdjęciami zrobionymi tam. Znajdziesz je w „Miejscach” albo klikając nazwę miejsca.",
+        "Redaktorzy mogą scalać zduplikowane miejsca; przywrócenie scalonego miejsca z Kosza to cofa.",
+      ],
+    },
+  },
+  {
+    id: "2026-10-29.2",
+    items: {
+      en: [
+        "Birthdays in your calendar: “Subscribe in your calendar” on the “On this day” page adds the tree’s birthdays, memorial days and wedding anniversaries to Google Calendar, Apple Calendar or Outlook, and keeps them up to date.",
+      ],
+      uk: [
+        "Дні народження у вашому календарі: «Підписатися в календарі» на сторінці «Цього дня» додає дні народження, дні пам’яті й річниці весіль родоводу до Google Календаря, Календаря Apple чи Outlook і тримає їх актуальними.",
+      ],
+      pl: [
+        "Urodziny w Twoim kalendarzu: „Subskrybuj w kalendarzu” na stronie „Tego dnia” dodaje urodziny, dni pamięci i rocznice ślubów z drzewa do Kalendarza Google, Kalendarza Apple lub Outlooka i dba o ich aktualność.",
+      ],
+    },
+  },
+  {
     id: "2026-10-29",
     items: {
       en: [

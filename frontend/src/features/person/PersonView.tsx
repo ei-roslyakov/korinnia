@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 
 import { Markdown } from "@/components/Markdown";
 import { Badge, Button } from "@/components/ui";
@@ -13,6 +13,7 @@ import type { LifeEvent, PersonDetail, PersonSummary, PlaceSummary } from "@/lib
 import { atLeast, type Role } from "@/lib/types";
 
 import { MediaSections } from "@/features/media/MediaSections";
+import { PlaceLink } from "@/features/places/PlaceLink";
 
 import { Avatar } from "./Avatar";
 import { LifeBar } from "./LifeBar";
@@ -29,11 +30,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function PlaceText({ place }: { place: PlaceSummary | null }) {
+  const { treeId } = useParams();
   if (!place) return null;
   const extra = [place.region, place.country].filter(Boolean).join(", ");
   return (
     <span>
-      {place.name}
+      {treeId ? <PlaceLink treeId={treeId} place={place} /> : place.name}
       {extra && <span className="text-bark-700"> ({extra})</span>}
     </span>
   );
@@ -85,6 +87,8 @@ export function PersonView({
   const { t, i18n } = useTranslation();
   const [suggesting, setSuggesting] = useState(false);
   const canContribute = role ? atLeast(role, "contributor") : false;
+  const stories = person.stories.filter((s) => !s.kind || s.kind === "story");
+  const recipes = person.stories.filter((s) => s.kind === "recipe" || s.kind === "tradition");
   const fmt = (d: Parameters<typeof formatPartialDate>[0]) =>
     formatPartialDate(d, t, i18n.language);
   const burial = person.events.find((e) => e.type === "burial");
@@ -178,6 +182,12 @@ export function PersonView({
                   className="text-leaf-700 hover:underline"
                 >
                   {t("insights.nav.timeline")}
+                </Link>
+                <Link
+                  to={`/trees/${treeId}/charts/fan/${person.id}`}
+                  className="text-leaf-700 hover:underline"
+                >
+                  {t("charts.title")}
                 </Link>
               </span>
             )}
@@ -362,10 +372,10 @@ export function PersonView({
         </Section>
       )}
 
-      {person.stories.length > 0 && treeId && (
+      {stories.length > 0 && treeId && (
         <Section title={t("collab.stories")}>
           <ul className="space-y-2 text-sm">
-            {person.stories.map((s) => (
+            {stories.map((s) => (
               <li key={s.id}>
                 <Link
                   to={`/trees/${treeId}/stories/${s.id}`}
@@ -380,6 +390,38 @@ export function PersonView({
               </li>
             ))}
           </ul>
+        </Section>
+      )}
+
+      {treeId && (recipes.length > 0 || canContribute) && (
+        <Section title={t("recipes.section")}>
+          <ul className="space-y-2 text-sm" data-testid="person-recipes">
+            {recipes.map((s) => (
+              <li key={s.id}>
+                <Link
+                  to={`/trees/${treeId}/stories/${s.id}`}
+                  className="text-leaf-700 font-medium hover:underline"
+                >
+                  {s.title}
+                </Link>
+                <span className="text-bark-700">
+                  {" · "}
+                  {[s.kind && t(`recipes.kinds.${s.kind}`), s.occasion].filter(Boolean).join(" · ")}
+                </span>
+                {s.status !== "published" && (
+                  <Badge tone="amber">{t(`collab.storyStatus.${s.status}`)}</Badge>
+                )}
+              </li>
+            ))}
+          </ul>
+          {canContribute && (
+            <Link
+              to={`/trees/${treeId}/stories/new?kind=recipe&person=${person.id}`}
+              className="text-leaf-700 mt-2 inline-block text-sm underline print:hidden"
+            >
+              + {t("recipes.addRecipe")}
+            </Link>
+          )}
         </Section>
       )}
 

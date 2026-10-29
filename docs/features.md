@@ -34,9 +34,12 @@ Everything below works today. Planned work is listed in the [roadmap](../README.
 ## Insights
 
 - Relationship calculator: "how is B related to A?" with the kinship term in Ukrainian (двоюрідний, троюрідний…; тесть / свекор…), English (first cousin once removed…) or Polish, half / adoptive notes, closest common ancestors and the path through the tree
+- Chart views of one person: fan chart of ancestors (4–8 generations, half or full circle, father's / mother's line coloured, pedigree collapse marked), pedigree (4–6 generations), descendants as a d'Aboville-numbered outline with partners and marriage years; click to re-centre, pan / zoom, PNG / PDF download, shareable URLs
 - Family map (OpenStreetMap): places of birth, life, marriage, migration, death and burial; filters by event type and person, with a person's life path drawn in order
+- Place pages: list of places by number of events (search by any name, historical included); per place its names with periods, a small map, people grouped by event type in date order, photos taken there, stories mentioning it and places within 25 km; place names everywhere link to them; editors edit places and merge duplicates (undone by restoring from the trash)
 - Family timeline: every dated event in chronological order, grouped by decade, with optional historical context (World Wars, Holodomor, Chornobyl, independence…)
 - "On this day": birthdays, wedding anniversaries and memorial days for a date or the coming week / month / three months
+- Calendar feed: each member can subscribe Google / Apple / Outlook calendars to the tree's birthdays, memorial days and wedding anniversaries (private iCalendar URL, yearly events, language of choice, revocable, follows the member's access and the living-people privacy setting)
 - Statistics: people, generations, period covered, oldest ancestor, longest life, average lifespan, surnames (spellings in different scripts grouped), first names, births and deaths by decade
 
 ## Builder mode (editors and admins)
@@ -69,7 +72,8 @@ Everything below works today. Planned work is listed in the [roadmap](../README.
 
 - Source library per tree (civil and church records, archive documents, census, newspapers, letters, oral history, books…) with archive, reference number and URL
 - Citations on any fact — a person field, a name, an event, a parent link, a partnership or a media item — with page and quality (primary, secondary, family tradition, unverified)
-- Stories and memories in Markdown with narrator, date and several people; draft → on review → published
+- Stories and memories in Markdown with narrator, date and several people; draft → on review → published; search by title, text and narrator
+- Family recipes (servings, times, ingredients, steps, the story behind the dish; one-page print) and traditions (occasion + text) as kinds of stories, with their own section, search by ingredient and occasion, and a section on the person's page; the demo family has two recipes and a tradition
 - Edit suggestions from contributors with a before / after diff; editors approve or reject with a comment; moderation page with a pending badge
 - Comments on people, stories, photos and videos; open research questions per person
 - Data-quality panel: people without a birth record, photo or source, with date problems, or with open questions

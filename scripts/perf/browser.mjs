@@ -67,6 +67,9 @@ result.api_ms = await page.evaluate(async (treeId) => {
     timeline: "/timeline?limit=100",
     map: "/map",
     relationship: `/relationship?a=${a}&b=${b}`,
+    // Chart views (D118): 8 generations from the youngest / oldest person generated.
+    lineage_ancestors: `/persons/${b}/lineage?direction=ancestors&depth=8`,
+    lineage_descendants: `/persons/${a}/lineage?direction=descendants&depth=8`,
     gedcom_export: "/export/gedcom",
   };
   const out = { people: graph.persons.length };

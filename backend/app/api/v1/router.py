@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from app.api.v1 import (
     admin,
     auth,
+    calendar,
     collaboration,
     events,
     exports,
@@ -43,6 +44,7 @@ for genealogy in (
     stories,
     collaboration,
     insights,
+    calendar,
     imports,
     exports,
     share,

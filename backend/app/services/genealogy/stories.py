@@ -12,7 +12,7 @@ import uuid
 from collections.abc import Collection, Sequence
 from typing import Any
 
-from sqlalchemy import delete, func, or_, select
+from sqlalchemy import Text, cast, delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AppError, NotFoundError, PermissionDeniedError
@@ -22,6 +22,7 @@ from app.models import (
     MediaKind,
     Person,
     Story,
+    StoryKind,
     StoryMedia,
     StoryPerson,
     StoryStatus,
@@ -108,6 +109,9 @@ def snapshot(
         "narrator": story.narrator,
         "date": date_to_dict(story.date),
         "status": story.status.value,
+        "kind": story.kind.value,
+        "recipe": story.recipe,
+        "occasion": story.occasion,
         "person_ids": sorted(str(p) for p in person_ids),
         "media_ids": sorted(str(m) for m in media_ids),
     }
@@ -124,6 +128,9 @@ async def apply_snapshot(session: AsyncSession, story: Story, snap: dict[str, An
     story.narrator = snap.get("narrator")
     set_date(story, "date", "date_sort", date_from_dict(snap.get("date")))
     story.status = StoryStatus(snap["status"])
+    story.kind = StoryKind(snap.get("kind", StoryKind.story))
+    story.recipe = snap.get("recipe")
+    story.occasion = snap.get("occasion")
     await _set_links(
         session,
         story,
@@ -186,9 +193,14 @@ async def list_stories(
     limit: int = 50,
     offset: int = 0,
     hidden: Collection[uuid.UUID] = (),
+    mentions: Sequence[str] = (),
+    kinds: Collection[StoryKind] = (),
+    q: str | None = None,
 ) -> tuple[list[Story], int]:
     """Stories this user may read. With `hidden` people (living, for readers who see only
-    their basics), stories about nobody else are left out."""
+    their basics), stories about nobody else are left out. `mentions`: only stories whose
+    title or text contains one of these words (e.g. a place's names). `q`: every word must
+    appear in the title, text, narrator, occasion or a recipe's ingredients and steps."""
     stmt = _visible(
         select(Story).where(Story.tree_id == tree_id, Story.deleted_at.is_(None)), user, role
     )
@@ -210,6 +222,23 @@ async def list_stories(
         )
     if status:
         stmt = stmt.where(Story.status == status)
+    if kinds:
+        stmt = stmt.where(Story.kind.in_(kinds))
+    for word in (q or "").split():
+        like = f"%{word}%"
+        stmt = stmt.where(
+            or_(
+                Story.title.ilike(like),
+                Story.body.ilike(like),
+                Story.narrator.ilike(like),
+                Story.occasion.ilike(like),
+                cast(Story.recipe, Text).ilike(like),
+            )
+        )
+    if mentions:
+        stmt = stmt.where(
+            or_(*(or_(Story.title.ilike(f"%{m}%"), Story.body.ilike(f"%{m}%")) for m in mentions))
+        )
     total = await session.scalar(select(func.count()).select_from(stmt.subquery())) or 0
     rows = await session.scalars(
         stmt.order_by(Story.date_sort.asc().nulls_last(), Story.created_at)
@@ -262,6 +291,8 @@ async def summaries(
             author=authors.get(s.author_user_id) if s.author_user_id else None,
             person_ids=persons[s.id],
             updated_at=s.updated_at,
+            kind=s.kind,
+            occasion=s.occasion,
             cover_url=cover(s.id),
             reading_minutes=reading_minutes(s.body),
         )
@@ -285,6 +316,7 @@ async def story_out(
     return StoryOut(
         **summary.model_dump(),
         body=story.body,
+        recipe=story.recipe,
         persons=[names[p] for p in persons[story.id] if p in names],
         media=await media_out_many(session, media_rows),
         review_comment=story.review_comment,
@@ -310,6 +342,9 @@ async def create_story(
         body=body.body or "",
         narrator=body.narrator,
         status=status,
+        kind=body.kind,
+        recipe=body.recipe.model_dump() if body.recipe else None,
+        occasion=(body.occasion or "").strip() or None,
         author_user_id=actor.user.id,
         created_by_id=actor.user.id,
         updated_by_id=actor.user.id,
@@ -340,6 +375,16 @@ async def update_story(
         story.body = body.body or ""
     if "narrator" in fields:
         story.narrator = body.narrator
+    if body.kind is not None:
+        story.kind = body.kind
+    if "occasion" in fields:
+        story.occasion = (body.occasion or "").strip() or None
+    if "recipe" in fields:
+        story.recipe = body.recipe.model_dump() if body.recipe else None
+    if story.recipe is not None and story.kind != StoryKind.recipe:
+        if "recipe" in fields:
+            raise AppError("recipe_only_for_recipes")
+        story.recipe = None  # no longer a recipe
     if "date" in fields:
         set_date(story, "date", "date_sort", to_partial(body.date))
     await _set_links(session, story, body.person_ids, body.media_ids)

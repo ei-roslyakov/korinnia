@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import datetime as dt
 import uuid
+from typing import Any
 
 from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.dates import PartialDate
-from app.core.enums import StoryStatus
+from app.core.enums import StoryKind, StoryStatus
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin, text_enum
 from app.models.genealogy_base import (
     AuthoredMixin,
@@ -40,6 +42,18 @@ class Story(
         ForeignKey("users.id", ondelete="SET NULL"), index=True
     )
     review_comment: Mapped[str | None] = mapped_column(Text)
+    # A family recipe or tradition is a story too (D117): same narrator, people, media,
+    # review and comments, plus the recipe's structured parts and the occasion.
+    kind: Mapped[StoryKind] = mapped_column(
+        text_enum(StoryKind, "story_kind"),
+        default=StoryKind.story,
+        server_default=StoryKind.story,
+        index=True,
+    )
+    # {servings, prep_minutes, cook_minutes, ingredients: [{amount, item}], steps: [str]}
+    recipe: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    # "Christmas Eve", "Easter", "Wedding"…
+    occasion: Mapped[str | None] = mapped_column(String(200))
 
 
 class StoryPerson(Base):

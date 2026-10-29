@@ -513,7 +513,8 @@
       "historical": "Historical names",
       "historicalName": "Former name",
       "until": "Until year",
-      "addHistorical": "Add former name"
+      "addHistorical": "Add former name",
+      "from": "From year"
     },
     "names": {
       "name": "Name {{n}}",
@@ -1327,5 +1328,140 @@
     },
     "portraits": "Show portraits of living people",
     "portraitsHelp": "Their portrait appears on cards; their photos stay hidden."
+  },
+  "calendarFeed": {
+    "button": "Subscribe in your calendar",
+    "title": "Birthdays in your calendar",
+    "hint": "A private link for your calendar app: it shows the tree's birthdays, memorial days and wedding anniversaries every year and updates by itself. Only dates known to the day are included. Do not share the link — anyone who has it can see these dates.",
+    "language": "Language of the events",
+    "create": "Create link",
+    "created": "Copy the link now — it will not be shown again.",
+    "openInApp": "Open in your calendar app",
+    "howTo": {
+      "google": "Google Calendar (on a computer): Other calendars → + → From URL, paste the link.",
+      "apple": "Apple Calendar: File → New Calendar Subscription (on iPhone: Settings → Calendar → Accounts → Add Subscribed Calendar), paste the link.",
+      "outlook": "Outlook: Add calendar → Subscribe from web, paste the link."
+    },
+    "since": "You have a calendar link since {{date}}.",
+    "lastUsed": "Your calendar last fetched it {{date}}.",
+    "notUsedYet": "No calendar has fetched it yet.",
+    "renew": "Get a new link",
+    "confirmRenew": "Get a new link? The old one stops working, so calendars subscribed to it stop updating.",
+    "revoke": "Revoke",
+    "confirmRevoke": "Revoke the calendar link? Calendars subscribed to it stop updating."
+  },
+  "places": {
+    "title": "Places",
+    "all": "All places",
+    "search": "Search places, also by former names…",
+    "empty": "No places yet.",
+    "noMatches": "No place matches.",
+    "emptyHint": "Places appear here once births, marriages, homes or graves are given a place.",
+    "counts": "{{events}} events · {{people}} people",
+    "period": {
+      "both": "{{name}} ({{from}}–{{until}})",
+      "until": "{{name}} (until {{until}})",
+      "from": "{{name}} (from {{from}})"
+    },
+    "formerly": "Former names:",
+    "summary": "{{events}} events, {{people}} people",
+    "showOnMap": "Show on the family map",
+    "nothingHere": "No events are recorded here yet.",
+    "photos": "Photos taken here",
+    "stories": "Stories mentioning this place",
+    "nearby": "Places nearby",
+    "km": "{{km}} km",
+    "mapLabel": "Map around {{name}}",
+    "edit": "Edit place",
+    "editTitle": "Edit “{{name}}”",
+    "merge": "Merge into another place",
+    "mergeTitle": "Merge “{{name}}” into another place",
+    "mergeHint": "Use this for duplicates (e.g. the same village entered twice). Its events, marriages and photos move to the place you choose, and its names are kept there as former names. You can undo this by restoring the place from the Trash.",
+    "mergeInto": "Merge into",
+    "mergeSelf": "Choose a different place.",
+    "mergeButton": "Merge",
+    "merged": "“{{source}}” was merged into “{{target}}”. Restore it from the Trash to undo.",
+    "mapFilter": "Place: {{name}}"
+  },
+  "recipes": {
+    "title": "Recipe",
+    "section": "Recipes & traditions",
+    "sections": "Stories or recipes",
+    "kind": "Kind",
+    "kinds": {
+      "story": "Story",
+      "recipe": "Recipe",
+      "tradition": "Tradition"
+    },
+    "new": {
+      "story": "New story",
+      "recipe": "New recipe",
+      "tradition": "New tradition"
+    },
+    "addRecipe": "Add a recipe",
+    "addTradition": "Add a tradition",
+    "occasion": "Occasion",
+    "occasionHint": "When it is made or kept, e.g. Christmas Eve, Easter, a wedding.",
+    "occasionValue": "Occasion: {{occasion}}",
+    "servings": "Servings",
+    "prep": "Preparation, min",
+    "cook": "Cooking, min",
+    "servingsValue_one": "{{count}} serving",
+    "servingsValue_other": "{{count}} servings",
+    "prepValue": "Preparation: {{minutes}} min",
+    "cookValue": "Cooking: {{minutes}} min",
+    "ingredients": "Ingredients",
+    "steps": "Method",
+    "amount": "Amount {{n}}",
+    "item": "Ingredient {{n}}",
+    "amountPlaceholder": "2 cups",
+    "itemPlaceholder": "flour",
+    "addIngredient": "Add an ingredient",
+    "removeIngredient": "Remove ingredient {{n}}",
+    "step": "Step {{n}}",
+    "addStep": "Add a step",
+    "removeStep": "Remove step {{n}}",
+    "preview": "Preview",
+    "storyBehind": "The story behind the dish",
+    "from": "from {{name}}",
+    "print": "Print",
+    "search": "Search stories…",
+    "searchRecipes": "Search by name, ingredient or occasion…",
+    "none": "No recipes or traditions yet.",
+    "noneHint": "Write down a grandmother's borscht, an Easter custom or a wedding song so it is not forgotten."
+  },
+  "charts": {
+    "title": "Charts",
+    "generations": "Generations",
+    "unknown": "unknown",
+    "paternal": "father's line",
+    "maternal": "mother's line",
+    "legend": "click a person to put them in the centre; ⟳ an ancestor shown again (cousins married); dashed: adoptive or step",
+    "more": "There are more generations beyond this chart.",
+    "download": "Download {{format}}",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetView": "Reset view",
+    "fan": {
+      "title": "Fan chart",
+      "of": "Ancestors of {{name}}",
+      "file": "fan",
+      "full": "Full circle"
+    },
+    "pedigree": {
+      "title": "Pedigree",
+      "of": "Pedigree of {{name}}",
+      "file": "pedigree"
+    },
+    "descendants": {
+      "title": "Descendants",
+      "of": "Descendants of {{name}}",
+      "file": "descendants",
+      "namesOnly": "Living people as names only",
+      "fold": "Fold: {{name}}",
+      "unfold": "Unfold: {{name}}",
+      "more_one": "Shown up to {{count}} generation; there are more.",
+      "more_other": "Shown up to {{count}} generations; there are more."
+    }
   }
 }

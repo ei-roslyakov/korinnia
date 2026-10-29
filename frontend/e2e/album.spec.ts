@@ -179,8 +179,13 @@ test("a new place created while describing a photo keeps the editor and the phot
   await expect(describe).toHaveCount(0);
   const row = page.locator("li").filter({ hasText: `place-${tag}.jpg` });
   await expect(row).toBeVisible();
-  const media = await (
-    await page.request.get(`/api/v1/trees/${treeId}/media?person_id=${personId}`)
-  ).json();
-  expect(media.items[0].place.name).toBe(placeName);
+  // The description (with the place) is saved after the upload finishes, so poll for it.
+  await expect
+    .poll(async () => {
+      const media = await (
+        await page.request.get(`/api/v1/trees/${treeId}/media?person_id=${personId}`)
+      ).json();
+      return media.items[0]?.place?.name ?? null;
+    })
+    .toBe(placeName);
 });

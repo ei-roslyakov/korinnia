@@ -56,6 +56,9 @@ const StoryPage = page(() => import("@/features/stories/StoryPage"), "StoryPage"
 const MembersPage = page(() => import("@/features/tree/MembersPage"), "MembersPage");
 const TreeViewPage = page(() => import("@/features/tree/TreeViewPage"), "TreeViewPage");
 const MapPage = lazy(() => import("@/features/map/MapPage"));
+const PlacesPage = page(() => import("@/features/places/PlacesPage"), "PlacesPage");
+const PlacePage = page(() => import("@/features/places/PlacePage"), "PlacePage");
+const ChartsPage = page(() => import("@/features/charts/ChartsPage"), "ChartsPage");
 
 export function App() {
   return (
@@ -187,6 +190,30 @@ export function App() {
             element={
               <RequireAuth>
                 <MapPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/charts/:kind/:personId"
+            element={
+              <RequireAuth>
+                <ChartsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/places"
+            element={
+              <RequireAuth>
+                <PlacesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="trees/:treeId/places/:placeId"
+            element={
+              <RequireAuth>
+                <PlacePage />
               </RequireAuth>
             }
           />

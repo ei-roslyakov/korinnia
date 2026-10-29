@@ -113,6 +113,15 @@ Editors and administrators switch the tree from **View** to **Builder**.
   the person; everything goes to the **Trash**, from where it can be restored. Nothing is ever
   erased for good.
 
+### Places (editors)
+
+- On a place's page, **Edit place** changes its name, region, country, map pin and former
+  names (each with the years it was used).
+- **Merge into another place** is for duplicates, such as the same village entered twice:
+  choose the place to keep. Events, marriages and photos move there, and the merged place's
+  names are kept as its former names. The merged place goes to the **Trash**; restoring it
+  from there undoes the merge.
+
 ## Photos, documents and recordings
 
 - On a person's page or in the editor's **Media** tab, drag files in or **Choose files**:
@@ -163,7 +172,16 @@ Editors and administrators switch the tree from **View** to **Builder**.
 
 - **Stories** are memories and family stories in Markdown, with a narrator, a date, the people
   they are about and photos. Contributors write them and **Submit for review**; editors
-  **Publish** them or **Return to author** with a comment.
+  **Publish** them or **Return to author** with a comment. **Search** finds stories by any
+  word in the title, text or narrator.
+- **Recipes & traditions** (a section of the stories page) keep family recipes, holiday
+  customs, songs and sayings. **Add a recipe** has servings, preparation and cooking time,
+  ingredients and numbered steps (add or remove rows; a preview shows the result), plus the
+  story behind the dish; **Add a tradition** has the occasion ("Christmas Eve", "Easter",
+  "a wedding") and the text. They are stories too: the same people, photos, review and
+  comments. Search finds recipes by name, ingredient or occasion. **Print** gives a recipe
+  on one page. A person's page lists the recipes and traditions linked to them, with **Add a
+  recipe** for contributors and editors.
 - **Comments** on people, stories and photos are for memories and notes.
 - **Research questions** on a person's page keep track of what is still unknown ("Where was he
   during 1941–1945?") until they are **Marked resolved** with the answer.
@@ -177,6 +195,21 @@ The links under the tree's title:
 - **Timeline** — every dated event and marriage by decade, with filters by type, person and
   years, and optional historical context (the world wars, the Holodomor, Chornobyl,
   independence…).
+- **Places** — every place of the tree, most events first; search finds former names too. A
+  place's page shows its current and former names (with the years each was used), a small map
+  with the places nearby, the people born, married, living, dying or buried there grouped by
+  event, photos taken there and stories that mention it. **Show on the family map** opens the
+  map at that place. Place names on person pages, in event lists, on the map and in the album
+  link to these pages.
+- **Charts** (on a person's page, in the side panel, or in the tree's header when someone is
+  selected) show one person's family in classic forms: a **fan chart** of 4–8 generations of
+  ancestors (half or full circle, the father's line on the left, the mother's on the right),
+  a **pedigree** of 4–6 generations from left to right, and **descendants** as a numbered
+  outline (1, 1.1, 1.2.1 …) with partners and the year of marriage, where every generation
+  can be folded. Click a person to put them in the centre; ⟳ marks an ancestor who appears
+  twice (relatives who married), dashed lines adoptive or step parents. Drag to move, scroll
+  or pinch to zoom, and **Download PNG / PDF**. The address can be shared, also with link
+  visitors.
 - **Map** — where the family was born, lived, married, moved, died and is buried; filters by
   event type and person, with a person's life path drawn in order.
 - **On this day** — birthdays, wedding anniversaries and memorial days for a date or the coming
@@ -187,6 +220,20 @@ The links under the tree's title:
 - **Statistics** — people, generations, the period covered, the oldest ancestor, the longest
   life, average lifespan, surnames (all spellings together), first names, and births and deaths
   by decade.
+
+### Birthdays in your calendar
+
+- **Subscribe in your calendar** on the **On this day** page gives you a private link for
+  Google Calendar, Apple Calendar, Outlook or any app that subscribes to calendars by URL. The
+  tree's birthdays, memorial days and wedding anniversaries then appear there every year, and
+  the calendar picks up changes by itself (usually within a day).
+- Choose the language of the events, then **Create link**: copy it, or press **Open in your
+  calendar app**. The link is shown only once; if you lose it, **Get a new link** (the old one
+  stops working).
+- Only dates known to the day are included. The calendar shows what you may see in the tree:
+  if living people's details are hidden from you, so are their birthdays.
+- The link works only while you are a member of the tree. **Revoke** turns it off at once.
+  Do not share it: anyone who has it can see these dates.
 
 ## Working together
 

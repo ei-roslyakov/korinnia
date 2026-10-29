@@ -33,7 +33,7 @@ from app.core.db import get_engine, get_sessionmaker
 from app.core.enums import DatePrecision
 from app.core.errors import AppError
 from app.core.logging import configure_logging
-from app.models import Person, Tree, User
+from app.models import Person, Tree, TreeRole, User
 from app.schemas.events import EventCreate
 from app.schemas.persons import PersonCreate
 from app.schemas.places import PlaceCreate
@@ -1431,6 +1431,114 @@ async def _relations(
         await event_service.create_event(session, tree_id, EventCreate.model_validate(body), actor)
 
 
+# Family recipes and a tradition (D117), told in the family's voice like the biographies.
+STORIES: list[dict[str, Any]] = [
+    {
+        "title": "Борщ баби Параски",
+        "kind": "recipe",
+        "occasion": "Неділя й храмове свято",
+        "narrator": "за розповіддю онуки Марії",
+        "people": ["paraska", "stepan"],
+        "body": (
+            "Параска варила борщ у печі, у великому глиняному горщику, і нікому не дозволяла "
+            "зазирати під кришку, доки не «відпочине». Буряк брала лише свій, з городу за "
+            "кузнею, а квасолю вимочувала звечора.\n\n"
+            "Марія казала, що справжній смак давала заправка — товчене сало з часником, яке "
+            "кидали в самому кінці."
+        ),
+        "recipe": {
+            "servings": 8,
+            "prep_minutes": 40,
+            "cook_minutes": 150,
+            "ingredients": [
+                {"amount": "1 кг", "item": "свинячі реберця"},
+                {"amount": "3 шт.", "item": "буряки"},
+                {"amount": "½ голівки", "item": "капуста"},
+                {"amount": "4 шт.", "item": "картоплини"},
+                {"amount": "1 склянка", "item": "квасоля, вимочена звечора"},
+                {"amount": "2 ст. л.", "item": "томатна паста"},
+                {"amount": "50 г", "item": "сало, товчене з часником"},
+            ],
+            "steps": [
+                "Зварити бульйон з реберець на повільному вогні (1,5 години).",
+                "Додати квасолю й нарізану картоплю, варити 20 хвилин.",
+                "Буряк натерти й потушкувати з томатом і ложкою оцту, додати до борщу.",
+                "Покласти нашатковану капусту, варити ще 10 хвилин.",
+                "Наприкінці заправити салом з часником, дати настоятися під кришкою.",
+            ],
+        },
+    },
+    {
+        "title": "Вареники з вишнями від Валентини",
+        "kind": "recipe",
+        "occasion": "Літо, коли достигають вишні",
+        "narrator": "Валентина Литвин",
+        "people": ["valentyna", "oksana"],
+        "body": (
+            "Щочервня вся родина збиралася в Дніпрі ліпити вареники. Валентина вчила онуків "
+            "защипувати краї «косичкою», а найкраще защипаний вареник діставався майстрові."
+        ),
+        "recipe": {
+            "servings": 6,
+            "prep_minutes": 60,
+            "cook_minutes": 15,
+            "ingredients": [
+                {"amount": "500 г", "item": "борошно"},
+                {"amount": "250 мл", "item": "кефір"},
+                {"amount": "1 шт.", "item": "яйце"},
+                {"amount": "600 г", "item": "вишні без кісточок"},
+                {"amount": "3 ст. л.", "item": "цукор"},
+            ],
+            "steps": [
+                "Замісити тісто з борошна, кефіру, яйця й дрібки солі; дати відпочити 30 хвилин.",
+                "Вишні пересипати цукром, сік злити — він піде до підливи.",
+                "Розкачати тісто, вирізати кружальця склянкою, викласти по 3–4 вишні.",
+                "Защипнути краї й варити в підсоленій воді 3–4 хвилини після спливання.",
+                "Подавати зі сметаною та вишневим соком.",
+            ],
+        },
+    },
+    {
+        "title": "Свят-вечір: дванадцять страв і дідух",
+        "kind": "tradition",
+        "occasion": "Святий вечір",
+        "narrator": "за спогадами родини",
+        "people": ["stepan", "paraska"],
+        "body": (
+            "На Святий вечір Степан заносив до хати дідуха — сніп жита з останнього обжинку — "
+            "і ставив у покуті. Параска стелила під скатертину сіно, а на стіл ставила "
+            "дванадцять пісних страв, і першою — кутю.\n\n"
+            "Вечеряти починали, щойно на небі з'являлася перша зірка. Одне місце за столом "
+            "лишали порожнім — для тих, кого вже немає з родиною."
+        ),
+    },
+]
+
+
+async def _stories(session: AsyncSession, tree: Tree, ids: dict[str, Any], actor: Actor) -> int:
+    """Add the demo's recipes and tradition that the copy does not have yet (one the owner
+    deleted is not brought back: titles in the trash count)."""
+    from app.models import Story
+    from app.schemas.stories import StoryCreate
+    from app.services.genealogy import stories as story_service
+
+    have = set(await session.scalars(select(Story.title).where(Story.tree_id == tree.id)))
+    added = 0
+    for s in STORIES:
+        if s["title"] in have:
+            continue
+        body = StoryCreate.model_validate(
+            {k: v for k, v in s.items() if k != "people"}
+            | {
+                "status": "published",
+                "person_ids": [ids[k] for k in s["people"] if k in ids],
+            }
+        )
+        await story_service.create_story(session, tree.id, body, actor, TreeRole.admin)
+        added += 1
+    return added
+
+
 async def _places(session: AsyncSession, tree: Tree, actor: Actor) -> dict[str, Any]:
     """Ids of the demo places in `tree`, creating those that are missing."""
     from app.models import Place
@@ -1516,6 +1624,8 @@ async def complete_demo(
     )
     for first, last, row in rows:
         by_name.setdefault((first, last), row)
+    ids = {p.key: by_name[(p.first, p.last)].id for p in PEOPLE if (p.first, p.last) in by_name}
+    result.updated += await _stories(session, tree, ids, actor)
     for i, p in enumerate(PEOPLE):
         person = by_name.get((p.first, p.last))
         if person is None:
@@ -1583,6 +1693,7 @@ async def seed(
         )
         ids[p.key] = person.id
     await _relations(session, tree.id, ids, places, actor)
+    await _stories(session, tree, ids, actor)
 
     if portraits:
         from app.jobs.queue import enqueue_demo_portraits

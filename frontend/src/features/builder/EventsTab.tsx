@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { Button, Card, Dialog, ErrorAlert, Field, Input, Select, TextArea } from "@/components/ui";
 import { PersonCombobox } from "@/features/person/PersonCombobox";
+import { PlaceLink } from "@/features/places/PlaceLink";
 import { formatPartialDate } from "@/lib/dates";
 import {
   EVENT_TYPES,
@@ -43,7 +44,11 @@ export function EventsTab({ treeId, person }: { treeId: string; person: PersonDe
                   {t(`eventTypes.${ev.type}`)}
                   {ev.title && `: ${ev.title}`}
                 </div>
-                {ev.place && <div className="text-sm">{ev.place.name}</div>}
+                {ev.place && (
+                  <div className="text-sm">
+                    <PlaceLink treeId={treeId} place={ev.place} />
+                  </div>
+                )}
               </div>
               <div className="flex gap-1">
                 <Button variant="secondary" onClick={() => setEditing(ev)}>

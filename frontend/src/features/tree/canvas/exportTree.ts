@@ -104,13 +104,13 @@ export function gradientStops(css: string): [string, number][] {
   return stops;
 }
 
-function toBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> {
+export function toBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> {
   return new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("export failed"))), type, quality),
   );
 }
 
-function download(blob: Blob, name: string) {
+export function download(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

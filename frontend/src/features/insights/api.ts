@@ -1,7 +1,14 @@
-import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-import { api, qs } from "@/lib/api";
+import { api, ApiError, qs } from "@/lib/api";
 import type { MapData, OnThisDay, Relationship, TimelinePage, TreeStats } from "@/lib/genealogy";
+import type { Language } from "@/lib/types";
 
 const base = (treeId: string) => `/api/v1/trees/${treeId}`;
 
@@ -60,5 +67,64 @@ export function useTreeStats(treeId: string) {
   return useQuery({
     queryKey: ["tree", treeId, "stats"],
     queryFn: () => api.get<TreeStats>(`${base(treeId)}/stats`),
+  });
+}
+
+// --- Calendar feed (D115) ----------------------------------------------------------------
+
+export interface CalendarFeed {
+  language: Language;
+  created_at: string;
+  last_used_at: string | null;
+}
+
+export interface CreatedCalendarFeed {
+  feed: CalendarFeed;
+  /** Shown once: only a hash of the token is stored. */
+  url: string;
+  webcal_url: string;
+}
+
+const feedKey = (treeId: string) => ["tree", treeId, "calendar-feed"] as const;
+
+/** Your calendar feed of this tree, or null when you have none. */
+export function useCalendarFeed(treeId: string, enabled = true) {
+  return useQuery({
+    queryKey: feedKey(treeId),
+    queryFn: async (): Promise<CalendarFeed | null> => {
+      try {
+        return await api.get<CalendarFeed>(`${base(treeId)}/calendar-feed`);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) return null;
+        throw err;
+      }
+    },
+    enabled,
+  });
+}
+
+export function useCreateCalendarFeed(treeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (language: Language) =>
+      api.post<CreatedCalendarFeed>(`${base(treeId)}/calendar-feed`, { language }),
+    onSuccess: (created) => qc.setQueryData(feedKey(treeId), created.feed),
+  });
+}
+
+export function useUpdateCalendarFeed(treeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (language: Language) =>
+      api.patch<CalendarFeed>(`${base(treeId)}/calendar-feed`, { language }),
+    onSuccess: (feed) => qc.setQueryData(feedKey(treeId), feed),
+  });
+}
+
+export function useRevokeCalendarFeed(treeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.delete(`${base(treeId)}/calendar-feed`),
+    onSuccess: () => qc.setQueryData(feedKey(treeId), null),
   });
 }

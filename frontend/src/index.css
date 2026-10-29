@@ -311,3 +311,23 @@ body {
 :root:is([data-theme="dark"], [data-theme="night"]) .leaflet-tile {
   filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
 }
+
+/* A recipe prints on one page (D117): no cover photo, people, media or comments, smaller type. */
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+  .recipe-page {
+    font-size: 10.5pt;
+  }
+  .recipe-page figure,
+  .recipe-page header > div:has(> a) {
+    display: none;
+  }
+  .recipe-page h1 {
+    font-size: 20pt;
+  }
+  .recipe-page .recipe-print {
+    break-inside: avoid;
+  }
+}

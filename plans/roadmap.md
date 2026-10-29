@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-29 (privacy of living people, D114; next: calendar feed, place pages, recipes, chart views)_
+_Last updated: 2026-10-29 (privacy of living people D114, calendar feed D115, place pages D116, recipes D117, chart views D118; next: "You are in a family tree")_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -90,6 +90,46 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   "hide this deceased person"); hide years too ("Living") as a stricter option; the place pages,
   calendar feed and chart views must use `VisibilityDep` as well.
 
+## Calendar feed (done 2026-10-29, D115)
+
+- "Subscribe in your calendar" on "On this day": a per-member, per-tree iCalendar URL
+  (`calendar_feeds`, migration 0015; token hashed, URL shown once; language uk / en / pl;
+  revoke = delete; 60 fetches per hour). Yearly all-day events for births, deaths and marriages
+  known to the day; follows the member's current role and the living-people privacy setting.
+- Follow-ups (not planned): share links have no rate limit of their own (the spec assumed they
+  did); a reminder option (`VALARM`) per feed; including other event types (baptisms,
+  name days).
+
+## Place pages (done 2026-10-29, D116)
+
+- `features/places`: list at `trees/:id/places`, page at `trees/:id/places/:placeId`
+  (`GET /places/index`, `GET /places/{id}/summary`), "Places" in the tree's sections, place
+  names linked everywhere, map filter `?place=`. Editors: edit place, merge into another place
+  (`POST /places/{id}/merge`, undone by restoring the merged place from the trash).
+- Follow-ups (not planned): match stories by declined forms of place names (Ukrainian cases);
+  suggest likely duplicate places (same name / within 1 km); an album filter by place (see the
+  family album follow-ups).
+
+## Family recipes and traditions (done 2026-10-29, D117)
+
+- `stories.kind` / `recipe` / `occasion` (migration 0016); "Recipes & traditions" section and
+  search on the stories page, recipe editor with live preview, one-page print, section on the
+  person's page. Demo family: two recipes and a tradition (`complete_demo` adds them to older
+  copies; run `python -m app.seed --all-users` after the deploy).
+- Follow-ups (not planned): include recipes and traditions in the family archive export
+  (phase 11, its own Markdown / printable section); scaling a recipe by servings.
+
+## Chart views (done 2026-10-29, D118)
+
+- `GET /persons/{id}/lineage` (ancestors ≤ 10, descendants ≤ 8 generations; 23 / 30 ms for 8
+  generations at 2,000 people, `docs/performance.md`); `features/charts`: fan chart, pedigree,
+  descendancy list at `trees/:id/charts/{fan|pedigree|descendants}/:personId`, PNG / PDF,
+  entry from the person page / side panel and the tree header.
+- `make perf` passes the Makefile's Playwright image to `scripts/perf.sh` (it had its own,
+  outdated default and failed after the 1.64 update).
+- Follow-ups (not planned): an hourglass chart (ancestors and descendants together);
+  descendants as a drawn chart, not only a list; vector PDF (today an image, as in D88).
+
 ## Now: "You are in a family tree" (agreed 2026-10-12)
 
 The owner's request: a user should learn that they appear as a person in some tree, with a
@@ -108,7 +148,7 @@ and reveals other families' trees):
 ## Phase 11: exports (planned)
 
 - Family archive ZIP: offline static website, JSON + GEDCOM, Markdown, original media with manifest,
-  README (uk / en)
+  README (uk / en); include family recipes and traditions (D117), which GEDCOM does not carry
 - Printable PDF family book
 - (Done early: GEDCOM export with an option to hide living people, D96.)
 - (Already done early: PNG / PDF download of the tree view, D88.)
@@ -161,6 +201,12 @@ Still to do:
 - `e2e/builder.spec.ts` "add a child from a card…" failed once on chromium in a full
   `make test-e2e` run (2026-10-25: a `toBeVisible` timeout) and passed on its own and in the
   next full run; looks like a flake under parallel load, not investigated.
+- `e2e/album.spec.ts` "a new place created while describing a photo…" failed twice on mobile in
+  full runs (2026-10-29): it read the photo's place from the API right after the row appeared,
+  before the description PATCH had finished. Fixed by polling (place-pages branch).
+- `e2e/media.spec.ts` "upload a photo… becomes the portrait" failed once on mobile in a full run
+  (2026-10-29): the face region drawn by a mouse drag did not appear; passed on its own and in
+  the next full run. Not investigated.
 - **Vite dev cache breaks after running tests locally.** `make lint` / `make test` run `npm ci` in a
   container that shares `node_modules` with the dev server, which wipes Vite's pre-bundled deps; the
   tree canvas then shows empty (504 "Outdated Optimize Dep" for `elkjs`). Workaround:

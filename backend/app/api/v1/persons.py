@@ -13,8 +13,10 @@ from app.api.deps import (
     TreeViewer,
     VisibilityDep,
 )
+from app.core.errors import AppError
 from app.jobs.queue import enqueue_avatar
 from app.schemas.common import Page
+from app.schemas.lineage import MAX_ANCESTOR_DEPTH, MAX_DESCENDANT_DEPTH, Direction, Lineage
 from app.schemas.person_page import PersonPage
 from app.schemas.persons import (
     DeletePreview,
@@ -24,6 +26,7 @@ from app.schemas.persons import (
 )
 from app.schemas.relationships import LayoutOffset, LayoutOffsets, TreeGraph
 from app.services.genealogy import builder as builder_service
+from app.services.genealogy import lineage as lineage_service
 from app.services.genealogy import persons as person_service
 from app.services.genealogy import trash as trash_service
 from app.services.genealogy.graph import tree_graph
@@ -68,6 +71,22 @@ async def get_person(
 ) -> PersonPage:
     person = await person_service.get_person(session, access.tree.id, person_id)
     return seen.person_page(await person_page(session, person, access.user, access.role, seen))
+
+
+@router.get("/persons/{person_id}/lineage", response_model=Lineage)
+async def get_lineage(
+    person_id: uuid.UUID,
+    access: TreeViewer,
+    session: SessionDep,
+    seen: VisibilityDep,
+    direction: Direction = "ancestors",
+    depth: Annotated[int, Query(ge=1, le=MAX_ANCESTOR_DEPTH)] = 4,
+) -> Lineage:
+    """The person's ancestors (up to 10 generations) or descendants (up to 8) as a compact
+    graph for the fan, pedigree and descendancy charts."""
+    if direction == "descendants" and depth > MAX_DESCENDANT_DEPTH:
+        raise AppError("depth_too_large", status_code=422, extra={"max": MAX_DESCENDANT_DEPTH})
+    return await lineage_service.lineage(session, access.tree.id, person_id, direction, depth, seen)
 
 
 @router.patch("/persons/{person_id}", response_model=PersonPage)

@@ -36,6 +36,7 @@ from app.schemas.history import TrashEntityType, TrashItem
 from app.schemas.persons import DeletePreview
 from app.services import audit
 from app.services.context import Actor
+from app.services.genealogy import place_pages
 from app.services.genealogy import sources as sources_service
 from app.services.genealogy import stories as stories_service
 from app.services.genealogy.common import date_from_dict, name_display, pick_primary, set_date
@@ -258,6 +259,8 @@ async def restore_from_trash(
         if m is ParentChild:
             stmt = stmt.where(ParentChild.id.notin_(duplicate_ids))
         await session.execute(stmt)
+    if entity_type == "place":
+        await place_pages.undo_merge(session, root)
     await session.refresh(root)
     audit.record(
         session,

@@ -223,7 +223,7 @@ def _same_day_key(r: FactRow) -> tuple[int, str, str]:
     return TYPE_WEIGHT.get(r.type, 5), r.type, str(r.id)
 
 
-def _order(rows: Iterable[FactRow]) -> list[FactRow]:
+def in_date_order(rows: Iterable[FactRow]) -> list[FactRow]:
     return sorted(rows, key=lambda r: (r.sort or dt.date.max, *_same_day_key(r)))
 
 
@@ -255,7 +255,7 @@ async def timeline(
         and (from_year is None or r.sort.year >= from_year)
         and (to_year is None or r.sort.year <= to_year)
     ]
-    ordered = _order(dated)
+    ordered = in_date_order(dated)
     return TimelinePage(
         items=[facts.out(r) for r in ordered[offset : offset + limit]],
         total=len(ordered),
@@ -266,6 +266,12 @@ async def timeline(
 
 
 # --- On this day --------------------------------------------------------------------------
+
+
+def exactly_dated(r: FactRow) -> bool:
+    """Day, month and year are known: only such facts have anniversaries."""
+    d = r.date
+    return d.precision == DatePrecision.exact and bool(d.year and d.month and d.day)
 
 
 def _calendar_day(year: int, month: int, day: int) -> dt.date:
@@ -288,7 +294,7 @@ async def on_this_day(
     found: list[tuple[dt.date, FactRow]] = []
     for r in facts.rows:
         d = r.date
-        if d.precision != DatePrecision.exact or not (d.year and d.month and d.day):
+        if not exactly_dated(r) or not (d.year and d.month and d.day):
             continue
         for year in {start.year, end.year}:
             on = _calendar_day(year, d.month, d.day)
@@ -320,7 +326,7 @@ async def map_data(
     points: dict[tuple[Decimal, Decimal], MapPoint] = {}
     missing: dict[uuid.UUID, Place] = {}
     unplaced = 0
-    for r in _order(rows):
+    for r in in_date_order(rows):
         if r.latitude is not None and r.longitude is not None:
             lat, lon = r.latitude, r.longitude
             label = r.cemetery_name or (r.place.name if r.place else "")
