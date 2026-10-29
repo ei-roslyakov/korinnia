@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 
 import { Markdown } from "@/components/Markdown";
 import { Badge, Button } from "@/components/ui";
@@ -13,6 +13,7 @@ import type { LifeEvent, PersonDetail, PersonSummary, PlaceSummary } from "@/lib
 import { atLeast, type Role } from "@/lib/types";
 
 import { MediaSections } from "@/features/media/MediaSections";
+import { PlaceLink } from "@/features/places/PlaceLink";
 
 import { Avatar } from "./Avatar";
 import { LifeBar } from "./LifeBar";
@@ -29,11 +30,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function PlaceText({ place }: { place: PlaceSummary | null }) {
+  const { treeId } = useParams();
   if (!place) return null;
   const extra = [place.region, place.country].filter(Boolean).join(", ");
   return (
     <span>
-      {place.name}
+      {treeId ? <PlaceLink treeId={treeId} place={place} /> : place.name}
       {extra && <span className="text-bark-700"> ({extra})</span>}
     </span>
   );

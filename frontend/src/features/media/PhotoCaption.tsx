@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link, useParams } from "react-router";
 
 import { formatPartialDate } from "@/lib/dates";
 import type { MediaItem } from "@/lib/genealogy";
@@ -35,9 +36,8 @@ export function PhotoCaption({
     return () => observer.disconnect();
   }, [item.description, expanded]);
 
-  const meta = [formatPartialDate(item.date, t, i18n.language), item.place?.name]
-    .filter(Boolean)
-    .join(" · ");
+  const { treeId } = useParams();
+  const date = formatPartialDate(item.date, t, i18n.language);
   const muted = tone === "dark" ? "text-white/70" : "text-bark-700";
   const title = item.title ?? (item.description ? null : fallback);
   const clamp = lines === 2 ? "line-clamp-2" : "line-clamp-3";
@@ -62,7 +62,20 @@ export function PhotoCaption({
           )}
         </div>
       )}
-      {meta && <div className={`text-xs ${muted}`}>{meta}</div>}
+      {(date || item.place) && (
+        <div className={`text-xs ${muted}`}>
+          {date}
+          {date && item.place && " · "}
+          {item.place &&
+            (treeId ? (
+              <Link to={`/trees/${treeId}/places/${item.place.id}`} className="underline">
+                {item.place.name}
+              </Link>
+            ) : (
+              item.place.name
+            ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -549,3 +549,29 @@ export const factCategory = (type: string): FactCategory =>
   (Object.keys(FACT_CATEGORIES) as FactCategory[]).find((c) =>
     (FACT_CATEGORIES[c] as readonly string[]).includes(type),
   ) ?? "life";
+
+// --- Place pages (D116) ---------------------------------------------------------------------
+
+export interface PlaceIndexItem {
+  place: Place;
+  /** Facts (events and marriages) at the place, and the different people in them. */
+  events: number;
+  people: number;
+}
+
+export interface NearbyPlace {
+  place: PlaceSummary;
+  distance_km: number;
+}
+
+export interface PlacePage {
+  place: Place;
+  /** Facts by type ("birth", "residence", "marriage", …). */
+  counts: Record<string, number>;
+  /** In date order, undated last. */
+  facts: Fact[];
+  persons: PersonSummary[];
+  media: MediaItem[];
+  stories: StorySummary[];
+  nearby: NearbyPlace[];
+}

@@ -32,6 +32,7 @@ export function TreeNav({
     ["album", t("insights.nav.album"), true],
     ["timeline", t("insights.nav.timeline"), true],
     ["map", t("insights.nav.map"), true],
+    ["places", t("places.title"), true],
     ["on-this-day", t("insights.nav.onThisDay"), true],
     ["relationship", t("insights.nav.relationship"), true],
     ["stats", t("insights.nav.stats"), true],
