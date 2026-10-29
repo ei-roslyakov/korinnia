@@ -142,6 +142,9 @@ Still to do:
 
 ## Open issues and things to keep in mind
 
+- `deploy/nginx/Dockerfile` upgrades `brotli-libs` on top of `nginx:1.31.8-alpine`
+  (CVE-2026-111497, CRITICAL, failed the CI image scan on 2026-10-29; no nginx image shipped
+  the fixed 1.2.1-r0 yet). Remove the `apk upgrade` line once a newer nginx:*-alpine tag has it.
 - `e2e/builder.spec.ts` "add a child from a card…" failed once on chromium in a full
   `make test-e2e` run (2026-10-25: a `toBeVisible` timeout) and passed on its own and in the
   next full run; looks like a flake under parallel load, not investigated.

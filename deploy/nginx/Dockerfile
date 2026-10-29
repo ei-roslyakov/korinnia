@@ -16,8 +16,11 @@ RUN npm run build \
       -exec gzip -k -9 {} \;
 
 # --- base: nginx + config (used directly in dev, where Vite serves the frontend)
-FROM nginx:1.31.7-alpine AS base
-RUN rm -f /etc/nginx/conf.d/default.conf
+FROM nginx:1.31.8-alpine AS base
+# brotli-libs 1.2.1-r0 fixes CVE-2026-111497 (CRITICAL); the base image still has 1.2.0-r1.
+# Drop the upgrade once a newer nginx:*-alpine tag ships the fixed package.
+RUN apk upgrade --no-cache brotli-libs \
+ && rm -f /etc/nginx/conf.d/default.conf
 COPY deploy/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY deploy/nginx/snippets/ /etc/nginx/snippets/
 COPY deploy/nginx/templates/ /etc/nginx/templates/
