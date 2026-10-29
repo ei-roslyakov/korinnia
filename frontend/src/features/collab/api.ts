@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, qs } from "@/lib/api";
 import type {
@@ -10,8 +10,10 @@ import type {
   OpenQuestion,
   PartialDateInput,
   Source,
+  Recipe,
   SourceType,
   Story,
+  StoryKind,
   StoryStatus,
   StorySummary,
   Suggestion,
@@ -103,11 +105,17 @@ export function useDeleteCitation(treeId: string) {
 
 // --- Stories ------------------------------------------------------------------------------
 
-export function useStories(treeId: string, filter: { status?: StoryStatus; person_id?: string }) {
+export function useStories(
+  treeId: string,
+  filter: { status?: StoryStatus; person_id?: string; kind?: StoryKind[]; q?: string },
+) {
+  const { kind = [], ...rest } = filter;
+  const params = new URLSearchParams(qs({ ...rest, limit: 200 }).slice(1));
+  for (const k of kind) params.append("kind", k);
   return useQuery({
     queryKey: ["tree", treeId, "stories", filter],
-    queryFn: () =>
-      api.get<Page<StorySummary>>(`${base(treeId)}/stories${qs({ ...filter, limit: 200 })}`),
+    queryFn: () => api.get<Page<StorySummary>>(`${base(treeId)}/stories?${params.toString()}`),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -127,6 +135,9 @@ export interface StoryPayload {
   person_ids?: string[];
   media_ids?: string[];
   status?: StoryStatus;
+  kind?: StoryKind;
+  recipe?: Recipe | null;
+  occasion?: string | null;
 }
 
 export function useSaveStory(treeId: string) {

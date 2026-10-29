@@ -14,6 +14,8 @@ import { atLeast } from "@/lib/types";
 import { Avatar } from "@/features/person/Avatar";
 import { isVisual } from "@/lib/genealogy";
 
+import { RecipeView } from "./RecipeView";
+
 export function StoryPage() {
   const { t, i18n } = useTranslation();
   const { treeId = "", storyId } = useParams();
@@ -35,7 +37,7 @@ export function StoryPage() {
   const isAuthor = s.author?.id === me.data?.id;
 
   return (
-    <article className="mx-auto max-w-3xl space-y-4">
+    <article className={`mx-auto max-w-3xl space-y-4 ${s.kind === "recipe" ? "recipe-page" : ""}`}>
       <Link
         to={`/trees/${treeId}/stories`}
         className="text-leaf-700 text-sm underline print:hidden"
@@ -58,10 +60,15 @@ export function StoryPage() {
         <h1 className="font-serif text-4xl leading-tight font-semibold">{s.title}</h1>
         <div className="text-bark-700 text-sm">
           {[
+            s.kind && s.kind !== "story" && t(`recipes.kinds.${s.kind}`),
+            s.kind === "tradition" && s.occasion,
             formatPartialDate(s.date, t, i18n.language),
-            s.narrator && t("collab.story.toldBy", { name: s.narrator }),
+            s.narrator &&
+              t(s.kind === "recipe" ? "recipes.from" : "collab.story.toldBy", {
+                name: s.narrator,
+              }),
             s.author && t("collab.story.writtenBy", { name: s.author.display_name }),
-            t("collab.story.readingTime", { count: s.reading_minutes ?? 1 }),
+            s.kind !== "recipe" && t("collab.story.readingTime", { count: s.reading_minutes ?? 1 }),
           ]
             .filter(Boolean)
             .join(" · ")}
@@ -115,6 +122,11 @@ export function StoryPage() {
             {t("collab.story.return")}
           </Button>
         )}
+        {s.kind === "recipe" && (
+          <Button variant="secondary" onClick={() => window.print()}>
+            {t("recipes.print")}
+          </Button>
+        )}
         {s.can_edit && (
           <Button
             variant="ghost"
@@ -148,20 +160,28 @@ export function StoryPage() {
           </Button>
         </div>
       )}
+      {s.kind === "recipe" && s.recipe && <RecipeView recipe={s.recipe} occasion={s.occasion} />}
+      {s.kind === "recipe" && s.body.trim() && (
+        <h2 className="font-serif text-lg font-semibold">{t("recipes.storyBehind")}</h2>
+      )}
       <Markdown className="[&>p:first-of-type]:first-letter:text-leaf-700 font-serif text-lg [&>p:first-of-type]:first-letter:float-left [&>p:first-of-type]:first-letter:mt-1 [&>p:first-of-type]:first-letter:mr-2 [&>p:first-of-type]:first-letter:font-serif [&>p:first-of-type]:first-letter:text-6xl [&>p:first-of-type]:first-letter:leading-[0.8] [&>p:first-of-type]:first-letter:font-semibold">
         {s.body}
       </Markdown>
-      <MediaSections
-        media={s.media}
-        personLink={(id) => `/trees/${treeId}/people/${id}`}
-        comments={{ treeId, role }}
-        Section={({ title, children }) => (
-          <section className="space-y-2">
-            <h2 className="text-bark-700 text-xs font-semibold tracking-wide uppercase">{title}</h2>
-            {children}
-          </section>
-        )}
-      />
+      <div className="print:hidden">
+        <MediaSections
+          media={s.media}
+          personLink={(id) => `/trees/${treeId}/people/${id}`}
+          comments={{ treeId, role }}
+          Section={({ title, children }) => (
+            <section className="space-y-2">
+              <h2 className="text-bark-700 text-xs font-semibold tracking-wide uppercase">
+                {title}
+              </h2>
+              {children}
+            </section>
+          )}
+        />
+      </div>
       <section className="space-y-2 print:hidden">
         <h2 className="text-bark-700 text-xs font-semibold tracking-wide uppercase">
           {t("collab.comments.title")}

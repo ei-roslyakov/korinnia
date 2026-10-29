@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-29.4",
+    items: {
+      en: [
+        "Family recipes and traditions: “Recipes & traditions” on the stories page keeps grandma’s recipes with ingredients and steps (printable on one page) and holiday customs; they also show on the person’s page.",
+      ],
+      uk: [
+        "Родинні рецепти й традиції: «Рецепти й традиції» на сторінці історій зберігають бабусині рецепти з інгредієнтами й кроками (друкуються на одній сторінці) та святкові звичаї; вони показуються й на сторінці людини.",
+      ],
+      pl: [
+        "Rodzinne przepisy i tradycje: „Przepisy i tradycje” na stronie historii przechowują przepisy babci ze składnikami i krokami (do wydruku na jednej stronie) oraz świąteczne zwyczaje; widać je też na stronie osoby.",
+      ],
+    },
+  },
+  {
     id: "2026-10-29.3",
     items: {
       en: [

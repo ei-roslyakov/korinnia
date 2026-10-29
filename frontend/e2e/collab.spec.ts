@@ -139,3 +139,65 @@ test("data quality page lists research to-dos", async ({ page }) => {
   await expect(page.getByText(/Список дослідницьких завдань для \d+ людей/)).toBeVisible();
   await expect(page.getByRole("heading", { name: /Без джерел \(\d+\)/ })).toBeVisible();
 });
+
+test("a family recipe with ingredients and steps shows on the person's page", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/login");
+  await page.getByLabel("Електронна пошта").fill(ADMIN_EMAIL);
+  await page.getByLabel("Пароль").fill(ADMIN_PASSWORD);
+  await page.getByRole("button", { name: "Увійти" }).click();
+  await expect(page.getByRole("link", { name: /Родина Коваленків \(демо\)/ })).toBeVisible();
+  const csrf = (await page.context().cookies()).find((c) => c.name === "korinnia_csrf")!.value;
+  const headers = { "X-CSRF-Token": csrf };
+  const tree = (await (
+    await page.request.post("/api/v1/trees", {
+      data: { name: `Рецепти ${testInfo.project.name} ${Date.now()}` },
+      headers,
+    })
+  ).json()) as { id: string };
+  const person = (await (
+    await page.request.post(`/api/v1/trees/${tree.id}/persons`, {
+      data: { names: [{ first_name: "Валентина", last_name: "Литвин" }] },
+      headers,
+    })
+  ).json()) as { id: string };
+
+  await page.goto(`/trees/${tree.id}/people/${person.id}`);
+  await page.getByRole("link", { name: "+ Додати рецепт" }).click();
+  await expect(page.getByRole("heading", { name: "Новий рецепт" })).toBeVisible();
+  await expect(page.getByText("Валентина Литвин").first()).toBeVisible(); // pre-selected
+
+  await page.getByLabel("Назва").fill("Вареники з вишнями");
+  await page.getByLabel("Нагода").fill("Літо");
+  await page.getByLabel("Кількість 1", { exact: true }).fill("500 г");
+  await page.getByLabel("Інгредієнт 1", { exact: true }).fill("борошно");
+  await page.getByRole("button", { name: "+ Додати інгредієнт" }).click();
+  await page.getByLabel("Інгредієнт 2", { exact: true }).fill("вишні");
+  await page.getByLabel("Крок 1", { exact: true }).fill("Замісити тісто.");
+  await page.getByRole("button", { name: "+ Додати крок" }).click();
+  await page.getByLabel("Крок 2", { exact: true }).fill("Зліпити вареники.");
+  await page.getByRole("button", { name: "+ Додати крок" }).click();
+  await page.getByLabel("Крок 3", { exact: true }).fill("Зварити.");
+  // The preview follows the form.
+  await expect(page.getByTestId("recipe").getByRole("listitem")).toHaveCount(5);
+  await page.getByRole("button", { name: "Опублікувати" }).click();
+
+  const recipe = page.getByTestId("recipe");
+  await expect(page.getByRole("heading", { level: 1, name: "Вареники з вишнями" })).toBeVisible();
+  await expect(recipe.getByRole("listitem")).toHaveText([
+    "500 гборошно",
+    "вишні",
+    "Замісити тісто.",
+    "Зліпити вареники.",
+    "Зварити.",
+  ]);
+  await expect(page.getByRole("button", { name: "Друкувати" })).toBeVisible();
+
+  await page.goto(`/trees/${tree.id}/people/${person.id}`);
+  const section = page.getByTestId("person-recipes");
+  await expect(section.getByRole("link", { name: "Вареники з вишнями" })).toBeVisible();
+  await expect(section).toContainText("Рецепт · Літо");
+
+  await page.request.delete(`/api/v1/trees/${tree.id}`, { headers });
+});

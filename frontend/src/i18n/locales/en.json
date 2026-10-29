@@ -1382,5 +1382,52 @@
     "mergeButton": "Merge",
     "merged": "“{{source}}” was merged into “{{target}}”. Restore it from the Trash to undo.",
     "mapFilter": "Place: {{name}}"
+  },
+  "recipes": {
+    "title": "Recipe",
+    "section": "Recipes & traditions",
+    "sections": "Stories or recipes",
+    "kind": "Kind",
+    "kinds": {
+      "story": "Story",
+      "recipe": "Recipe",
+      "tradition": "Tradition"
+    },
+    "new": {
+      "story": "New story",
+      "recipe": "New recipe",
+      "tradition": "New tradition"
+    },
+    "addRecipe": "Add a recipe",
+    "addTradition": "Add a tradition",
+    "occasion": "Occasion",
+    "occasionHint": "When it is made or kept, e.g. Christmas Eve, Easter, a wedding.",
+    "occasionValue": "Occasion: {{occasion}}",
+    "servings": "Servings",
+    "prep": "Preparation, min",
+    "cook": "Cooking, min",
+    "servingsValue_one": "{{count}} serving",
+    "servingsValue_other": "{{count}} servings",
+    "prepValue": "Preparation: {{minutes}} min",
+    "cookValue": "Cooking: {{minutes}} min",
+    "ingredients": "Ingredients",
+    "steps": "Method",
+    "amount": "Amount {{n}}",
+    "item": "Ingredient {{n}}",
+    "amountPlaceholder": "2 cups",
+    "itemPlaceholder": "flour",
+    "addIngredient": "Add an ingredient",
+    "removeIngredient": "Remove ingredient {{n}}",
+    "step": "Step {{n}}",
+    "addStep": "Add a step",
+    "removeStep": "Remove step {{n}}",
+    "preview": "Preview",
+    "storyBehind": "The story behind the dish",
+    "from": "from {{name}}",
+    "print": "Print",
+    "search": "Search stories…",
+    "searchRecipes": "Search by name, ingredient or occasion…",
+    "none": "No recipes or traditions yet.",
+    "noneHint": "Write down a grandmother's borscht, an Easter custom or a wedding song so it is not forgotten."
   }
 }

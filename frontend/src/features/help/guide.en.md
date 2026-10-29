@@ -172,7 +172,16 @@ Editors and administrators switch the tree from **View** to **Builder**.
 
 - **Stories** are memories and family stories in Markdown, with a narrator, a date, the people
   they are about and photos. Contributors write them and **Submit for review**; editors
-  **Publish** them or **Return to author** with a comment.
+  **Publish** them or **Return to author** with a comment. **Search** finds stories by any
+  word in the title, text or narrator.
+- **Recipes & traditions** (a section of the stories page) keep family recipes, holiday
+  customs, songs and sayings. **Add a recipe** has servings, preparation and cooking time,
+  ingredients and numbered steps (add or remove rows; a preview shows the result), plus the
+  story behind the dish; **Add a tradition** has the occasion ("Christmas Eve", "Easter",
+  "a wedding") and the text. They are stories too: the same people, photos, review and
+  comments. Search finds recipes by name, ingredient or occasion. **Print** gives a recipe
+  on one page. A person's page lists the recipes and traditions linked to them, with **Add a
+  recipe** for contributors and editors.
 - **Comments** on people, stories and photos are for memories and notes.
 - **Research questions** on a person's page keep track of what is still unknown ("Where was he
   during 1941–1945?") until they are **Marked resolved** with the answer.
