@@ -141,3 +141,38 @@ test("a place page opens from a person page and lists people by event type", asy
   await page.goto(`/trees/${treeId}/places`);
   await expect(page.getByRole("link", { name: person.birth_place!, exact: true })).toBeVisible();
 });
+
+test("fan chart: open from a person, change generations, re-centre, download", async ({ page }) => {
+  await openDemoTree(page);
+  const treeId = page.url().match(/\/trees\/([0-9a-f-]+)/)![1]!;
+  const found = (await (
+    await page.request.get(`/api/v1/trees/${treeId}/persons?q=Андрій Володимирович`)
+  ).json()) as { items: { id: string; display_name: string }[] };
+  const andrii = found.items[0]!;
+  await page.goto(`/trees/${treeId}/people/${andrii.id}`);
+  await page.getByRole("link", { name: "Діаграми" }).first().click();
+
+  await expect(page).toHaveURL(new RegExp(`/charts/fan/${andrii.id}`));
+  await expect(page.getByRole("heading", { name: `Предки: ${andrii.display_name}` })).toBeVisible();
+  const sectors = page.getByTestId("fan-sector");
+  await expect(sectors.first()).toBeVisible();
+  expect(await sectors.count()).toBeGreaterThan(7);
+
+  // Fewer generations: nothing beyond the 4th ring (slots 1–15).
+  await page.getByLabel("Поколінь").selectOption("4");
+  await expect(page).toHaveURL(/gen=4/);
+  await expect(page.locator('[data-testid="fan-sector"][data-slot="16"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid="fan-sector"][data-slot="2"]')).toBeVisible();
+
+  // The father's sector puts him in the centre.
+  const father = page.locator('[data-testid="fan-sector"][data-slot="2"]');
+  const fatherName = (await father.getAttribute("aria-label"))!.split(",")[0]!;
+  await father.click();
+  await expect(page).not.toHaveURL(new RegExp(`/charts/fan/${andrii.id}`));
+  await expect(page).toHaveURL(/gen=4/);
+  await expect(page.getByRole("heading", { name: `Предки: ${fatherName}` })).toBeVisible();
+
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Завантажити PNG" }).click();
+  expect((await download).suggestedFilename()).toMatch(/\.png$/);
+});

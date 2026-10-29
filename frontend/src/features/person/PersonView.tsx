@@ -183,6 +183,12 @@ export function PersonView({
                 >
                   {t("insights.nav.timeline")}
                 </Link>
+                <Link
+                  to={`/trees/${treeId}/charts/fan/${person.id}`}
+                  className="text-leaf-700 hover:underline"
+                >
+                  {t("charts.title")}
+                </Link>
               </span>
             )}
             {treeId && role === "contributor" && (

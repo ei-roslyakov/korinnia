@@ -87,7 +87,10 @@ plans/            this folder
    haversine, merge + `undo_merge` called from the trash restore), `features/places`
    (`PlacesPage`, `PlacePage`, `PlaceLink` used wherever a place name is shown). Calendar feed
    (D115): `exporters/ical.py`, `services/calendar_feeds.py`, `api/v1/calendar.py`,
-   `insights/CalendarFeedDialog`.
+   `insights/CalendarFeedDialog`. Chart views (D118): `services/genealogy/lineage.py` on the
+   kinship index, `features/charts` (`lineage.ts` pedigree slots and d'Aboville outline,
+   `FanChart`, `PedigreeChart`, `DescendancyList`, `PanZoom`, `exportChart` on top of the
+   tree export's helpers).
 9. **Data safety** — GEDCOM import (preview, duplicate merge, one transaction, undo) and weekly /
    on-demand integrity checks of stored originals; backups are left to the infrastructure.
    (D89–D90)

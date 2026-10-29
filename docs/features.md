@@ -34,6 +34,7 @@ Everything below works today. Planned work is listed in the [roadmap](../README.
 ## Insights
 
 - Relationship calculator: "how is B related to A?" with the kinship term in Ukrainian (двоюрідний, троюрідний…; тесть / свекор…), English (first cousin once removed…) or Polish, half / adoptive notes, closest common ancestors and the path through the tree
+- Chart views of one person: fan chart of ancestors (4–8 generations, half or full circle, father's / mother's line coloured, pedigree collapse marked), pedigree (4–6 generations), descendants as a d'Aboville-numbered outline with partners and marriage years; click to re-centre, pan / zoom, PNG / PDF download, shareable URLs
 - Family map (OpenStreetMap): places of birth, life, marriage, migration, death and burial; filters by event type and person, with a person's life path drawn in order
 - Place pages: list of places by number of events (search by any name, historical included); per place its names with periods, a small map, people grouped by event type in date order, photos taken there, stories mentioning it and places within 25 km; place names everywhere link to them; editors edit places and merge duplicates (undone by restoring from the trash)
 - Family timeline: every dated event in chronological order, grouped by decade, with optional historical context (World Wars, Holodomor, Chornobyl, independence…)
