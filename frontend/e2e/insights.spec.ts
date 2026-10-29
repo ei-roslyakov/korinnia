@@ -63,3 +63,57 @@ test("timeline, on this day, statistics and map", async ({ page }) => {
   // Leaflet drew the markers.
   await expect(page.locator(".leaflet-interactive").first()).toBeVisible();
 });
+
+test("subscribe to a tree's anniversaries in a calendar app, then revoke", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/login");
+  await page.getByLabel("Електронна пошта").fill(ADMIN_EMAIL);
+  await page.getByLabel("Пароль").fill(ADMIN_PASSWORD);
+  await page.getByRole("button", { name: "Увійти" }).click();
+  await expect(page.getByRole("link", { name: /Родина Коваленків \(демо\)/ })).toBeVisible();
+  const csrf = (await page.context().cookies()).find((c) => c.name === "korinnia_csrf")!.value;
+  const headers = { "X-CSRF-Token": csrf };
+  // A tree of its own: a feed belongs to one user and tree, and projects run in parallel.
+  const tree = (await (
+    await page.request.post("/api/v1/trees", {
+      data: { name: `Календар ${testInfo.project.name} ${Date.now()}` },
+      headers,
+    })
+  ).json()) as { id: string };
+  await page.request.post(`/api/v1/trees/${tree.id}/persons`, {
+    data: {
+      names: [{ first_name: "Галина", last_name: "Коваленко" }],
+      birth: { date: { year: 1923, month: 5, day: 2 } },
+      death: { date: { year: 2001, month: 11, day: 2 } },
+    },
+    headers,
+  });
+
+  await page.goto(`/trees/${tree.id}/on-this-day`);
+  await page.getByRole("button", { name: "Підписатися в календарі" }).click();
+  const dialog = page.getByRole("dialog", { name: "Дні народження у вашому календарі" });
+  await dialog.getByLabel("Мова подій").selectOption("en");
+  await dialog.getByRole("button", { name: "Створити посилання" }).click();
+  const created = dialog.getByTestId("calendar-feed-created");
+  await expect(created).toBeVisible();
+  const url = await created.getByRole("textbox").inputValue();
+  expect(url).toMatch(/\/api\/v1\/calendar\/[\w-]+\.ics$/);
+  await expect(
+    created.getByRole("link", { name: "Відкрити в застосунку календаря" }),
+  ).toHaveAttribute("href", /^webcal:\/\//);
+
+  const path = new URL(url).pathname;
+  const ics = await page.request.get(path);
+  expect(ics.headers()["content-type"]).toContain("text/calendar");
+  const text = await ics.text();
+  expect(text).toContain("SUMMARY:Birthday: Галина Коваленко (b. 1923)");
+  expect(text).toContain("RRULE:FREQ=YEARLY");
+
+  page.once("dialog", (d) => void d.accept());
+  await dialog.getByRole("button", { name: "Відкликати" }).click();
+  await expect(dialog.getByRole("button", { name: "Створити посилання" })).toBeVisible();
+  expect((await page.request.get(path)).status()).toBe(404);
+
+  await page.request.delete(`/api/v1/trees/${tree.id}`, { headers });
+});

@@ -1395,5 +1395,26 @@
     },
     "portraits": "Pokazuj portrety żyjących osób",
     "portraitsHelp": "Portret widać na kartach; ich zdjęcia pozostają ukryte."
+  },
+  "calendarFeed": {
+    "button": "Subskrybuj w kalendarzu",
+    "title": "Urodziny w Twoim kalendarzu",
+    "hint": "Prywatny link dla aplikacji kalendarza: co roku pokazuje urodziny, dni pamięci i rocznice ślubów z drzewa i aktualizuje się sam. Tylko daty znane co do dnia. Nie udostępniaj linku — każdy, kto go ma, widzi te daty.",
+    "language": "Język wydarzeń",
+    "create": "Utwórz link",
+    "created": "Skopiuj link teraz — nie zostanie pokazany ponownie.",
+    "openInApp": "Otwórz w aplikacji kalendarza",
+    "howTo": {
+      "google": "Kalendarz Google (na komputerze): Inne kalendarze → + → Z adresu URL, wklej link.",
+      "apple": "Kalendarz Apple: Plik → Nowa subskrypcja kalendarza (na iPhonie: Ustawienia → Kalendarz → Konta → Dodaj subskrybowany kalendarz), wklej link.",
+      "outlook": "Outlook: Dodaj kalendarz → Subskrybuj z sieci Web, wklej link."
+    },
+    "since": "Masz link do kalendarza od {{date}}.",
+    "lastUsed": "Kalendarz ostatnio pobrał go {{date}}.",
+    "notUsedYet": "Żaden kalendarz go jeszcze nie pobrał.",
+    "renew": "Uzyskaj nowy link",
+    "confirmRenew": "Uzyskać nowy link? Stary przestanie działać, a subskrybujące go kalendarze przestaną się aktualizować.",
+    "revoke": "Odwołaj",
+    "confirmRevoke": "Odwołać link do kalendarza? Subskrybujące go kalendarze przestaną się aktualizować."
   }
 }

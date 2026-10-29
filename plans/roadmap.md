@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-29 (privacy of living people, D114; next: calendar feed, place pages, recipes, chart views)_
+_Last updated: 2026-10-29 (privacy of living people D114, calendar feed D115; next: place pages, recipes, chart views)_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -90,6 +90,16 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   "hide this deceased person"); hide years too ("Living") as a stricter option; the place pages,
   calendar feed and chart views must use `VisibilityDep` as well.
 
+## Calendar feed (done 2026-10-29, D115)
+
+- "Subscribe in your calendar" on "On this day": a per-member, per-tree iCalendar URL
+  (`calendar_feeds`, migration 0015; token hashed, URL shown once; language uk / en / pl;
+  revoke = delete; 60 fetches per hour). Yearly all-day events for births, deaths and marriages
+  known to the day; follows the member's current role and the living-people privacy setting.
+- Follow-ups (not planned): share links have no rate limit of their own (the spec assumed they
+  did); a reminder option (`VALARM`) per feed; including other event types (baptisms,
+  name days).
+
 ## Now: "You are in a family tree" (agreed 2026-10-12)
 
 The owner's request: a user should learn that they appear as a person in some tree, with a
@@ -158,6 +168,9 @@ Still to do:
 - `e2e/builder.spec.ts` "add a child from a card…" failed once on chromium in a full
   `make test-e2e` run (2026-10-25: a `toBeVisible` timeout) and passed on its own and in the
   next full run; looks like a flake under parallel load, not investigated.
+- `e2e/album.spec.ts` "a new place created while describing a photo…" failed once on mobile in
+  a full `make test-e2e` run (2026-10-29), passed on its own and in the next full run; same
+  pattern as above, not investigated.
 - **Vite dev cache breaks after running tests locally.** `make lint` / `make test` run `npm ci` in a
   container that shares `node_modules` with the dev server, which wipes Vite's pre-bundled deps; the
   tree canvas then shows empty (504 "Outdated Optimize Dep" for `elkjs`). Workaround:

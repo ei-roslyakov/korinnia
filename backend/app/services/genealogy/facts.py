@@ -268,6 +268,12 @@ async def timeline(
 # --- On this day --------------------------------------------------------------------------
 
 
+def exactly_dated(r: FactRow) -> bool:
+    """Day, month and year are known: only such facts have anniversaries."""
+    d = r.date
+    return d.precision == DatePrecision.exact and bool(d.year and d.month and d.day)
+
+
 def _calendar_day(year: int, month: int, day: int) -> dt.date:
     """The day an anniversary falls on in `year` (29 February → 28 February)."""
     return dt.date(year, month, min(day, calendar.monthrange(year, month)[1]))
@@ -288,7 +294,7 @@ async def on_this_day(
     found: list[tuple[dt.date, FactRow]] = []
     for r in facts.rows:
         d = r.date
-        if d.precision != DatePrecision.exact or not (d.year and d.month and d.day):
+        if not exactly_dated(r) or not (d.year and d.month and d.day):
             continue
         for year in {start.year, end.year}:
             on = _calendar_day(year, d.month, d.day)
