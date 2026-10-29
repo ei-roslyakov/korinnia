@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-25 (family album with a carousel; next: "You are in a family tree")_
+_Last updated: 2026-10-29 (privacy of living people, D114; next: calendar feed, place pages, recipes, chart views)_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -52,8 +52,8 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
 
 ## Phase 10 — hardening and user guide (done 2026-10-12)
 
-- ✅ Read-only share links (revocable, expiring) — D98. Possible follow-up: hide living people
-  from link visitors.
+- ✅ Read-only share links (revocable, expiring) — D98. Living people are shown with only the
+  basics to link visitors since 2026-10-29 (D114).
 - ✅ Performance test with large trees: `make perf` (PEOPLE=2000 by default), results in
   `docs/performance.md`; simplified cards when zoomed out, faster GEDCOM export — D97.
 - ✅ Full user guide in Ukrainian and English, in the app at `/help` — D99. Possible follow-up:
@@ -76,6 +76,19 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   `python -m app.seed --all-users` after the deploy so existing demo copies get them).
 - Possible follow-ups: an album filter by place; choosing photos for the album (today it is
   every photo); full-screen slideshow mode.
+
+## Privacy of living people (done 2026-10-29, D114)
+
+- `trees.living_privacy` (`off` / `share_links` default / `viewers_and_share_links`) and
+  `show_living_portraits` (migration 0014), on the Members page. Restricted readers see living
+  people with name, gender, birth year and family links only; enforced by
+  `services/visibility.py` on every reading endpoint (person, graph, search, events, media,
+  album, files, avatars, stories, comments, questions, citations, sources, timeline, map, on this
+  day, kinship, stats, history, GEDCOM). Closes the open question about living people's photos
+  in the album.
+- Follow-ups (not planned): a per-person override ("show this living person in full" /
+  "hide this deceased person"); hide years too ("Living") as a stricter option; the place pages,
+  calendar feed and chart views must use `VisibilityDep` as well.
 
 ## Now: "You are in a family tree" (agreed 2026-10-12)
 
@@ -145,11 +158,6 @@ Still to do:
 - `e2e/builder.spec.ts` "add a child from a card…" failed once on chromium in a full
   `make test-e2e` run (2026-10-25: a `toBeVisible` timeout) and passed on its own and in the
   next full run; looks like a flake under parallel load, not investigated.
-- **Living people's photos in the family album (open question for the owner).** The album shows
-  every photo to everyone who can see the tree, viewers and share-link visitors included — the
-  same as person pages and the media list today. Should it (and maybe media in general) hide
-  photos of living people from viewers and share-link visitors? Not changed until decided.
-
 - **Vite dev cache breaks after running tests locally.** `make lint` / `make test` run `npm ci` in a
   container that shares `node_modules` with the dev server, which wipes Vite's pre-bundled deps; the
   tree canvas then shows empty (504 "Outdated Optimize Dep" for `elkjs`). Workaround:

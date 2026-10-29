@@ -90,6 +90,7 @@ Everything below works today. Planned work is listed in the [roadmap](../README.
 - Multiple trees with per-tree roles: viewer, contributor, editor, admin (enforced on every endpoint)
 - Every user can start their own trees (can be turned off per user or site-wide)
 - Share a tree with another user by email, invite by one-time expiring link, or create read-only share links for people without an account (expiry, open count, revoke)
+- Privacy of living people: share-link visitors (by default), optionally also viewers, see only a living person's name, gender, birth year and family links; enforced by the server on every endpoint (photos, documents, events, stories, comments, map, timeline, album, exports); portraits optional
 - Admin panel: users, superadmin rights, password-reset links, 2FA reset, all trees (delete / restore), audit log of every change (who, when, before / after)
 - Operator CLI for lock-out recovery
 - Optional public demo mode: every visitor gets a throwaway account with a fresh demo family (`DEMO_LOGIN_ENABLED`)

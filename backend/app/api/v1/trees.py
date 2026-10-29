@@ -34,11 +34,18 @@ from app.schemas.trees import (
 from app.services import audit
 from app.services import trees as tree_service
 from app.services import users as user_service
+from app.services.visibility import restricts
 
 router = APIRouter(prefix="/trees", tags=["trees"])
 
 
-def tree_out(tree: Tree, role: TreeRole, overview: tree_service.Overview | None = None) -> TreeOut:
+def tree_out(
+    tree: Tree,
+    role: TreeRole,
+    overview: tree_service.Overview | None = None,
+    *,
+    via_share_link: bool = False,
+) -> TreeOut:
     o = overview or tree_service.Overview()
     return TreeOut(
         person_count=o.person_count,
@@ -53,6 +60,9 @@ def tree_out(tree: Tree, role: TreeRole, overview: tree_service.Overview | None 
         updated_at=tree.updated_at,
         my_role=role,
         is_demo=tree.is_demo,
+        living_privacy=tree.living_privacy,
+        show_living_portraits=tree.show_living_portraits,
+        living_details_hidden=restricts(tree, role, via_share_link=via_share_link),
     )
 
 
@@ -70,7 +80,15 @@ def member_out(membership: TreeMembership, user: User) -> MemberOut:
 @router.get("", response_model=list[TreeOut])
 async def list_trees(user: CurrentUser, session: SessionDep) -> list[TreeOut]:
     trees = await tree_service.list_trees_for_user(session, user)
-    info = await tree_service.overviews(session, [t.id for t, _ in trees])
+    info = await tree_service.overviews(
+        session,
+        [t.id for t, _ in trees],
+        no_living_portraits=[
+            t.id
+            for t, r in trees
+            if restricts(t, r, via_share_link=False) and not t.show_living_portraits
+        ],
+    )
     return [tree_out(t, r, info[t.id]) for t, r in trees]
 
 
@@ -94,7 +112,7 @@ async def create_tree(
 
 @router.get("/{tree_id}", response_model=TreeOut)
 async def get_tree(access: TreeViewer) -> TreeOut:
-    return tree_out(access.tree, access.role)
+    return tree_out(access.tree, access.role, via_share_link=access.via_share_link)
 
 
 @router.patch("/{tree_id}", response_model=TreeOut)
@@ -108,6 +126,8 @@ async def update_tree(
         description=body.description,
         fields_set=body.model_fields_set,
         actor=actor,
+        living_privacy=body.living_privacy,
+        show_living_portraits=body.show_living_portraits,
     )
     return tree_out(tree, access.role)
 

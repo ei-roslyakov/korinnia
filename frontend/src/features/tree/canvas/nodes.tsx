@@ -80,6 +80,16 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
               †
             </span>
           )}
+          {person.details_hidden && (
+            <span
+              className="ml-1"
+              role="img"
+              title={t("person.detailsHiddenShort")}
+              aria-label={t("person.detailsHiddenShort")}
+            >
+              🔒
+            </span>
+          )}
         </div>
       </div>
       {hover && <Preview person={person} />}

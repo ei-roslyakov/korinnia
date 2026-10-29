@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from typing import Any
 
 from sqlalchemy import func, or_, select
@@ -441,9 +441,11 @@ async def search_persons(
     *,
     limit: int,
     offset: int,
+    hidden: Collection[uuid.UUID] = (),
 ) -> tuple[list[PersonSummary], int]:
     """Each query term must match a name variant (Cyrillic or Latin, any name type) or the
-    place of one of the person's events; 4-digit terms match birth/death years."""
+    place of one of the person's events; 4-digit terms match birth/death years. The places
+    and death years of `hidden` people (living, for restricted readers) are not searched."""
     stmt = select(Person).where(Person.tree_id == tree_id, Person.deleted_at.is_(None))
     alternatives = query_alternatives(q or "")
     years = [int(a[0]) for a in alternatives if len(a) == 1 and a[0].isdigit() and len(a[0]) == 4]
@@ -460,6 +462,7 @@ async def search_persons(
             .where(
                 Event.tree_id == tree_id,
                 Event.deleted_at.is_(None),
+                EventParticipant.person_id.not_in(hidden),
                 or_(*(Place.search_text.ilike(f"%{a}%") for a in alts)),
             )
         )
@@ -472,6 +475,7 @@ async def search_persons(
                 Event.deleted_at.is_(None),
                 Event.type.in_((EventType.birth, EventType.death)),
                 Event.tree_id == tree_id,
+                or_(Event.type == EventType.birth, EventParticipant.person_id.not_in(hidden)),
                 or_(
                     func.extract("year", Event.date_sort) == year,
                     Event.__table__.c.date_end_year == year,

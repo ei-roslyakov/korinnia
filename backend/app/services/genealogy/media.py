@@ -7,7 +7,7 @@ import io
 import logging
 import tempfile
 import uuid
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, BinaryIO
@@ -343,8 +343,12 @@ async def list_media(
     q: str | None,
     limit: int,
     offset: int,
+    hidden: Collection[uuid.UUID] = (),
 ) -> tuple[list[MediaFile], int]:
-    stmt = select(MediaFile).where(MediaFile.tree_id == tree_id, MediaFile.deleted_at.is_(None))
+    """`hidden` media (of living people, for restricted readers) are left out."""
+    stmt = select(MediaFile).where(
+        MediaFile.tree_id == tree_id, MediaFile.deleted_at.is_(None), MediaFile.id.not_in(hidden)
+    )
     if person_id:
         stmt = stmt.join(MediaPerson, MediaPerson.media_id == MediaFile.id).where(
             MediaPerson.person_id == person_id
@@ -382,6 +386,7 @@ async def list_album(
     newest: bool,
     limit: int,
     offset: int,
+    hidden: Collection[uuid.UUID] = (),
 ) -> tuple[list[MediaFile], int, list[int]]:
     """The tree's photo album: processed, not deleted photos, by photo date (undated last)
     or newest upload first. Also returns the decades that have photos (for the filter;
@@ -391,6 +396,7 @@ async def list_album(
         MediaFile.deleted_at.is_(None),
         MediaFile.kind == MediaKind.photo,
         MediaFile.processing_status == ProcessingStatus.ready,
+        MediaFile.id.not_in(hidden),
     )
     if person_ids:
         stmt = stmt.where(

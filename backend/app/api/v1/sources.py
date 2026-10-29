@@ -7,7 +7,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query, status
 
-from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer
+from app.api.deps import (
+    ActorDep,
+    PageParams,
+    SessionDep,
+    TreeEditor,
+    TreeViewer,
+    VisibilityDep,
+)
 from app.models import CitedEntity
 from app.schemas.common import Page
 from app.schemas.sources import (
@@ -28,16 +35,19 @@ async def list_sources(
     access: TreeViewer,
     session: SessionDep,
     page: PageParams,
+    seen: VisibilityDep,
     q: Annotated[str | None, Query(max_length=200)] = None,
 ) -> Page[SourceOut]:
     rows, total = await svc.search_sources(
         session, access.tree.id, q, limit=page.limit, offset=page.offset
     )
-    return Page(
-        items=await svc.sources_out(session, rows),
-        total=total,
-        limit=page.limit,
-        offset=page.offset,
+    return seen.redact(
+        Page(
+            items=await svc.sources_out(session, rows),
+            total=total,
+            limit=page.limit,
+            offset=page.offset,
+        )
     )
 
 
@@ -50,10 +60,11 @@ async def create_source(
 
 
 @router.get("/sources/{source_id}", response_model=SourceOut)
-async def get_source(source_id: uuid.UUID, access: TreeViewer, session: SessionDep) -> SourceOut:
-    return (
-        await svc.sources_out(session, [await svc.get_source(session, access.tree.id, source_id)])
-    )[0]
+async def get_source(
+    source_id: uuid.UUID, access: TreeViewer, session: SessionDep, seen: VisibilityDep
+) -> SourceOut:
+    source = await svc.get_source(session, access.tree.id, source_id)
+    return seen.redact((await svc.sources_out(session, [source]))[0])
 
 
 @router.patch("/sources/{source_id}", response_model=SourceOut)
@@ -84,6 +95,7 @@ async def delete_source(
 async def list_citations(
     access: TreeViewer,
     session: SessionDep,
+    seen: VisibilityDep,
     entity_type: CitedEntity | None = None,
     entity_id: uuid.UUID | None = None,
     source_id: uuid.UUID | None = None,
@@ -91,7 +103,7 @@ async def list_citations(
     rows = await svc.list_citations(
         session, access.tree.id, entity_type=entity_type, entity_id=entity_id, source_id=source_id
     )
-    return await svc.citations_out(session, access.tree.id, rows)
+    return await svc.citations_out(session, access.tree.id, await seen.citations(session, rows))
 
 
 @router.post("/citations", response_model=CitationOut, status_code=status.HTTP_201_CREATED)

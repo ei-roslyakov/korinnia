@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Collection
 from dataclasses import dataclass, field
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased, selectinload
 
+from app.core.enums import LivingPrivacy
 from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.security import utcnow
 from app.models import Invitation, Tree, TreeMembership, TreeRole, User
@@ -17,7 +19,14 @@ from app.services.auth import get_user_by_email
 from app.services.context import Actor
 from app.services.users import create_invitation
 
-TREE_AUDIT_FIELDS = ("name", "description", "owner_id", "deleted_at")
+TREE_AUDIT_FIELDS = (
+    "name",
+    "description",
+    "owner_id",
+    "deleted_at",
+    "living_privacy",
+    "show_living_portraits",
+)
 
 
 async def list_trees_for_user(session: AsyncSession, user: User) -> list[tuple[Tree, TreeRole]]:
@@ -88,12 +97,18 @@ async def update_tree(
     description: str | None,
     fields_set: set[str],
     actor: Actor,
+    living_privacy: LivingPrivacy | None = None,
+    show_living_portraits: bool | None = None,
 ) -> Tree:
     before = audit.snapshot(tree, TREE_AUDIT_FIELDS)
     if name is not None:
         tree.name = name.strip()
     if "description" in fields_set:
         tree.description = description
+    if living_privacy is not None:
+        tree.living_privacy = living_privacy
+    if show_living_portraits is not None:
+        tree.show_living_portraits = show_living_portraits
     after = audit.snapshot(tree, TREE_AUDIT_FIELDS)
     if before != after:
         b, a = audit.diff_only(before, after)
@@ -306,8 +321,14 @@ class Overview:
 COVER_SIZE = 4
 
 
-async def overviews(session: AsyncSession, tree_ids: list[uuid.UUID]) -> dict[uuid.UUID, Overview]:
-    """People count, years covered and a few portraits per tree, in three queries."""
+async def overviews(
+    session: AsyncSession,
+    tree_ids: list[uuid.UUID],
+    *,
+    no_living_portraits: Collection[uuid.UUID] = (),
+) -> dict[uuid.UUID, Overview]:
+    """People count, years covered and a few portraits per tree, in three queries.
+    Trees in `no_living_portraits` show only portraits of people who are not living."""
     from app.models import Event, Person
     from app.services.genealogy.media_urls import avatar_url
 
@@ -338,6 +359,7 @@ async def overviews(session: AsyncSession, tree_ids: list[uuid.UUID]) -> dict[uu
             Person.tree_id.in_(tree_ids),
             Person.deleted_at.is_(None),
             Person.avatar_key.is_not(None),
+            or_(Person.is_living.is_(False), Person.tree_id.not_in(no_living_portraits)),
         )
         .subquery()
     )

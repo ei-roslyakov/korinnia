@@ -48,3 +48,19 @@ describe("biography section", () => {
     expect(screen.queryByText(/Біографію ще не написано/)).not.toBeInTheDocument();
   });
 });
+
+describe("living people's details", () => {
+  it("says when they are hidden from this reader", () => {
+    renderWithProviders(
+      <PersonView person={{ ...halyna, details_hidden: true }} personLink={link} />,
+    );
+    expect(screen.getByTestId("details-hidden")).toHaveTextContent(
+      "Подробиці про живих людей приховано",
+    );
+  });
+
+  it("says nothing to readers who see everything", () => {
+    renderWithProviders(<PersonView person={halyna} personLink={link} />);
+    expect(screen.queryByTestId("details-hidden")).not.toBeInTheDocument();
+  });
+});

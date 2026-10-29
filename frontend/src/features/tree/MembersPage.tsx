@@ -18,7 +18,7 @@ import {
 } from "@/components/ui";
 import { useFormatDate } from "@/lib/hooks";
 import { useMe } from "@/features/auth/api";
-import { ROLES, type Role, type Tree } from "@/lib/types";
+import { LIVING_PRIVACY, ROLES, type LivingPrivacy, type Role, type Tree } from "@/lib/types";
 
 import {
   useAddMember,
@@ -53,6 +53,7 @@ export function MembersPage() {
       <AddMemberForm treeId={treeId} />
       <MemberList treeId={treeId} />
       <TreeSettings tree={tree.data} />
+      <LivingPrivacySettings tree={tree.data} />
     </div>
   );
 }
@@ -266,6 +267,71 @@ function TreeSettings({ tree }: { tree: Tree }) {
             {t("trees.delete")}
           </Button>
         </div>
+      </form>
+    </Card>
+  );
+}
+
+/** Who sees only the basics of living people, and whether their portraits show (D114). */
+function LivingPrivacySettings({ tree }: { tree: Tree }) {
+  const { t } = useTranslation();
+  const update = useUpdateTree(tree.id);
+  const [privacy, setPrivacy] = useState<LivingPrivacy>(tree.living_privacy ?? "share_links");
+  const [portraits, setPortraits] = useState(tree.show_living_portraits ?? false);
+
+  return (
+    <Card>
+      <form
+        className="space-y-4"
+        aria-labelledby="living-privacy"
+        onSubmit={(e) => {
+          e.preventDefault();
+          update.mutate({ living_privacy: privacy, show_living_portraits: portraits });
+        }}
+      >
+        <h2 id="living-privacy" className="font-semibold">
+          {t("livingPrivacy.title")}
+        </h2>
+        <p className="text-bark-700 text-sm">{t("livingPrivacy.hint")}</p>
+        <fieldset className="space-y-2">
+          <legend className="sr-only">{t("livingPrivacy.who")}</legend>
+          {LIVING_PRIVACY.map((option) => (
+            <label key={option} className="flex items-start gap-2 text-sm">
+              <input
+                type="radio"
+                name="living-privacy"
+                className="mt-1"
+                value={option}
+                checked={privacy === option}
+                onChange={() => setPrivacy(option)}
+              />
+              <span>
+                <span className="font-medium">{t(`livingPrivacy.options.${option}.label`)}</span>
+                <span className="text-bark-700 block text-xs">
+                  {t(`livingPrivacy.options.${option}.help`)}
+                </span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={portraits}
+            disabled={privacy === "off"}
+            onChange={(e) => setPortraits(e.target.checked)}
+          />
+          <span>
+            <span className="font-medium">{t("livingPrivacy.portraits")}</span>
+            <span className="text-bark-700 block text-xs">{t("livingPrivacy.portraitsHelp")}</span>
+          </span>
+        </label>
+        <ErrorAlert error={update.error} />
+        {update.isSuccess && <Alert kind="success">{t("common.saved")}</Alert>}
+        <Button type="submit" busy={update.isPending}>
+          {t("common.save")}
+        </Button>
       </form>
     </Card>
   );

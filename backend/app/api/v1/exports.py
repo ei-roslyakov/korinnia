@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, Query, Response
 
-from app.api.deps import ActorDep, SessionDep, TreeViewer
+from app.api.deps import ActorDep, SessionDep, TreeViewer, VisibilityDep
 from app.core.config import get_settings
 from app.exporters.gedcom import export_tree
 from app.services import audit
@@ -29,11 +29,14 @@ async def export_gedcom(
     access: TreeViewer,
     session: SessionDep,
     actor: ActorDep,
+    seen: VisibilityDep,
     living: Annotated[bool, Query(description="False: living people only as 'Living'")] = True,
 ) -> Response:
     """The tree as a GEDCOM 5.5.1 file (UTF-8). With `living=false` living people keep their
-    place in the family but appear as "Living <surname>", without dates, notes or sources."""
+    place in the family but appear as "Living <surname>", without dates, notes or sources.
+    Readers who see only the basics of living people always get that version."""
     tree = access.tree
+    living = living and not seen.restricted
     text = await export_tree(
         session,
         tree,

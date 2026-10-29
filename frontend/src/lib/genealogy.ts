@@ -36,6 +36,8 @@ export interface PersonSummary {
   birth_place: string | null;
   primary_photo_id: string | null;
   avatar_url?: string | null;
+  /** Only the basics of this living person are shown to this reader (D114). */
+  details_hidden?: boolean;
 }
 
 export type ParentChildType = "biological" | "adoptive" | "step" | "foster" | "unknown";
@@ -142,6 +144,8 @@ export interface PersonDetail {
   avatar_url: string | null;
   /** The cropped portrait is still being rendered (avatar_url is a temporary fallback). */
   portrait_pending: boolean;
+  /** Only the basics of this living person are shown to this reader (D114). */
+  details_hidden?: boolean;
   media: MediaItem[];
   names: PersonName[];
   birth: Vital | null;

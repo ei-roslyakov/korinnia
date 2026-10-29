@@ -8,7 +8,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.enums import TreeRole
+from app.core.enums import LivingPrivacy, TreeRole
 from app.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin, text_enum
 from app.models.user import User
 
@@ -33,6 +33,16 @@ class Tree(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     # The fictional demo family (each user gets their own copy to explore and practise on).
     is_demo: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    # Readers who see only the basics of living people (D114), and whether they still see
+    # those people's portraits.
+    living_privacy: Mapped[LivingPrivacy] = mapped_column(
+        text_enum(LivingPrivacy, "living_privacy"),
+        default=LivingPrivacy.share_links,
+        server_default=LivingPrivacy.share_links,
+    )
+    show_living_portraits: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )
 
     owner: Mapped[User | None] = relationship()
     memberships: Mapped[list[TreeMembership]] = relationship(

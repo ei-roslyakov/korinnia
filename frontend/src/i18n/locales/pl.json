@@ -392,7 +392,9 @@
     "yearsLived_one": "{{count}} rok",
     "yearsLived_few": "{{count}} lata",
     "yearsLived_many": "{{count}} lat",
-    "yearsLived_other": "{{count}} roku"
+    "yearsLived_other": "{{count}} roku",
+    "detailsHidden": "Szczegóły dotyczące żyjących osób są ukryte: widać tylko imię, rok urodzenia i więzi rodzinne.",
+    "detailsHiddenShort": "Szczegóły dotyczące żyjących osób są ukryte"
   },
   "gender": {
     "male": "Mężczyzna",
@@ -1285,7 +1287,7 @@
   },
   "shareLinks": {
     "title": "Każdy z linkiem może przeglądać",
-    "hint": "Dla bliskich bez konta: link otwiera to drzewo tylko do odczytu. Kto ma link, widzi wszystko w drzewie, także żyjące osoby — wybierz termin ważności i odwołaj link, gdy nie będzie potrzebny.",
+    "hint": "Dla bliskich bez konta: link otwiera to drzewo tylko do odczytu. Wybierz termin ważności i odwołaj link, gdy nie będzie potrzebny.",
     "label": "Nazwa (opcjonalnie)",
     "labelPlaceholder": "np. Na zjazd rodzinny",
     "expires": "Ważny",
@@ -1309,7 +1311,12 @@
     "signIn": "Zaloguj się",
     "opening": "Otwieramy drzewo…",
     "invalidTitle": "Ten link już nie działa",
-    "invalidHint": "Wygasł lub został odwołany. Poproś osobę, która go wysłała, o nowy."
+    "invalidHint": "Wygasł lub został odwołany. Poproś osobę, która go wysłała, o nowy.",
+    "visitorsSee": {
+      "basics": "Odwiedzający widzą tylko imię, rok urodzenia i więzi rodzinne żyjących osób — bez dat, miejsc, zdjęć, dokumentów i historii o nich.",
+      "everything": "Odwiedzający widzą wszystko w drzewie, także szczegóły dotyczące żyjących osób."
+    },
+    "privacySettings": "Ustawienia prywatności"
   },
   "help": {
     "contents": "Spis treści",
@@ -1367,5 +1374,26 @@
     "openPersonPage": "Otwórz stronę",
     "filteredBy": "Zdjęcia: {{name}}",
     "clearFilter": "Pokaż zdjęcia wszystkich"
+  },
+  "livingPrivacy": {
+    "title": "Prywatność żyjących osób",
+    "hint": "Wybierz, kto widzi o żyjących osobach tylko podstawy: imię, płeć, rok urodzenia i więzi rodzinne. Współtwórcy, redaktorzy i administratorzy zawsze widzą wszystko.",
+    "who": "Kto widzi tylko podstawy",
+    "options": {
+      "off": {
+        "label": "Nikt",
+        "help": "Każdy, kto może otworzyć drzewo, widzi wszystkie szczegóły dotyczące żyjących osób."
+      },
+      "share_links": {
+        "label": "Odwiedzający przez link",
+        "help": "Osoby otwierające link widzą tylko podstawy; członkowie widzą wszystko. Zalecane."
+      },
+      "viewers_and_share_links": {
+        "label": "Przeglądający i odwiedzający przez link",
+        "help": "Członkowie z rolą przeglądającego też widzą tylko podstawy."
+      }
+    },
+    "portraits": "Pokazuj portrety żyjących osób",
+    "portraitsHelp": "Portret widać na kartach; ich zdjęcia pozostają ukryte."
   }
 }

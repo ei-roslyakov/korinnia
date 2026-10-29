@@ -7,7 +7,15 @@ from typing import Literal
 
 from fastapi import APIRouter, status
 
-from app.api.deps import ActorDep, PageParams, SessionDep, TreeContributor, TreeViewer
+from app.api.deps import (
+    ActorDep,
+    PageParams,
+    SessionDep,
+    TreeContributor,
+    TreeViewer,
+    VisibilityDep,
+)
+from app.core.errors import NotFoundError
 from app.models import StoryStatus
 from app.schemas.common import Page
 from app.schemas.stories import ReviewIn, StoryCreate, StoryOut, StorySummary, StoryUpdate
@@ -21,6 +29,7 @@ async def list_stories(
     access: TreeViewer,
     session: SessionDep,
     page: PageParams,
+    seen: VisibilityDep,
     person_id: uuid.UUID | None = None,
     status: StoryStatus | None = None,
 ) -> Page[StorySummary]:
@@ -28,9 +37,13 @@ async def list_stories(
     rows, total = await svc.list_stories(
         session, access.tree.id, access.user, access.role,
         person_id=person_id, status=status, limit=page.limit, offset=page.offset,
+        hidden=seen.protected,
     )  # fmt: skip
     return Page(
-        items=await svc.summaries(session, rows), total=total, limit=page.limit, offset=page.offset
+        items=await svc.summaries(session, rows, seen),
+        total=total,
+        limit=page.limit,
+        offset=page.offset,
     )
 
 
@@ -43,9 +56,14 @@ async def create_story(
 
 
 @router.get("/{story_id}", response_model=StoryOut)
-async def get_story(story_id: uuid.UUID, access: TreeViewer, session: SessionDep) -> StoryOut:
+async def get_story(
+    story_id: uuid.UUID, access: TreeViewer, session: SessionDep, seen: VisibilityDep
+) -> StoryOut:
     story = await svc.get_story(session, access.tree.id, story_id, access.user, access.role)
-    return await svc.story_out(session, story, access.user, access.role)
+    out = await svc.story_out(session, story, access.user, access.role, seen)
+    if seen.hides_story(out.person_ids):
+        raise NotFoundError("story_not_found")
+    return seen.redact(out)
 
 
 @router.patch("/{story_id}", response_model=StoryOut)

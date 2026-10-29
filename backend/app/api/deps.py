@@ -15,10 +15,12 @@ from app.core.db import get_session
 from app.core.errors import NotAuthenticatedError, NotFoundError, PermissionDeniedError
 from app.core.security import TokenError, decode_token
 from app.models import Tree, TreeRole, User
+from app.services import visibility
 from app.services.auth import session_revoked
 from app.services.context import Actor
 from app.services.share_links import resolve as resolve_share_link
 from app.services.trees import get_tree_role
+from app.services.visibility import Visibility
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
@@ -81,6 +83,8 @@ class TreeAccess:
     tree: Tree
     role: TreeRole
     user: User
+    # Reading through a share link rather than as a member.
+    via_share_link: bool = False
 
 
 def _share_guest() -> User:
@@ -110,7 +114,12 @@ def tree_access(min_role: TreeRole) -> Callable[..., Awaitable[TreeAccess]]:
                 return None
             if request.method not in ("GET", "HEAD") or min_role != TreeRole.viewer:
                 raise PermissionDeniedError()
-            return TreeAccess(tree=shared[1], role=TreeRole.viewer, user=user or _share_guest())
+            return TreeAccess(
+                tree=shared[1],
+                role=TreeRole.viewer,
+                user=user or _share_guest(),
+                via_share_link=True,
+            )
 
         if not request.cookies.get(ACCESS_COOKIE):
             guest = await via_share_link(None)
@@ -137,6 +146,16 @@ TreeViewer = Annotated[TreeAccess, Depends(tree_access(TreeRole.viewer))]
 TreeContributor = Annotated[TreeAccess, Depends(tree_access(TreeRole.contributor))]
 TreeEditor = Annotated[TreeAccess, Depends(tree_access(TreeRole.editor))]
 TreeAdmin = Annotated[TreeAccess, Depends(tree_access(TreeRole.admin))]
+
+
+async def get_visibility(access: TreeViewer, session: SessionDep) -> Visibility:
+    """What this reader may see of living people (D114)."""
+    return await visibility.load(
+        session, access.tree, access.role, via_share_link=access.via_share_link
+    )
+
+
+VisibilityDep = Annotated[Visibility, Depends(get_visibility)]
 
 
 @dataclass(frozen=True, slots=True)

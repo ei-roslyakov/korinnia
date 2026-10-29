@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from typing import Any
 
 from sqlalchemy import delete, func, or_, select
@@ -44,6 +44,7 @@ from app.services.genealogy.media import media_out_many
 from app.services.genealogy.media_urls import file_url
 from app.services.genealogy.sources import user_refs
 from app.services.genealogy.summaries import summary_map
+from app.services.visibility import EVERYTHING, Visibility
 
 EXCERPT_LENGTH = 240
 
@@ -184,10 +185,25 @@ async def list_stories(
     status: StoryStatus | None = None,
     limit: int = 50,
     offset: int = 0,
+    hidden: Collection[uuid.UUID] = (),
 ) -> tuple[list[Story], int]:
+    """Stories this user may read. With `hidden` people (living, for readers who see only
+    their basics), stories about nobody else are left out."""
     stmt = _visible(
         select(Story).where(Story.tree_id == tree_id, Story.deleted_at.is_(None)), user, role
     )
+    if hidden:
+        about_others = (
+            select(StoryPerson.story_id)
+            .join(Person, Person.id == StoryPerson.person_id)
+            .where(StoryPerson.person_id.not_in(hidden), Person.deleted_at.is_(None))
+        )
+        about_anyone = (
+            select(StoryPerson.story_id)
+            .join(Person, Person.id == StoryPerson.person_id)
+            .where(Person.deleted_at.is_(None))
+        )
+        stmt = stmt.where(or_(Story.id.in_(about_others), Story.id.not_in(about_anyone)))
     if person_id:
         stmt = stmt.where(
             Story.id.in_(select(StoryPerson.story_id).where(StoryPerson.person_id == person_id))
@@ -210,7 +226,10 @@ def reading_minutes(body: str) -> int:
     return max(1, round(len(body.split()) / WORDS_PER_MINUTE))
 
 
-async def summaries(session: AsyncSession, stories: Sequence[Story]) -> list[StorySummary]:
+async def summaries(
+    session: AsyncSession, stories: Sequence[Story], seen: Visibility = EVERYTHING
+) -> list[StorySummary]:
+    """`seen`: covers are never taken from media the reader may not see."""
     if not stories:
         return []
     persons, media = await _links(session, [s.id for s in stories])
@@ -227,7 +246,7 @@ async def summaries(session: AsyncSession, stories: Sequence[Story]) -> list[Sto
 
     def cover(story_id: uuid.UUID) -> str | None:
         for mid in media[story_id]:
-            m = files.get(mid)
+            m = None if seen.hides_media(mid) else files.get(mid)
             if m and m.thumb_key and m.kind in (MediaKind.photo, MediaKind.document_scan):
                 return file_url(m, "thumb")
         return None
@@ -250,9 +269,15 @@ async def summaries(session: AsyncSession, stories: Sequence[Story]) -> list[Sto
     ]
 
 
-async def story_out(session: AsyncSession, story: Story, user: User, role: TreeRole) -> StoryOut:
+async def story_out(
+    session: AsyncSession,
+    story: Story,
+    user: User,
+    role: TreeRole,
+    seen: Visibility = EVERYTHING,
+) -> StoryOut:
     persons, media = await _links(session, [story.id])
-    summary = (await summaries(session, [story]))[0]
+    summary = (await summaries(session, [story], seen))[0]
     names = await summary_map(session, story.tree_id, persons[story.id])
     media_rows = list(
         await session.scalars(select(MediaFile).where(MediaFile.id.in_(media[story.id])))

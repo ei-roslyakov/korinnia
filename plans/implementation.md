@@ -24,8 +24,10 @@ What exists today and how it is built. The reasoning for each choice is in
 backend/app/
   api/v1/        REST endpoints (trees, persons, events, relationships, places, media, sources,
                  stories, collaboration, insights, history, admin, auth)
-  api/deps.py    auth + per-tree role dependencies (TreeViewer … TreeAdmin, Superadmin)
-  services/      business logic (trees, users, auth, audit, genealogy/*, demo portraits)
+  api/deps.py    auth + per-tree role dependencies (TreeViewer … TreeAdmin, Superadmin) and
+                 VisibilityDep (what this reader may see of living people)
+  services/      business logic (trees, users, auth, audit, genealogy/*, demo portraits);
+                 visibility.py applies the living-people privacy policy (D114) to every read
   models/        SQLAlchemy models;  schemas/  Pydantic models
   jobs/          procrastinate app, tasks (media processing, demo family), worker
   storage/       local filesystem storage (atomic writes, SHA-256)

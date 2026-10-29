@@ -5,7 +5,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query, status
 
-from app.api.deps import ActorDep, PageParams, SessionDep, TreeEditor, TreeViewer
+from app.api.deps import (
+    ActorDep,
+    PageParams,
+    SessionDep,
+    TreeEditor,
+    TreeViewer,
+    VisibilityDep,
+)
 from app.jobs.queue import enqueue_avatar
 from app.schemas.common import Page
 from app.schemas.person_page import PersonPage
@@ -26,9 +33,9 @@ router = APIRouter(prefix="/trees/{tree_id}", tags=["persons"])
 
 
 @router.get("/graph", response_model=TreeGraph)
-async def graph(access: TreeViewer, session: SessionDep) -> TreeGraph:
+async def graph(access: TreeViewer, session: SessionDep, seen: VisibilityDep) -> TreeGraph:
     """All people and relationships of the tree, for the canvas."""
-    return await tree_graph(session, access.tree.id)
+    return seen.redact(await tree_graph(session, access.tree.id))
 
 
 @router.get("/persons", response_model=Page[PersonSummary])
@@ -36,13 +43,14 @@ async def list_persons(
     access: TreeViewer,
     session: SessionDep,
     page: PageParams,
+    seen: VisibilityDep,
     q: Annotated[str | None, Query(max_length=200)] = None,
 ) -> Page[PersonSummary]:
     """Search by any name variant (Cyrillic or Latin) and/or a birth/death year."""
     items, total = await person_service.search_persons(
-        session, access.tree.id, q, limit=page.limit, offset=page.offset
+        session, access.tree.id, q, limit=page.limit, offset=page.offset, hidden=seen.protected
     )
-    return Page(items=items, total=total, limit=page.limit, offset=page.offset)
+    return seen.redact(Page(items=items, total=total, limit=page.limit, offset=page.offset))
 
 
 @router.post("/persons", response_model=PersonPage, status_code=status.HTTP_201_CREATED)
@@ -55,9 +63,11 @@ async def create_person(
 
 
 @router.get("/persons/{person_id}", response_model=PersonPage)
-async def get_person(person_id: uuid.UUID, access: TreeViewer, session: SessionDep) -> PersonPage:
+async def get_person(
+    person_id: uuid.UUID, access: TreeViewer, session: SessionDep, seen: VisibilityDep
+) -> PersonPage:
     person = await person_service.get_person(session, access.tree.id, person_id)
-    return await person_page(session, person, access.user, access.role)
+    return seen.person_page(await person_page(session, person, access.user, access.role, seen))
 
 
 @router.patch("/persons/{person_id}", response_model=PersonPage)
