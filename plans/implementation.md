@@ -76,7 +76,9 @@ plans/            this folder
    PATCH and a tag per chosen person after the upload finishes; `PersonCombobox` takes
    `suggestions`, here the person's relatives, shown before anything is typed). The demo seed gives every portrait a title, description,
    approximate date and place (`complete_demo` fills older copies).
-7. **Collaboration** — sources and citations on any fact, stories with review workflow,
+7. **Collaboration** — sources and citations on any fact, stories with review workflow
+   (recipes and traditions are story kinds, D117: `schemas/stories.Recipe`,
+   `stories/RecipeFields`, `RecipeView`, `recipe.ts`),
    contributor suggestions with diff and approval, comments, research questions, data-quality
    panel. (D60–D67)
 8. **Insights** — family map, timeline with historical context, relationship calculator (kinship

@@ -188,6 +188,12 @@ class CitedEntity(StrEnum):
     media = "media"
 
 
+class StoryKind(StrEnum):
+    story = "story"
+    recipe = "recipe"
+    tradition = "tradition"
+
+
 class StoryStatus(StrEnum):
     draft = "draft"
     pending_review = "pending_review"

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import uuid
-from typing import Literal
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Query, status
 
 from app.api.deps import (
     ActorDep,
@@ -16,7 +16,7 @@ from app.api.deps import (
     VisibilityDep,
 )
 from app.core.errors import NotFoundError
-from app.models import StoryStatus
+from app.models import StoryKind, StoryStatus
 from app.schemas.common import Page
 from app.schemas.stories import ReviewIn, StoryCreate, StoryOut, StorySummary, StoryUpdate
 from app.services.genealogy import stories as svc
@@ -32,12 +32,16 @@ async def list_stories(
     seen: VisibilityDep,
     person_id: uuid.UUID | None = None,
     status: StoryStatus | None = None,
+    kind: Annotated[list[StoryKind] | None, Query(max_length=3)] = None,
+    q: Annotated[str | None, Query(max_length=200)] = None,
 ) -> Page[StorySummary]:
-    """Published stories; plus your own drafts; editors see all."""
+    """Published stories; plus your own drafts; editors see all. `kind` (repeatable) keeps
+    stories, recipes or traditions; `q` searches titles, texts, narrators, occasions and
+    recipes' ingredients."""
     rows, total = await svc.list_stories(
         session, access.tree.id, access.user, access.role,
         person_id=person_id, status=status, limit=page.limit, offset=page.offset,
-        hidden=seen.protected,
+        hidden=seen.protected, kinds=kind or (), q=q,
     )  # fmt: skip
     return Page(
         items=await svc.summaries(session, rows, seen),

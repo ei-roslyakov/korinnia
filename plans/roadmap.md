@@ -1,6 +1,6 @@
 # Roadmap
 
-_Last updated: 2026-10-29 (privacy of living people D114, calendar feed D115, place pages D116; next: recipes, chart views)_
+_Last updated: 2026-10-29 (privacy of living people D114, calendar feed D115, place pages D116, recipes D117; next: chart views)_
 
 Korinnia (Коріння) is a self-hosted family archive and interactive family tree. It is delivered in
 11 phases; after each phase the work stops for review before the next one starts.
@@ -110,6 +110,15 @@ Korinnia (Коріння) is a self-hosted family archive and interactive family
   suggest likely duplicate places (same name / within 1 km); an album filter by place (see the
   family album follow-ups).
 
+## Family recipes and traditions (done 2026-10-29, D117)
+
+- `stories.kind` / `recipe` / `occasion` (migration 0016); "Recipes & traditions" section and
+  search on the stories page, recipe editor with live preview, one-page print, section on the
+  person's page. Demo family: two recipes and a tradition (`complete_demo` adds them to older
+  copies; run `python -m app.seed --all-users` after the deploy).
+- Follow-ups (not planned): include recipes and traditions in the family archive export
+  (phase 11, its own Markdown / printable section); scaling a recipe by servings.
+
 ## Now: "You are in a family tree" (agreed 2026-10-12)
 
 The owner's request: a user should learn that they appear as a person in some tree, with a
@@ -128,7 +137,7 @@ and reveals other families' trees):
 ## Phase 11: exports (planned)
 
 - Family archive ZIP: offline static website, JSON + GEDCOM, Markdown, original media with manifest,
-  README (uk / en)
+  README (uk / en); include family recipes and traditions (D117), which GEDCOM does not carry
 - Printable PDF family book
 - (Done early: GEDCOM export with an option to hide living people, D96.)
 - (Already done early: PNG / PDF download of the tree view, D88.)

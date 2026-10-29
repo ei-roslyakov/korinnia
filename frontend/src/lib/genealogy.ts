@@ -340,6 +340,21 @@ export interface Citation {
 }
 
 export type StoryStatus = "draft" | "pending_review" | "published";
+/** A family recipe or tradition is a story too (D117). */
+export type StoryKind = "story" | "recipe" | "tradition";
+
+export interface Ingredient {
+  amount?: string | null;
+  item: string;
+}
+
+export interface Recipe {
+  servings?: number | null;
+  prep_minutes?: number | null;
+  cook_minutes?: number | null;
+  ingredients: Ingredient[];
+  steps: string[];
+}
 export interface UserRef {
   id: string;
   display_name: string;
@@ -357,10 +372,13 @@ export interface StorySummary {
   updated_at: string;
   cover_url?: string | null;
   reading_minutes?: number;
+  kind?: StoryKind;
+  occasion?: string | null;
 }
 
 export interface Story extends StorySummary {
   body: string;
+  recipe?: Recipe | null;
   persons: PersonSummary[];
   media: MediaItem[];
   review_comment: string | null;

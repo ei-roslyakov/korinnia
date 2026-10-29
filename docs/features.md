@@ -71,7 +71,8 @@ Everything below works today. Planned work is listed in the [roadmap](../README.
 
 - Source library per tree (civil and church records, archive documents, census, newspapers, letters, oral history, books…) with archive, reference number and URL
 - Citations on any fact — a person field, a name, an event, a parent link, a partnership or a media item — with page and quality (primary, secondary, family tradition, unverified)
-- Stories and memories in Markdown with narrator, date and several people; draft → on review → published
+- Stories and memories in Markdown with narrator, date and several people; draft → on review → published; search by title, text and narrator
+- Family recipes (servings, times, ingredients, steps, the story behind the dish; one-page print) and traditions (occasion + text) as kinds of stories, with their own section, search by ingredient and occasion, and a section on the person's page; the demo family has two recipes and a tradition
 - Edit suggestions from contributors with a before / after diff; editors approve or reject with a comment; moderation page with a pending badge
 - Comments on people, stories, photos and videos; open research questions per person
 - Data-quality panel: people without a birth record, photo or source, with date problems, or with open questions
