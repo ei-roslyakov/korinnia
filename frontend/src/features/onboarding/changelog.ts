@@ -13,6 +13,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: "2026-10-29.2",
+    items: {
+      en: [
+        "Birthdays in your calendar: “Subscribe in your calendar” on the “On this day” page adds the tree’s birthdays, memorial days and wedding anniversaries to Google Calendar, Apple Calendar or Outlook, and keeps them up to date.",
+      ],
+      uk: [
+        "Дні народження у вашому календарі: «Підписатися в календарі» на сторінці «Цього дня» додає дні народження, дні пам’яті й річниці весіль родоводу до Google Календаря, Календаря Apple чи Outlook і тримає їх актуальними.",
+      ],
+      pl: [
+        "Urodziny w Twoim kalendarzu: „Subskrybuj w kalendarzu” na stronie „Tego dnia” dodaje urodziny, dni pamięci i rocznice ślubów z drzewa do Kalendarza Google, Kalendarza Apple lub Outlooka i dba o ich aktualność.",
+      ],
+    },
+  },
+  {
     id: "2026-10-29",
     items: {
       en: [

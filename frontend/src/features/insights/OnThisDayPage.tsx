@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router";
 
-import { Card, ErrorAlert, Input, PageHeader, Select } from "@/components/ui";
+import { Button, Card, ErrorAlert, Input, PageHeader, Select } from "@/components/ui";
+import { useMe } from "@/features/auth/api";
 import { localIsoDate } from "@/lib/dates";
 import type { Anniversary } from "@/lib/genealogy";
 
 import { useOnThisDay } from "./api";
+import { CalendarFeedDialog } from "./CalendarFeedDialog";
 import { FactLine } from "./FactLine";
 import { EmptyState } from "@/components/EmptyState";
 import { TextSkeleton } from "@/components/Skeleton";
@@ -21,6 +24,10 @@ export function OnThisDayPage() {
   const date = params.get("date") ?? today;
   const days = Number(params.get("days") ?? 0);
   const data = useOnThisDay(treeId, date, days);
+  const me = useMe();
+  const [subscribing, setSubscribing] = useState(false);
+  // Members only: share-link visitors and demo accounts cannot have a feed (D115).
+  const canSubscribe = Boolean(me.data && !me.data.is_sandbox);
 
   const set = (k: string, v: string | null) => {
     const next = new URLSearchParams(params);
@@ -48,7 +55,18 @@ export function OnThisDayPage() {
       <Link to={`/trees/${treeId}`} className="text-leaf-700 text-sm underline">
         ← {t("person.backToTree")}
       </Link>
-      <PageHeader title={t("insights.onThisDay.title")} />
+      <PageHeader
+        title={t("insights.onThisDay.title")}
+        actions={
+          canSubscribe && (
+            <Button variant="secondary" onClick={() => setSubscribing(true)}>
+              <span aria-hidden="true">📅 </span>
+              {t("calendarFeed.button")}
+            </Button>
+          )
+        }
+      />
+      {subscribing && <CalendarFeedDialog treeId={treeId} onClose={() => setSubscribing(false)} />}
       <div className="flex flex-wrap items-center gap-3">
         <Input
           type="date"

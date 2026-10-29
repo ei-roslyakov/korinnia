@@ -37,6 +37,7 @@ Everything below works today. Planned work is listed in the [roadmap](../README.
 - Family map (OpenStreetMap): places of birth, life, marriage, migration, death and burial; filters by event type and person, with a person's life path drawn in order
 - Family timeline: every dated event in chronological order, grouped by decade, with optional historical context (World Wars, Holodomor, Chornobyl, independence…)
 - "On this day": birthdays, wedding anniversaries and memorial days for a date or the coming week / month / three months
+- Calendar feed: each member can subscribe Google / Apple / Outlook calendars to the tree's birthdays, memorial days and wedding anniversaries (private iCalendar URL, yearly events, language of choice, revocable, follows the member's access and the living-people privacy setting)
 - Statistics: people, generations, period covered, oldest ancestor, longest life, average lifespan, surnames (spellings in different scripts grouped), first names, births and deaths by decade
 
 ## Builder mode (editors and admins)

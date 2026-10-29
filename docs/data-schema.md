@@ -123,6 +123,11 @@ Imported people, events, places, sources and citations are ordinary rows of the 
 
 `users` also gained `welcome_dismissed`, `changelog_seen` and `show_changelog` (migration 0009, D95).
 
+### Calendar feeds
+| Table | Purpose | Key columns |
+|---|---|---|
+| `calendar_feeds` | A member's private iCalendar subscription to a tree (migration 0015, D115); one per member and tree, deleted when revoked | `tree_id`, `user_id` (unique together), `token_hash` (SHA-256 of the token in the URL; the URL is shown once), `language` (`uk`/`en`/`pl`, of the event titles), `created_at`, `last_used_at`, `window_started_at` + `window_count` (fetches in the current hour, for the rate limit) |
+
 ### Privacy of living people
 `trees` gained `living_privacy` and `show_living_portraits` (migration 0014, D114). Nothing is
 stored per person beyond the existing `persons.is_living`.

@@ -26,6 +26,7 @@ from app.core.enums import (
 )
 from app.models.audit import AuditLog
 from app.models.base import Base
+from app.models.calendar import CalendarFeed
 from app.models.collaboration import Comment, EditSuggestion, OpenQuestion
 from app.models.data_safety import GedcomImport, IntegrityIssue, IntegrityRun
 from app.models.event import Event, EventParticipant
@@ -44,6 +45,7 @@ from app.models.user import LoginAttempt, RecoveryCode, RefreshToken, User
 __all__ = [
     "AuditLog",
     "Base",
+    "CalendarFeed",
     "Citation",
     "CitationQuality",
     "CitedEntity",

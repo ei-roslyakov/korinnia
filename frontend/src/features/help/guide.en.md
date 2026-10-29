@@ -188,6 +188,20 @@ The links under the tree's title:
   life, average lifespan, surnames (all spellings together), first names, and births and deaths
   by decade.
 
+### Birthdays in your calendar
+
+- **Subscribe in your calendar** on the **On this day** page gives you a private link for
+  Google Calendar, Apple Calendar, Outlook or any app that subscribes to calendars by URL. The
+  tree's birthdays, memorial days and wedding anniversaries then appear there every year, and
+  the calendar picks up changes by itself (usually within a day).
+- Choose the language of the events, then **Create link**: copy it, or press **Open in your
+  calendar app**. The link is shown only once; if you lose it, **Get a new link** (the old one
+  stops working).
+- Only dates known to the day are included. The calendar shows what you may see in the tree:
+  if living people's details are hidden from you, so are their birthdays.
+- The link works only while you are a member of the tree. **Revoke** turns it off at once.
+  Do not share it: anyone who has it can see these dates.
+
 ## Working together
 
 Every tree has members, each with a role:

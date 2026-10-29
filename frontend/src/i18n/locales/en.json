@@ -1327,5 +1327,26 @@
     },
     "portraits": "Show portraits of living people",
     "portraitsHelp": "Their portrait appears on cards; their photos stay hidden."
+  },
+  "calendarFeed": {
+    "button": "Subscribe in your calendar",
+    "title": "Birthdays in your calendar",
+    "hint": "A private link for your calendar app: it shows the tree's birthdays, memorial days and wedding anniversaries every year and updates by itself. Only dates known to the day are included. Do not share the link — anyone who has it can see these dates.",
+    "language": "Language of the events",
+    "create": "Create link",
+    "created": "Copy the link now — it will not be shown again.",
+    "openInApp": "Open in your calendar app",
+    "howTo": {
+      "google": "Google Calendar (on a computer): Other calendars → + → From URL, paste the link.",
+      "apple": "Apple Calendar: File → New Calendar Subscription (on iPhone: Settings → Calendar → Accounts → Add Subscribed Calendar), paste the link.",
+      "outlook": "Outlook: Add calendar → Subscribe from web, paste the link."
+    },
+    "since": "You have a calendar link since {{date}}.",
+    "lastUsed": "Your calendar last fetched it {{date}}.",
+    "notUsedYet": "No calendar has fetched it yet.",
+    "renew": "Get a new link",
+    "confirmRenew": "Get a new link? The old one stops working, so calendars subscribed to it stop updating.",
+    "revoke": "Revoke",
+    "confirmRevoke": "Revoke the calendar link? Calendars subscribed to it stop updating."
   }
 }

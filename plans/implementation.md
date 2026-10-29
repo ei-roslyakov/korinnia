@@ -32,7 +32,7 @@ backend/app/
   jobs/          procrastinate app, tasks (media processing, demo family), worker
   storage/       local filesystem storage (atomic writes, SHA-256)
   importers/gedcom/  GEDCOM reader (parser, ANSEL, dates, records → plain data)
-  exporters/         placeholder for phase 11
+  exporters/         GEDCOM export, iCalendar feed (ical.py, D115)
   seed.py, cli.py         demo family seeding; operator CLI (create-superadmin, disable-2fa)
   perf.py                 synthetic large trees for `make perf`
 backend/alembic/  migrations (run automatically on backend start)

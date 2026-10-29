@@ -79,6 +79,9 @@ class Settings(BaseSettings):
     # Largest file a demo account may upload.
     demo_max_upload_mb: int = 20
 
+    # Calendar feeds (D115): fetches per feed per hour (calendar apps poll every few hours).
+    calendar_feed_requests_per_hour: int = 60
+
     # --- Bootstrap ----------------------------------------------------------------
     superadmin_email: str | None = None
     superadmin_password: SecretStr | None = None
